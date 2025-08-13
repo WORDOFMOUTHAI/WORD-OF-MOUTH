@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Math Return: 30-Day Journey</title>
+  <!--
+    Math Return: A single-file, dependency-free learning platform
+    Implements five systems:
+      1) Progress Management (30 lessons, 4 stages) with localStorage
+      2) Interactive Flashcard Engine with spaced repetition
+      3) 2D + pseudo-3D Canvas visualization with interaction
+      4) Function Graphing with expression parsing, zoom/pan, intercepts, step solving
+      5) Teach-Back Assessment with progressive hints & self-assessment
+
+    Accessibility:
+      - Keyboard navigation and shortcuts
+      - High contrast mode toggle
+      - Touch/mouse interaction via Pointer Events
+
+    Design:
+      - Gradient background
+      - Card-based layout with color-coded progression
+      - Smooth CSS transforms & micro-interactions
+
+    Persistence:
+      - All progress saved to localStorage under namespace "math30.*"
+
+    This file is deliberately verbose with inline documentation for clarity.
+  -->
+  <style>
+    :root {
+      --bg-grad-1: #0f172a; /* slate-900 */
+      --bg-grad-2: #1e293b; /* slate-800 */
+      --panel: #0b1220;     /* deep panel */
+      --panel-alt: #111827; /* near-black */
+      --text: #e5e7eb;      /* gray-200 */
+      --text-dim: #9ca3af;  /* gray-400 */
+      --accent: #38bdf8;    /* sky-400 */
+      --accent-2: #34d399;  /* emerald-400 */
+      --warn: #fb923c;      /* orange-400 */
+      --muted: #6b7280;     /* gray-500 */
+      --card-bg: #111827;
+      --border: #263247;
+
+      --complete: #22c55e;  /* green-500 */
+      --current: #f59e0b;   /* amber-500 */
+      --future: #6b7280;    /* gray-500 */
+
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius: 14px;
+    }
+
+    body.high-contrast {
+      --bg-grad-1: #000000;
+      --bg-grad-2: #000000;
+      --panel: #000000;
+      --panel-alt: #000000;
+      --text: #ffffff;
+      --text-dim: #d1d5db;
+      --accent: #00e5ff;
+      --accent-2: #00ff66;
+      --warn: #ffc300;
+      --muted: #e5e7eb;
+      --card-bg: #000000;
+      --border: #ffffff;
+
+      --complete: #00ff66;
+      --current: #ffd60a;
+      --future: #aaaaaa;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2));
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+    button, input, select, textarea { font: inherit; color: inherit; }
+
+    .app {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100%;
+    }
+
+    header.app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.0));
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand .logo {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      background: conic-gradient(from 180deg, var(--accent), var(--accent-2), var(--warn), var(--accent));
+      box-shadow: var(--shadow);
+    }
+    .brand .title {
+      display: flex; flex-direction: column;
+    }
+    .brand h1 { margin: 0; font-size: 20px; letter-spacing: 0.3px; }
+    .brand .subtitle { margin: 0; font-size: 12px; color: var(--text-dim); }
+
+    .header-controls { display: flex; align-items: center; gap: 12px; }
+
+    .toggle {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 12px; background: var(--panel); border: 1px solid var(--border);
+      border-radius: 999px; cursor: pointer; user-select: none; transition: transform 0.2s;
+    }
+    .toggle:active { transform: scale(0.98); }
+
+    .progress-container {
+      display: grid; gap: 6px; min-width: 260px;
+    }
+    .progress-bar {
+      height: 10px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .progress-fill {
+      height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 0.6s ease;
+    }
+    .progress-label { font-size: 12px; color: var(--text-dim); }
+
+    main {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    @media (max-width: 1024px) { main { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .lesson-list { padding: 12px; display: grid; grid-template-rows: auto 1fr auto; gap: 12px; }
+
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filters button {
+      background: var(--panel-alt); border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px 10px; cursor: pointer; color: var(--text-dim); transition: all 0.2s;
+    }
+    .filters button.active, .filters button:hover { color: var(--text); border-color: var(--accent); }
+
+    .lessons-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px;
+      max-height: 60vh; overflow: auto; padding: 6px;
+    }
+
+    .lesson-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 10px; cursor: pointer; position: relative; isolation: isolate;
+      transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .lesson-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
+    .lesson-card:focus { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .lesson-card .stage-tag {
+      position: absolute; top: 8px; right: 8px; font-size: 10px; padding: 2px 6px; border-radius: 999px; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04); color: var(--text-dim);
+    }
+    .lesson-card .title { font-weight: 600; font-size: 14px; margin: 4px 0; }
+    .lesson-card .status { font-size: 12px; color: var(--text-dim); }
+
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: middle; }
+    .status-complete { background: var(--complete); }
+    .status-current { background: var(--current); }
+    .status-future { background: var(--future); }
+
+    .lesson-actions { display: flex; gap: 8px; justify-content: space-between; }
+    .lesson-actions button { flex: 1; }
+
+    .btn {
+      padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel);
+      color: var(--text); cursor: pointer; transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .btn:hover { transform: translateY(-1px); border-color: var(--accent); box-shadow: 0 8px 24px rgba(0,0,0,0.26); }
+    .btn:active { transform: translateY(0); }
+    .btn.primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); border: none; color: #00151a; font-weight: 700; }
+    .btn.warn { background: var(--warn); color: #091217; border: none; font-weight: 700; }
+
+    .content { padding: 12px; display: grid; grid-template-rows: auto 1fr; gap: 12px; min-height: 60vh; }
+
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tab-btn { padding: 10px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--panel-alt); color: var(--text-dim); cursor: pointer; }
+    .tab-btn.active, .tab-btn:hover { color: var(--text); border-color: var(--accent); }
+
+    .tab-panel { display: none; height: 100%; }
+    .tab-panel.active { display: grid; grid-template-rows: auto 1fr; gap: 12px; }
+
+    .overview {
+      display: grid; gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .overview .card { padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel-alt); }
+    .overview h3 { margin: 0 0 8px 0; font-size: 16px; }
+    .overview p, .overview ul { margin: 0; color: var(--text-dim); font-size: 14px; }
+
+    /* Flashcards */
+    .flashcards { display: grid; gap: 12px; grid-template-columns: 320px 1fr; }
+    @media (max-width: 1024px) { .flashcards { grid-template-columns: 1fr; } }
+
+    .card-stage {
+      perspective: 1000px;
+    }
+    .flashcard {
+      width: 100%; min-height: 220px; border-radius: 16px; border: 1px solid var(--border); background: var(--card-bg);
+      transform-style: preserve-3d; transition: transform 0.5s; position: relative; cursor: pointer;
+    }
+    .flashcard.is-flipped { transform: rotateY(180deg); }
+    .flashcard-side {
+      position: absolute; inset: 0; backface-visibility: hidden; padding: 18px; display: grid; place-content: center; text-align: center;
+    }
+    .flashcard-back { transform: rotateY(180deg); }
+
+    .fc-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+    .fc-controls .btn { flex: 1; }
+
+    .deck-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+    /* Visualization */
+    .viz-grid { display: grid; grid-template-columns: 300px 1fr; gap: 12px; }
+    @media (max-width: 1024px) { .viz-grid { grid-template-columns: 1fr; } }
+
+    .viz-controls { padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel-alt); display: grid; gap: 10px; }
+    .viz-controls label { font-size: 13px; color: var(--text-dim); }
+    .viz-controls .row { display: grid; gap: 8px; }
+
+    .canvas-wrap { position: relative; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: radial-gradient(ellipse at top left, rgba(255,255,255,0.04), rgba(255,255,255,0.0)); }
+    canvas { display: block; width: 100%; height: 100%; }
+
+    .viz-props { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 8px; }
+    .viz-props .prop { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 10px; font-size: 14px; }
+
+    /* Graphing */
+    .graph-grid { display: grid; grid-template-columns: 320px 1fr; gap: 12px; }
+    @media (max-width: 1024px) { .graph-grid { grid-template-columns: 1fr; } }
+
+    .graph-controls { padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel-alt); display: grid; gap: 10px; }
+    .graph-controls .row { display: grid; gap: 6px; }
+    .graph-legend { font-size: 12px; color: var(--text-dim); }
+
+    .graph-overlay { padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel-alt); }
+
+    .intercepts { display: flex; gap: 10px; flex-wrap: wrap; }
+    .intercept-badge { padding: 6px 8px; border-radius: 999px; background: rgba(34,193,195,0.15); border: 1px solid var(--accent); font-size: 12px; }
+
+    /* Teach-Back */
+    .teach-grid { display: grid; grid-template-columns: 1fr 320px; gap: 12px; }
+    @media (max-width: 1024px) { .teach-grid { grid-template-columns: 1fr; } }
+
+    .teach-area { padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel-alt); display: grid; gap: 10px; }
+    .teach-area textarea { width: 100%; min-height: 160px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel); padding: 10px; }
+    .teach-hints { padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel-alt); }
+    .hint { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; }
+
+    footer.app-footer {
+      padding: 12px 16px; border-top: 1px solid var(--border); color: var(--text-dim); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+    }
+
+    .kbd { background: var(--panel); border: 1px solid var(--border); padding: 2px 6px; border-radius: 6px; font-size: 12px; }
+
+    /* Celebration Confetti */
+    .confetti { pointer-events: none; position: fixed; inset: 0; overflow: hidden; z-index: 9999; }
+    .confetti .piece { position: absolute; width: 8px; height: 14px; top: -20px; opacity: 0.9; border-radius: 2px; }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="app-header" role="banner">
+      <div class="brand" aria-label="App Title">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="title">
+          <h1>Math Return</h1>
+          <div class="subtitle">30-Day Journey to Mathematical Confidence</div>
+        </div>
+      </div>
+      <div class="header-controls">
+        <div class="progress-container" aria-live="polite">
+          <div class="progress-bar" aria-label="Overall Progress">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-label" id="progressLabel">0% complete</div>
+        </div>
+        <button class="toggle" id="contrastToggle" aria-pressed="false" title="Toggle High Contrast (H)">High Contrast</button>
+      </div>
+    </header>
+
+    <main role="main">
+      <section class="panel lesson-list" aria-label="Lessons">
+        <div class="filters" role="toolbar" aria-label="Stage Filters">
+          <button class="active" data-stage="all" aria-pressed="true">All</button>
+          <button data-stage="1">Stage 1: Foundation</button>
+          <button data-stage="2">Stage 2: Intermediate</button>
+          <button data-stage="3">Stage 3: Classical</button>
+          <button data-stage="4">Stage 4: Synthesis</button>
+        </div>
+        <div class="lessons-grid" id="lessonsGrid" tabindex="0" aria-label="Lessons Grid"></div>
+        <div class="lesson-actions">
+          <button id="startCurrentBtn" class="btn primary">Continue Current Lesson</button>
+          <button id="resetProgressBtn" class="btn" title="Reset progress for a fresh start">Reset Progress</button>
+        </div>
+      </section>
+
+      <section class="panel content" aria-label="Lesson Content">
+        <div class="tabs" role="tablist" aria-label="Content Tabs">
+          <button class="tab-btn active" data-tab="overview" role="tab" aria-selected="true">Overview</button>
+          <button class="tab-btn" data-tab="flashcards" role="tab">Flashcards</button>
+          <button class="tab-btn" data-tab="visualize" role="tab">Visualize</button>
+          <button class="tab-btn" data-tab="graph" role="tab">Graph</button>
+          <button class="tab-btn" data-tab="teach" role="tab">Teach-Back</button>
+        </div>
+
+        <!-- Overview Panel -->
+        <div class="tab-panel active" id="panel-overview" role="tabpanel">
+          <div class="overview">
+            <div class="card">
+              <h3 id="lessonTitle">Welcome</h3>
+              <p id="lessonSummary">Select a lesson to begin. Your progress is saved automatically. You can return anytime and continue where you left off.</p>
+            </div>
+            <div class="card">
+              <h3>Learning Goals</h3>
+              <ul id="lessonGoals">
+                <li>Rebuild your mathematical intuition with clarity</li>
+                <li>Practice with supportive feedback and visual tools</li>
+                <li>Celebrate progress and build confidence</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Stage Context</h3>
+              <p id="lessonContext">Stages guide your journey: Foundations, Intermediate, Classical, and Synthesis. Each stage balances rigor and creativity.</p>
+            </div>
+            <div class="card">
+              <h3>Completion</h3>
+              <p id="lessonCompletion">Complete by teaching back the concept, rating your confidence, and practicing flashcards due today.</p>
+              <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+                <button id="markCompleteBtn" class="btn primary">Mark Lesson Complete</button>
+                <button id="openFlashcardsBtn" class="btn">Open Flashcards</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Flashcards Panel -->
+        <div class="tab-panel" id="panel-flashcards" role="tabpanel">
+          <div class="deck-controls">
+            <div>
+              <label for="deckFilter">Deck:</label>
+              <select id="deckFilter" aria-label="Select Deck"></select>
+            </div>
+            <button class="btn" id="shuffleDeckBtn" title="Shuffle deck">Shuffle</button>
+            <button class="btn" id="dueOnlyToggle" aria-pressed="true" title="Show only due cards">Due Only</button>
+            <div style="color:var(--text-dim); font-size:13px;">Use Space to flip, 1-4 to rate Again/Hard/Good/Easy</div>
+          </div>
+          <div class="flashcards">
+            <div class="card-stage" aria-live="polite">
+              <div class="flashcard" id="flashcard" tabindex="0" aria-label="Flashcard">
+                <div class="flashcard-side flashcard-front" id="flashcardFront">Tap or press Space to flip</div>
+                <div class="flashcard-side flashcard-back" id="flashcardBack"></div>
+              </div>
+            </div>
+            <div>
+              <div class="fc-controls">
+                <button class="btn warn" id="rateAgainBtn" title="Schedule soon (fail)">Again (1)</button>
+                <button class="btn" id="rateHardBtn" title="Schedule sooner">Hard (2)</button>
+                <button class="btn" id="rateGoodBtn" title="Schedule normally">Good (3)</button>
+                <button class="btn primary" id="rateEasyBtn" title="Schedule later">Easy (4)</button>
+              </div>
+              <div id="fcMeta" style="margin-top:8px; font-size:13px; color:var(--text-dim);"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visualization Panel -->
+        <div class="tab-panel" id="panel-visualize" role="tabpanel">
+          <div class="viz-grid">
+            <div class="viz-controls">
+              <div class="row">
+                <label>Mode</label>
+                <select id="vizMode">
+                  <option value="2d">2D Geometry</option>
+                  <option value="3d">3D (Isometric)</option>
+                </select>
+              </div>
+              <div id="viz2dControls" class="row">
+                <label>2D Shape</label>
+                <select id="shape2d">
+                  <option value="circle">Circle</option>
+                  <option value="triangle">Triangle</option>
+                  <option value="rectangle">Rectangle</option>
+                </select>
+                <div class="row" id="shape2dParams"></div>
+              </div>
+              <div id="viz3dControls" class="row" style="display:none;">
+                <label>3D Shape</label>
+                <select id="shape3d">
+                  <option value="cube">Cube</option>
+                  <option value="pyramid">Square Pyramid</option>
+                </select>
+                <div class="row" id="shape3dParams"></div>
+              </div>
+              <div class="row">
+                <button class="btn" id="vizResetBtn">Reset View</button>
+                <div style="color:var(--text-dim); font-size:12px;">Drag to move/rotate, Wheel or Pinch to zoom</div>
+              </div>
+            </div>
+            <div>
+              <div class="canvas-wrap" style="height: 380px;" aria-label="Visualization Canvas">
+                <canvas id="vizCanvas"></canvas>
+              </div>
+              <div class="viz-props" style="margin-top:10px;" id="vizProps"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Graph Panel -->
+        <div class="tab-panel" id="panel-graph" role="tabpanel">
+          <div class="graph-grid">
+            <div class="graph-controls">
+              <div class="row">
+                <label for="exprInput">Function f(x) =</label>
+                <input id="exprInput" type="text" value="sin(x) + x/5" aria-label="Expression input" />
+              </div>
+              <div class="row">
+                <button class="btn primary" id="plotBtn">Plot</button>
+                <button class="btn" id="resetViewBtn">Reset View</button>
+              </div>
+              <div class="row graph-legend">
+                Touch/Mouse: drag to pan, wheel/pinch to zoom. Keys: +/- zoom, arrows pan.
+              </div>
+              <div class="row">
+                <div class="intercepts" id="intercepts"></div>
+              </div>
+              <div class="graph-overlay" id="solveOverlay">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <strong>Solve f(x) = 0</strong>
+                  <button class="btn" id="solveBtn">Show Steps</button>
+                </div>
+                <div id="solveSteps" style="margin-top:8px; font-size:14px; color:var(--text-dim);"></div>
+              </div>
+            </div>
+            <div>
+              <div class="canvas-wrap" style="height: 420px;" aria-label="Graph Canvas">
+                <canvas id="graphCanvas"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teach-Back Panel -->
+        <div class="tab-panel" id="panel-teach" role="tabpanel">
+          <div class="teach-grid">
+            <div class="teach-area">
+              <label for="teachInput"><strong>Explain the concept in your own words</strong></label>
+              <textarea id="teachInput" placeholder="Write as if teaching a friend. Use steps, examples, and your voice."></textarea>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <label for="selfRate">Self-assess confidence:</label>
+                <select id="selfRate" aria-label="Self assessment">
+                  <option value="1">1 - Unsure</option>
+                  <option value="2">2 - Somewhat</option>
+                  <option value="3">3 - Comfortable</option>
+                  <option value="4">4 - I could teach this</option>
+                </select>
+                <button class="btn" id="saveTeachBtn">Save Reflection</button>
+              </div>
+              <div id="teachSavedMsg" style="font-size:13px; color:var(--text-dim);"></div>
+            </div>
+            <div class="teach-hints">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong>Hints</strong>
+                <button class="btn" id="nextHintBtn">Next Hint</button>
+              </div>
+              <div id="hintsList" style="margin-top:8px;"></div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+
+    <footer class="app-footer" role="contentinfo">
+      <div>
+        "Progress, not perfection." You belong here. Your effort today matters.
+      </div>
+      <div>
+        Shortcuts: <span class="kbd">Space</span> flip card, <span class="kbd">1-4</span> rate, <span class="kbd">H</span> contrast, <span class="kbd">+/−</span> zoom, <span class="kbd">Arrows</span> pan
+      </div>
+    </footer>
+
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+  </div>
+
+  <script>
+    /* ============================================================
+       Data: Lessons, Stage Context, and Sample Content
+       ============================================================ */
+    const STAGES = {
+      1: {
+        name: 'Foundation Reconstruction',
+        days: [1,2,3,4,5,6,7,8,9,10],
+        context: 'Rebuild fundamentals: PEMDAS, variables, linear equations, and basic geometry.'
+      },
+      2: {
+        name: 'Intermediate Integration',
+        days: [11,12,13,14,15,16,17,18],
+        context: 'Trigonometry, advanced geometry, coordinate geometry, transformations.'
+      },
+      3: {
+        name: 'Classical Mathematical Thinking',
+        days: [19,20,21,22,23,24,25],
+        context: 'Euclidean geometry, golden ratio, Fibonacci, conic sections.'
+      },
+      4: {
+        name: 'Sacred Geometry Synthesis',
+        days: [26,27,28,29,30],
+        context: 'Pattern construction, ancient insights, geometric proofs.'
+      }
+    };
+
+    const LESSONS = (() => {
+      const list = [];
+      const titles = {
+        1: [
+          'PEMDAS & Numerical Confidence',
+          'Variables & Expressions',
+          'Linear Equations Basics',
+          'Ratios & Proportions',
+          'Fractions & Decimals',
+          'Exponents & Roots',
+          'Lines & Angles (Basics)',
+          'Area & Perimeter',
+          'Distance & Midpoint',
+          'Intro to Word Problems'
+        ],
+        2: [
+          'Right Triangle Trigonometry',
+          'Unit Circle Intuition',
+          'Similarity & Congruence',
+          'Coordinate Geometry: Slopes',
+          'Transformations: Translate/Rotate',
+          'Polygons & Interior Angles',
+          'Circles: Arcs & Chords',
+          'Trigonometric Graphs'
+        ],
+        3: [
+          'Euclid’s Postulates',
+          'Golden Ratio & Phi',
+          'Fibonacci Patterns',
+          'Parabolas & Quadratics',
+          'Ellipses & Hyperbolas',
+          'Classical Constructions',
+          'Proportion & Symmetry'
+        ],
+        4: [
+          'Sacred Patterns I',
+          'Sacred Patterns II',
+          'Platonic Solids',
+          'Geometric Proof Strategies',
+          'Synthesis & Reflection'
+        ]
+      };
+      let day = 1;
+      for (let s = 1; s <= 4; s++) {
+        for (const t of titles[s]) {
+          list.push({
+            id: day,
+            stage: s,
+            title: `Day ${day}: ${t}`,
+            summary: STAGES[s].context,
+            goals: [
+              'Understand key concepts and vocabulary',
+              'Practice with worked examples',
+              'Explain the concept in your own words'
+            ]
+          });
+          day++;
+        }
+      }
+      return list;
+    })();
+
+    // Flashcards: At least 1-3 per lesson to demonstrate the engine.
+    // Each card belongs to a lesson via lessonId
+    const FLASHCARDS = [
+      // Stage 1 samples
+      { id: '1-1', lessonId: 1, front: 'What does PEMDAS stand for?', back: 'Parentheses, Exponents, Multiplication and Division (left to right), Addition and Subtraction (left to right).' },
+      { id: '1-2', lessonId: 1, front: 'Compute: 6 + 4 × 3', back: 'Follow PEMDAS: 4×3=12, then 6+12=18.' },
+      { id: '2-1', lessonId: 2, front: 'Define a variable.', back: 'A symbol (often a letter) representing a number whose value can change.' },
+      { id: '3-1', lessonId: 3, front: 'Solve for x: 2x + 6 = 10', back: '2x = 4, so x = 2.' },
+      { id: '4-1', lessonId: 4, front: 'Ratio 2:3 equals what fraction?', back: '2/3.' },
+      { id: '5-1', lessonId: 5, front: 'Convert 0.25 to a fraction.', back: '0.25 = 1/4.' },
+      { id: '6-1', lessonId: 6, front: 'Simplify: sqrt(49)', back: '7.' },
+      { id: '7-1', lessonId: 7, front: 'Sum of angles on a line', back: '180°.' },
+      { id: '8-1', lessonId: 8, front: 'Area of rectangle with w and h', back: 'A = w×h.' },
+      { id: '9-1', lessonId: 9, front: 'Distance between (x1,y1),(x2,y2)', back: 'd = sqrt((x2-x1)^2 + (y2-y1)^2).' },
+      { id: '10-1', lessonId: 10, front: 'Strategy for word problems?', back: 'Define variables, write equations, solve, interpret.' },
+      // Stage 2
+      { id: '11-1', lessonId: 11, front: 'Define sine in a right triangle.', back: 'sin(θ) = opposite/hypotenuse.' },
+      { id: '12-1', lessonId: 12, front: 'cos(0) = ?', back: '1.' },
+      { id: '13-1', lessonId: 13, front: 'Similar triangles have...', back: 'Equal corresponding angles and proportional sides.' },
+      { id: '14-1', lessonId: 14, front: 'Slope formula between two points', back: 'm = (y2 - y1) / (x2 - x1).' },
+      { id: '15-1', lessonId: 15, front: 'Rotation by 90° around origin maps (x,y) to?', back: '(-y, x).' },
+      { id: '16-1', lessonId: 16, front: 'Sum of interior angles of n-gon', back: '(n-2)×180°.' },
+      { id: '17-1', lessonId: 17, front: 'Arc length formula for circle radius r, angle θ (radians)', back: 's = r×θ.' },
+      { id: '18-1', lessonId: 18, front: 'Amplitude of y = A sin(x)', back: 'A.' },
+      // Stage 3
+      { id: '19-1', lessonId: 19, front: 'Euclid’s 5th postulate relates to...', back: 'Parallel lines.' },
+      { id: '20-1', lessonId: 20, front: 'Golden ratio φ approximately', back: '≈ 1.618.' },
+      { id: '21-1', lessonId: 21, front: 'Fibonacci next term after 21', back: '34.' },
+      { id: '22-1', lessonId: 22, front: 'Quadratic vertex form', back: 'y = a(x - h)^2 + k.' },
+      { id: '23-1', lessonId: 23, front: 'Standard form of ellipse centered at origin', back: 'x^2/a^2 + y^2/b^2 = 1.' },
+      { id: '24-1', lessonId: 24, front: 'Classical constructions use...', back: 'Straightedge and compass.' },
+      { id: '25-1', lessonId: 25, front: 'Symmetry means...', back: 'A figure is invariant under a transformation.' },
+      // Stage 4
+      { id: '26-1', lessonId: 26, front: 'Sacred geometry explores...', back: 'Patterns, proportions, and forms found in nature and art.' },
+      { id: '27-1', lessonId: 27, front: 'Logarithmic spiral relates to...', back: 'Growth patterns; self-similarity; φ in some contexts.' },
+      { id: '28-1', lessonId: 28, front: 'Platonic solids count', back: 'Five.' },
+      { id: '29-1', lessonId: 29, front: 'A proof is...', back: 'A logical argument establishing truth from axioms.' },
+      { id: '30-1', lessonId: 30, front: 'Synthesis involves...', back: 'Integrating insights across topics into a coherent whole.' }
+    ];
+
+    /* Spaced repetition state model: Each card gets {ease, intervalDays, dueTs}
+       Scheduling approximates SM-2 but simplified to keep code light.
+       Ratings: Again (1), Hard (2), Good (3), Easy (4)
+    */
+
+    /* ============================================================
+       Persistence Utilities
+       ============================================================ */
+    const store = {
+      get(key, fallback) {
+        try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; }
+      },
+      set(key, value) { localStorage.setItem(key, JSON.stringify(value)); },
+      remove(key) { localStorage.removeItem(key); }
+    };
+
+    const NS = 'math30';
+
+    const state = {
+      selectedLessonId: 1,
+      dueOnly: true,
+      highContrast: false,
+      // graph view window in math coords
+      graph: { xMin: -10, xMax: 10, yMin: -6, yMax: 6 },
+      // viz interaction
+      viz: {
+        mode: '2d',
+        scale: 1,
+        offsetX: 0,
+        offsetY: 0,
+        // 3D rotation
+        rotX: Math.PI / 6,
+        rotY: Math.PI / 6
+      }
+    };
+
+    function loadState() {
+      const p = store.get(`${NS}.progress`, { completed: {}, teach: {}, lastLesson: 1, milestones: {} });
+      const srs = store.get(`${NS}.srs`, {});
+      const ui = store.get(`${NS}.ui`, { dueOnly: true, highContrast: false });
+      state.dueOnly = ui.dueOnly;
+      state.highContrast = ui.highContrast;
+      state.selectedLessonId = p.lastLesson || 1;
+      return { progress: p, srs: srs };
+    }
+
+    function saveState(progress, srs) {
+      store.set(`${NS}.progress`, progress);
+      store.set(`${NS}.srs`, srs);
+      store.set(`${NS}.ui`, { dueOnly: state.dueOnly, highContrast: state.highContrast });
+    }
+
+    /* ============================================================
+       Progress Management System
+       ============================================================ */
+    function calcProgress(progress) {
+      const completedCount = Object.keys(progress.completed || {}).length;
+      const percent = Math.round((completedCount / LESSONS.length) * 100);
+      return { completedCount, percent };
+    }
+
+    function updateProgressUI(progress) {
+      const { percent } = calcProgress(progress);
+      const fill = document.getElementById('progressFill');
+      const label = document.getElementById('progressLabel');
+      fill.style.width = `${percent}%`;
+      label.textContent = `${percent}% complete`;
+      triggerMilestones(progress, percent);
+    }
+
+    function triggerMilestones(progress, percent) {
+      const milestones = [25, 50, 75, 100];
+      progress.milestones = progress.milestones || {};
+      for (const m of milestones) {
+        if (percent >= m && !progress.milestones[m]) {
+          progress.milestones[m] = true;
+          celebrate(`${m}% milestone reached!`);
+        }
+      }
+    }
+
+    function celebrate(message) {
+      // Simple confetti
+      const confetti = document.getElementById('confetti');
+      confetti.innerHTML = '';
+      const colors = [getVar('--accent'), getVar('--accent-2'), '#ff6b6b', '#ffd166', '#06d6a0'];
+      const count = 120;
+      for (let i = 0; i < count; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'piece';
+        const color = colors[Math.floor(Math.random()*colors.length)];
+        piece.style.background = color;
+        piece.style.left = Math.random()*100 + '%';
+        piece.style.transform = `rotate(${Math.random()*360}deg)`;
+        piece.style.animation = `fall ${2 + Math.random()*2}s ease-out forwards`;
+        piece.style.opacity = (0.6 + Math.random()*0.4).toFixed(2);
+        piece.style.width = 6 + Math.random()*6 + 'px';
+        piece.style.height = 10 + Math.random()*10 + 'px';
+        confetti.appendChild(piece);
+      }
+      const note = document.createElement('div');
+      note.style.position = 'fixed'; note.style.top = '20px'; note.style.left = '50%'; note.style.transform = 'translateX(-50%)';
+      note.style.background = 'rgba(0,0,0,0.7)'; note.style.padding = '10px 14px'; note.style.borderRadius = '10px';
+      note.style.border = `1px solid ${getVar('--accent')}`; note.style.zIndex = 10000; note.textContent = message;
+      document.body.appendChild(note);
+      setTimeout(() => { note.remove(); confetti.innerHTML = ''; }, 3000);
+    }
+
+    // Inject confetti keyframes
+    (function injectKeyframes(){
+      const style = document.createElement('style');
+      style.textContent = `@keyframes fall { 0% { transform: translateY(-20px) rotate(0deg); } 100% { transform: translateY(110vh) rotate(360deg); } }`;
+      document.head.appendChild(style);
+    })();
+
+    function getVar(name) { return getComputedStyle(document.body).getPropertyValue(name).trim(); }
+
+    /* ============================================================
+       Lessons UI
+       ============================================================ */
+    function renderLessons(progress) {
+      const grid = document.getElementById('lessonsGrid');
+      grid.innerHTML = '';
+      const stageFilterBtn = document.querySelector('.filters button.active');
+      const stageFilter = stageFilterBtn?.dataset.stage || 'all';
+
+      const currentId = determineCurrentLesson(progress);
+
+      for (const lesson of LESSONS) {
+        if (stageFilter !== 'all' && String(lesson.stage) !== String(stageFilter)) continue;
+
+        const card = document.createElement('button');
+        card.className = 'lesson-card'; card.tabIndex = 0; card.setAttribute('role','button');
+        card.dataset.lessonId = lesson.id;
+        card.innerHTML = `
+          <div class="stage-tag">Stage ${lesson.stage}</div>
+          <div class="title">${lesson.title}</div>
+          <div class="status">${renderStatus(progress, lesson.id, currentId)}</div>
+        `;
+        card.addEventListener('click', () => selectLesson(lesson.id, progress));
+        grid.appendChild(card);
+      }
+    }
+
+    function renderStatus(progress, lessonId, currentId) {
+      if (progress.completed[lessonId]) {
+        return `<span class="status-dot status-complete"></span>Completed`;
+      }
+      if (lessonId === currentId) {
+        return `<span class="status-dot status-current"></span>Current`;
+      }
+      return `<span class="status-dot status-future"></span>Upcoming`;
+    }
+
+    function determineCurrentLesson(progress) {
+      // Current is next incomplete lesson
+      for (const lesson of LESSONS) {
+        if (!progress.completed[lesson.id]) return lesson.id;
+      }
+      return 30;
+    }
+
+    function selectLesson(lessonId, progress) {
+      state.selectedLessonId = lessonId;
+      progress.lastLesson = lessonId;
+      saveState(progress, loadState().srs);
+      updateOverview(progress);
+      populateDeckFilter();
+      prepareFlashcardForLesson();
+      loadTeachBack(progress);
+      renderHints();
+    }
+
+    function updateOverview(progress) {
+      const lesson = LESSONS.find(l => l.id === state.selectedLessonId) || LESSONS[0];
+      document.getElementById('lessonTitle').textContent = lesson.title;
+      document.getElementById('lessonSummary').textContent = lesson.summary;
+      const ctx = STAGES[lesson.stage]?.context || '';
+      document.getElementById('lessonContext').textContent = `Stage ${lesson.stage}: ${STAGES[lesson.stage].name}. ${ctx}`;
+      const goals = document.getElementById('lessonGoals');
+      goals.innerHTML = '';
+      for (const g of lesson.goals) {
+        const li = document.createElement('li'); li.textContent = g; goals.appendChild(li);
+      }
+      const btn = document.getElementById('markCompleteBtn');
+      btn.disabled = !!progress.completed[lesson.id];
+      btn.textContent = progress.completed[lesson.id] ? 'Lesson Completed' : 'Mark Lesson Complete';
+    }
+
+    /* ============================================================
+       Flashcard Engine with Spaced Repetition
+       ============================================================ */
+
+    function nowTs() { return Date.now(); }
+    const DAY_MS = 86400000;
+
+    function getDeckForLesson(lessonId) {
+      return FLASHCARDS.filter(c => c.lessonId === lessonId);
+    }
+
+    function getSrsState() { return loadState().srs || {}; }
+
+    function srsForCard(id) {
+      const srs = getSrsState();
+      return srs[id] || { ease: 2.5, interval: 0, dueTs: 0, reps: 0 };
+    }
+
+    function saveSrsCard(id, data) {
+      const all = getSrsState();
+      all[id] = data;
+      const prog = loadState().progress;
+      saveState(prog, all);
+    }
+
+    function rateCard(cardId, rating) {
+      const s = srsForCard(cardId);
+      // Update SM-2-like parameters (simplified)
+      // Again: reset interval to 0. Hard: small increase. Good: normal. Easy: larger.
+      let ease = s.ease;
+      if (rating === 1) ease = Math.max(1.3, ease - 0.3);
+      if (rating === 2) ease = Math.max(1.3, ease - 0.15);
+      if (rating === 3) ease = ease + 0.0;
+      if (rating === 4) ease = ease + 0.15;
+
+      let interval = s.interval;
+      if (rating === 1) interval = 0.04; // ~1 hour
+      else if (interval < 1) interval = 1; // 1 day for first success
+      else interval = Math.ceil(interval * ease);
+
+      const dueTs = nowTs() + interval * DAY_MS;
+      const reps = (s.reps || 0) + 1;
+
+      saveSrsCard(cardId, { ease, interval, dueTs, reps });
+    }
+
+    let currentDeck = [];
+    let currentCardIndex = 0;
+    let showingBack = false;
+
+    function populateDeckFilter() {
+      const select = document.getElementById('deckFilter');
+      select.innerHTML = '';
+      const optAll = document.createElement('option'); optAll.value = 'lesson'; optAll.textContent = 'This Lesson'; select.appendChild(optAll);
+      const optStage = document.createElement('option'); optStage.value = 'stage'; optStage.textContent = 'This Stage'; select.appendChild(optStage);
+      const optAllLessons = document.createElement('option'); optAllLessons.value = 'all'; optAllLessons.textContent = 'All Lessons'; select.appendChild(optAllLessons);
+      select.value = select.value || 'lesson';
+    }
+
+    function buildDeck() {
+      const lesson = LESSONS.find(l => l.id === state.selectedLessonId);
+      const filter = document.getElementById('deckFilter').value;
+      let deck = [];
+      if (filter === 'lesson') deck = FLASHCARDS.filter(c => c.lessonId === lesson.id);
+      else if (filter === 'stage') deck = FLASHCARDS.filter(c => LESSONS.find(l => l.id === c.lessonId)?.stage === lesson.stage);
+      else deck = [...FLASHCARDS];
+
+      // Due filtering and weighting: Surface difficult cards (low reps or recently failed) more often
+      const dueOnly = state.dueOnly;
+      const enhanced = [];
+      for (const c of deck) {
+        const s = srsForCard(c.id);
+        const isDue = s.dueTs <= nowTs();
+        if (!dueOnly || isDue) {
+          const weight = Math.max(1, 3 - Math.min(2, Math.floor((s.reps || 0) / 2)) + (s.interval < 1 ? 1 : 0) + (isDue ? 1 : 0));
+          for (let i = 0; i < weight; i++) enhanced.push(c);
+        }
+      }
+      if (enhanced.length === 0 && dueOnly) {
+        // fallback show a few from deck to keep learning going
+        enhanced.push(...deck.slice(0, Math.min(5, deck.length)));
+      }
+      currentDeck = shuffle(enhanced);
+      currentCardIndex = 0;
+      showingBack = false;
+      renderFlashcard();
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function currentCard() { return currentDeck[currentCardIndex]; }
+
+    function renderFlashcard() {
+      const front = document.getElementById('flashcardFront');
+      const back = document.getElementById('flashcardBack');
+      const meta = document.getElementById('fcMeta');
+      const fc = currentCard();
+      if (!fc) {
+        front.textContent = 'No cards available. Great time to review another deck or continue to the Teach-Back!';
+        back.textContent = '';
+        meta.textContent = '';
+        return;
+      }
+      front.textContent = fc.front;
+      back.textContent = fc.back;
+      const s = srsForCard(fc.id);
+      const dueStr = s.dueTs ? new Date(s.dueTs).toLocaleString() : 'now';
+      meta.innerHTML = `Card ${currentCardIndex+1}/${currentDeck.length} • Ease ${s.ease.toFixed(2)} • Due ${dueStr}`;
+      const cardEl = document.getElementById('flashcard');
+      cardEl.classList.toggle('is-flipped', showingBack);
+    }
+
+    function nextCard() {
+      if (currentDeck.length === 0) return;
+      currentCardIndex = (currentCardIndex + 1) % currentDeck.length;
+      showingBack = false;
+      renderFlashcard();
+    }
+
+    function flipCard() { showingBack = !showingBack; renderFlashcard(); }
+
+    function rateCurrent(r) {
+      const fc = currentCard();
+      if (!fc) return;
+      rateCard(fc.id, r);
+      nextCard();
+    }
+
+    function prepareFlashcardForLesson() { buildDeck(); }
+
+    /* ============================================================
+       Visualization: 2D and pseudo-3D Isometric
+       ============================================================ */
+    const vizCanvas = () => document.getElementById('vizCanvas');
+
+    function resizeCanvasToParent(canvas) {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+      return dpr;
+    }
+
+    function drawVisualization() {
+      const canvas = vizCanvas();
+      if (!canvas) return;
+      const dpr = resizeCanvasToParent(canvas);
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      // Center and apply pan/zoom
+      const cx = canvas.width/2 + state.viz.offsetX * dpr;
+      const cy = canvas.height/2 + state.viz.offsetY * dpr;
+      ctx.translate(cx, cy);
+      ctx.scale(state.viz.scale * dpr, state.viz.scale * dpr);
+
+      const mode = document.getElementById('vizMode').value;
+      const props = document.getElementById('vizProps');
+      props.innerHTML = '';
+
+      if (mode === '2d') {
+        drawGrid(ctx, 20, 0.15);
+        const shape = document.getElementById('shape2d').value;
+        const params = get2DParams();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = getVar('--accent');
+        ctx.fillStyle = 'rgba(56,189,248,0.15)';
+        if (shape === 'circle') {
+          const r = params.r;
+          ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+          addProp(props, 'Area', (Math.PI*r*r).toFixed(2));
+          addProp(props, 'Circumference', (2*Math.PI*r).toFixed(2));
+        } else if (shape === 'triangle') {
+          const { a, b, c } = params; // sides of isosceles drawn for simplicity
+          const base = b, side = a;
+          const h = Math.sqrt(Math.max(0, side*side - (base*base)/4));
+          ctx.beginPath(); ctx.moveTo(-base/2, h/2); ctx.lineTo(base/2, h/2); ctx.lineTo(0, -h/2); ctx.closePath(); ctx.fill(); ctx.stroke();
+          const s = (a + b + c)/2; const area = Math.sqrt(Math.max(0, s*(s-a)*(s-b)*(s-c)));
+          addProp(props, 'Perimeter', (a+b+c).toFixed(2));
+          addProp(props, 'Area (Heron)', area.toFixed(2));
+        } else if (shape === 'rectangle') {
+          const { w, h } = params;
+          ctx.beginPath(); ctx.rect(-w/2, -h/2, w, h); ctx.fill(); ctx.stroke();
+          addProp(props, 'Area', (w*h).toFixed(2));
+          addProp(props, 'Perimeter', (2*(w+h)).toFixed(2));
+        }
+      } else {
+        // 3D isometric style: project 3D points to 2D
+        drawGrid(ctx, 20, 0.15);
+        const shape = document.getElementById('shape3d').value;
+        const params = get3DParams();
+        const rotX = state.viz.rotX, rotY = state.viz.rotY;
+        if (shape === 'cube') {
+          const s = params.s;
+          const verts = [
+            [-s/2,-s/2,-s/2], [ s/2,-s/2,-s/2], [ s/2, s/2,-s/2], [-s/2, s/2,-s/2],
+            [-s/2,-s/2, s/2], [ s/2,-s/2, s/2], [ s/2, s/2, s/2], [-s/2, s/2, s/2]
+          ];
+          const edges = [ [0,1],[1,2],[2,3],[3,0], [4,5],[5,6],[6,7],[7,4], [0,4],[1,5],[2,6],[3,7] ];
+          const projected = verts.map(v => project3D(rotateY(rotateX(v, rotX), rotY)));
+          drawEdges(ctx, projected, edges, getVar('--accent'));
+          addProp(props, 'Surface Area', (6*s*s).toFixed(2));
+          addProp(props, 'Volume', (s*s*s).toFixed(2));
+        } else if (shape === 'pyramid') {
+          const b = params.b, h = params.h;
+          const verts = [
+            [-b/2,0,-b/2], [b/2,0,-b/2], [b/2,0,b/2], [-b/2,0,b/2], [0,-h,0]
+          ];
+          const edges = [ [0,1],[1,2],[2,3],[3,0], [0,4],[1,4],[2,4],[3,4] ];
+          const projected = verts.map(v => project3D(rotateY(rotateX(v, rotX), rotY)));
+          drawEdges(ctx, projected, edges, getVar('--accent'));
+          const slant = Math.sqrt((b/2)**2 + h**2);
+          const area = b*b + 2*(b*slant);
+          const vol = (b*b*h)/3;
+          addProp(props, 'Surface Area (approx)', area.toFixed(2));
+          addProp(props, 'Volume', vol.toFixed(2));
+        }
+      }
+
+      ctx.restore();
+    }
+
+    function drawGrid(ctx, step=20, alpha=0.1) {
+      const w = ctx.canvas.width, h = ctx.canvas.height;
+      ctx.save();
+      ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+      ctx.lineWidth = 1;
+      // Draw axes
+      ctx.beginPath();
+      ctx.moveTo(-w, 0); ctx.lineTo(w, 0);
+      ctx.moveTo(0, -h); ctx.lineTo(0, h);
+      ctx.stroke();
+      // Minor grid
+      ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.4})`;
+      for (let x = -w; x <= w; x += step) { ctx.beginPath(); ctx.moveTo(x, -h); ctx.lineTo(x, h); ctx.stroke(); }
+      for (let y = -h; y <= h; y += step) { ctx.beginPath(); ctx.moveTo(-w, y); ctx.lineTo(w, y); ctx.stroke(); }
+      ctx.restore();
+    }
+
+    function addProp(container, name, value) {
+      const div = document.createElement('div');
+      div.className = 'prop';
+      div.innerHTML = `<strong>${name}</strong><div style="color:var(--text-dim);">${value}</div>`;
+      container.appendChild(div);
+    }
+
+    function get2DParams() {
+      const shape = document.getElementById('shape2d').value;
+      const p = {};
+      if (shape === 'circle') p.r = Number(document.getElementById('param2d_r')?.value || 60);
+      if (shape === 'triangle') {
+        p.a = Number(document.getElementById('param2d_a')?.value || 80);
+        p.b = Number(document.getElementById('param2d_b')?.value || 100);
+        p.c = Number(document.getElementById('param2d_c')?.value || 80);
+      }
+      if (shape === 'rectangle') {
+        p.w = Number(document.getElementById('param2d_w')?.value || 160);
+        p.h = Number(document.getElementById('param2d_h')?.value || 100);
+      }
+      return p;
+    }
+
+    function get3DParams() {
+      const shape = document.getElementById('shape3d').value;
+      const p = {};
+      if (shape === 'cube') p.s = Number(document.getElementById('param3d_s')?.value || 120);
+      if (shape === 'pyramid') {
+        p.b = Number(document.getElementById('param3d_b')?.value || 140);
+        p.h = Number(document.getElementById('param3d_h')?.value || 120);
+      }
+      return p;
+    }
+
+    function rotateX([x,y,z], a) { const sa = Math.sin(a), ca = Math.cos(a); return [x, y*ca - z*sa, y*sa + z*ca]; }
+    function rotateY([x,y,z], a) { const sa = Math.sin(a), ca = Math.cos(a); return [x*ca + z*sa, y, -x*sa + z*ca]; }
+
+    function project3D([x,y,z]) {
+      // Isometric-like projection (no perspective) for clarity
+      const isoX = x - z * 0.5;
+      const isoY = y + z * 0.5;
+      return [isoX, isoY];
+    }
+
+    function drawEdges(ctx, pts, edges, color) {
+      ctx.save();
+      ctx.strokeStyle = color; ctx.lineWidth = 2;
+      for (const [i,j] of edges) {
+        ctx.beginPath();
+        ctx.moveTo(pts[i][0], pts[i][1]);
+        ctx.lineTo(pts[j][0], pts[j][1]);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function ensureVizControls() {
+      // Build parameter inputs dynamically for clarity and to keep DOM light
+      const s2 = document.getElementById('shape2d');
+      const params2 = document.getElementById('shape2dParams');
+      params2.innerHTML = '';
+      if (s2.value === 'circle') {
+        params2.appendChild(makeRange('Radius', 'param2d_r', 20, 240, 60));
+      } else if (s2.value === 'triangle') {
+        params2.appendChild(makeRange('Side a', 'param2d_a', 20, 200, 80));
+        params2.appendChild(makeRange('Side b', 'param2d_b', 20, 200, 100));
+        params2.appendChild(makeRange('Side c', 'param2d_c', 20, 200, 80));
+      } else if (s2.value === 'rectangle') {
+        params2.appendChild(makeRange('Width', 'param2d_w', 20, 300, 160));
+        params2.appendChild(makeRange('Height', 'param2d_h', 20, 220, 100));
+      }
+
+      const s3 = document.getElementById('shape3d');
+      const params3 = document.getElementById('shape3dParams');
+      params3.innerHTML = '';
+      if (s3.value === 'cube') {
+        params3.appendChild(makeRange('Side', 'param3d_s', 40, 240, 120));
+      } else if (s3.value === 'pyramid') {
+        params3.appendChild(makeRange('Base', 'param3d_b', 40, 260, 140));
+        params3.appendChild(makeRange('Height', 'param3d_h', 40, 220, 120));
+      }
+    }
+
+    function makeRange(label, id, min, max, value) {
+      const wrap = document.createElement('div');
+      wrap.className = 'row';
+      const lab = document.createElement('label'); lab.setAttribute('for', id); lab.textContent = label;
+      const input = document.createElement('input'); input.type = 'range'; input.min = String(min); input.max = String(max); input.value = String(value); input.id = id; input.addEventListener('input', drawVisualization);
+      wrap.appendChild(lab); wrap.appendChild(input);
+      return wrap;
+    }
+
+    // Pointer interactions for pan/zoom and rotation
+    function attachVizInteractions() {
+      const canvas = vizCanvas();
+      let pointerDown = false; let lastX = 0; let lastY = 0;
+      canvas.addEventListener('pointerdown', e => { pointerDown = true; lastX = e.clientX; lastY = e.clientY; canvas.setPointerCapture(e.pointerId); });
+      canvas.addEventListener('pointerup', e => { pointerDown = false; canvas.releasePointerCapture(e.pointerId); });
+      canvas.addEventListener('pointercancel', () => { pointerDown = false; });
+      canvas.addEventListener('pointermove', e => {
+        if (!pointerDown) return;
+        const dx = e.clientX - lastX; const dy = e.clientY - lastY;
+        lastX = e.clientX; lastY = e.clientY;
+        const mode = document.getElementById('vizMode').value;
+        if (mode === '2d') { state.viz.offsetX += dx; state.viz.offsetY += dy; }
+        else { state.viz.rotY += dx * 0.01; state.viz.rotX += dy * 0.01; }
+        drawVisualization();
+      });
+      canvas.addEventListener('wheel', e => { e.preventDefault(); const delta = Math.sign(e.deltaY); const factor = delta > 0 ? 0.9 : 1.1; state.viz.scale *= factor; state.viz.scale = Math.max(0.2, Math.min(5, state.viz.scale)); drawVisualization(); }, { passive: false });
+
+      // Simple pinch zoom
+      let pinchDist = 0; let isPinching = false;
+      canvas.addEventListener('touchstart', e => {
+        if (e.touches.length === 2) { isPinching = true; pinchDist = touchDist(e.touches[0], e.touches[1]); }
+      }, { passive: true });
+      canvas.addEventListener('touchmove', e => {
+        if (isPinching && e.touches.length === 2) {
+          const d = touchDist(e.touches[0], e.touches[1]);
+          const factor = d / pinchDist; pinchDist = d; state.viz.scale *= factor; state.viz.scale = Math.max(0.2, Math.min(5, state.viz.scale)); drawVisualization();
+        }
+      }, { passive: true });
+      canvas.addEventListener('touchend', () => { isPinching = false; }, { passive: true });
+    }
+
+    function touchDist(a,b){ const dx = a.clientX - b.clientX; const dy = a.clientY - b.clientY; return Math.hypot(dx,dy); }
+
+    /* ============================================================
+       Graphing System with Parser, Zoom/Pan, Intercepts, Solving
+       ============================================================ */
+    const graphCanvasEl = () => document.getElementById('graphCanvas');
+
+    function drawGraph() {
+      const canvas = graphCanvasEl();
+      const dpr = resizeCanvasToParent(canvas);
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width, canvas.height);
+      const W = canvas.width, H = canvas.height;
+
+      const view = state.graph; // xMin, xMax, yMin, yMax
+      const sx = W / (view.xMax - view.xMin);
+      const sy = H / (view.yMax - view.yMin);
+      function xToPx(x){ return (x - view.xMin) * sx; }
+      function yToPx(y){ return H - (y - view.yMin) * sy; }
+
+      // Grid
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
+      // vertical lines
+      const step = niceStep((view.xMax - view.xMin)/10);
+      for (let x = Math.ceil(view.xMin/step)*step; x <= view.xMax; x+=step) {
+        const px = xToPx(x); ctx.beginPath(); ctx.moveTo(px,0); ctx.lineTo(px,H); ctx.stroke();
+      }
+      for (let y = Math.ceil(view.yMin/step)*step; y <= view.yMax; y+=step) {
+        const py = yToPx(y); ctx.beginPath(); ctx.moveTo(0,py); ctx.lineTo(W,py); ctx.stroke();
+      }
+      // Axes
+      ctx.strokeStyle = getVar('--accent');
+      ctx.beginPath(); ctx.moveTo(0, yToPx(0)); ctx.lineTo(W, yToPx(0)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(xToPx(0), 0); ctx.lineTo(xToPx(0), H); ctx.stroke();
+      ctx.restore();
+
+      // Plot function
+      const expr = document.getElementById('exprInput').value;
+      let f;
+      try { f = compileExpression(expr); } catch (e) { drawError(ctx, W, H, e.message); return; }
+
+      ctx.save();
+      ctx.strokeStyle = getVar('--accent-2'); ctx.lineWidth = 2;
+      ctx.beginPath();
+      const samples = 1000; let first = true;
+      const xRange = view.xMax - view.xMin;
+      let lastY = null; const intercepts = [];
+      for (let i = 0; i <= samples; i++) {
+        const x = view.xMin + (i/samples)*xRange;
+        let y = f({ x });
+        if (!isFinite(y)) { first = true; lastY = null; continue; }
+        const px = xToPx(x), py = yToPx(y);
+        if (first) { ctx.moveTo(px, py); first = false; }
+        else { ctx.lineTo(px, py); }
+        if (lastY !== null) {
+          if (y === 0) intercepts.push({ x, y: 0 });
+          else if (Math.sign(y) !== Math.sign(lastY)) {
+            // refine zero crossing via bisection
+            const root = refineRootBisection(f, x - xRange/samples, x, 20);
+            if (root !== null) intercepts.push({ x: root, y: 0 });
+          }
+        }
+        lastY = y;
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // Draw intercept points
+      const intDiv = document.getElementById('intercepts'); intDiv.innerHTML='';
+      const uniqueIntercepts = uniqueBy(intercepts, p => Math.round(p.x*1000));
+      ctx.save(); ctx.fillStyle = '#ff6b6b';
+      for (const p of uniqueIntercepts) {
+        const px = xToPx(p.x), py = yToPx(0);
+        ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2); ctx.fill();
+        const badge = document.createElement('div'); badge.className='intercept-badge'; badge.textContent = `x-intercept ≈ ${p.x.toFixed(3)}`;
+        intDiv.appendChild(badge);
+      }
+      // y-intercept
+      try {
+        const y0 = f({ x: 0 });
+        if (isFinite(y0)) {
+          ctx.beginPath(); ctx.arc(xToPx(0), yToPx(y0), 4, 0, Math.PI*2); ctx.fill();
+          const badgeY = document.createElement('div'); badgeY.className='intercept-badge'; badgeY.textContent = `y-intercept = ${y0.toFixed(3)}`; intDiv.appendChild(badgeY);
+        }
+      } catch {}
+      ctx.restore();
+    }
+
+    function uniqueBy(arr, keyFn) { const seen = new Set(); return arr.filter(v => { const k = keyFn(v); if (seen.has(k)) return false; seen.add(k); return true; }); }
+
+    function niceStep(range) {
+      const pow = Math.pow(10, Math.floor(Math.log10(range)));
+      const base = range / pow;
+      if (base < 1.5) return 1*pow; if (base < 3) return 2*pow; if (base < 7) return 5*pow; return 10*pow;
+    }
+
+    function drawError(ctx, W, H, message) {
+      ctx.save(); ctx.fillStyle = '#ff6b6b'; ctx.font = '16px sans-serif'; ctx.fillText('Parse error: ' + message, 12, 24); ctx.restore();
+    }
+
+    function refineRootBisection(f, a, b, steps=20) {
+      let fa = f({ x: a }); let fb = f({ x: b });
+      if (!isFinite(fa) || !isFinite(fb)) return null;
+      if (fa === 0) return a; if (fb === 0) return b;
+      if (Math.sign(fa) === Math.sign(fb)) return null;
+      for (let i = 0; i < steps; i++) {
+        const m = (a+b)/2; const fm = f({ x: m });
+        if (!isFinite(fm)) return null;
+        if (Math.abs(fm) < 1e-9) return m;
+        if (Math.sign(fa) !== Math.sign(fm)) { b = m; fb = fm; } else { a = m; fa = fm; }
+      }
+      return (a+b)/2;
+    }
+
+    // Expression parser: Tokenize -> Shunting Yard -> RPN -> Evaluator
+    const FUNCTIONS = {
+      sin: Math.sin, cos: Math.cos, tan: Math.tan,
+      asin: Math.asin, acos: Math.acos, atan: Math.atan,
+      sqrt: Math.sqrt, abs: Math.abs, log: Math.log, exp: Math.exp,
+      floor: Math.floor, ceil: Math.ceil, round: Math.round
+    };
+
+    function compileExpression(expr) {
+      // Allow users to optionally include "y =" or "f(x) ="
+      expr = expr.replace(/\s+/g,'');
+      expr = expr.replace(/^y=|^f\(x\)=/,'');
+      const tokens = tokenize(expr);
+      const rpn = toRPN(tokens);
+      return function(scope) {
+        return evalRPN(rpn, scope);
+      };
+    }
+
+    function tokenize(s) {
+      const tokens = [];
+      let i = 0;
+      while (i < s.length) {
+        const c = s[i];
+        if (/[0-9.]/.test(c)) {
+          let num = c; i++;
+          while (i < s.length && /[0-9.]/.test(s[i])) { num += s[i++]; }
+          if (num.split('.').length > 2) throw new Error('Invalid number');
+          tokens.push({ type:'num', value: parseFloat(num) });
+          continue;
+        }
+        if (/[a-zA-Z]/.test(c)) {
+          let id = c; i++;
+          while (i < s.length && /[a-zA-Z0-9_]/.test(s[i])) { id += s[i++]; }
+          tokens.push({ type:'id', value: id });
+          continue;
+        }
+        if (/[+\-*/^(),]/.test(c)) { tokens.push({ type:'op', value: c }); i++; continue; }
+        throw new Error('Unexpected character: ' + c);
+      }
+      return tokens;
+    }
+
+    function toRPN(tokens) {
+      const out = []; const ops = [];
+      const prec = { '+':1, '-':1, '*':2, '/':2, '^':3 };
+      const rightAssoc = { '^': true };
+      let prevType = null;
+      for (let i = 0; i < tokens.length; i++) {
+        const t = tokens[i];
+        if (t.type === 'num') { out.push(t); prevType = 'val'; continue; }
+        if (t.type === 'id') {
+          // id can be variable x or function name
+          // If next token is '(', treat as function
+          const next = tokens[i+1];
+          if (next && next.type === 'op' && next.value === '(') { ops.push(t); prevType = 'func'; continue; }
+          out.push(t); prevType = 'val'; continue;
+        }
+        if (t.type === 'op') {
+          if (t.value === ',') { while (ops.length && ops[ops.length-1].value !== '(') out.push(ops.pop()); continue; }
+          if (t.value === '(') { ops.push(t); prevType = 'op'; continue; }
+          if (t.value === ')') {
+            while (ops.length && ops[ops.length-1].value !== '(') out.push(ops.pop());
+            if (!ops.length) throw new Error('Mismatched parentheses');
+            ops.pop(); // remove '('
+            // If function on stack, pop to output
+            if (ops.length && ops[ops.length-1].type === 'id') out.push(ops.pop());
+            continue;
+          }
+          // unary minus handling: if previous is operator or left paren or start
+          if (t.value === '-' && (prevType === null || prevType === 'op' || prevType === 'func')) {
+            // transform unary -x into (0 - x)
+            out.push({ type:'num', value: 0 });
+          }
+          while (ops.length) {
+            const top = ops[ops.length-1];
+            const tprec = prec[t.value];
+            const oprec = prec[top.value] || 0;
+            if ((top.type === 'op' || top.type === 'id') && top.value !== '(' &&
+                ((rightAssoc[t.value] ? tprec < oprec : tprec <= oprec))) {
+              out.push(ops.pop());
+            } else break;
+          }
+          ops.push(t); prevType = 'op'; continue;
+        }
+      }
+      while (ops.length) {
+        const op = ops.pop();
+        if (op.value === '(' || op.value === ')') throw new Error('Mismatched parentheses');
+        out.push(op);
+      }
+      return out;
+    }
+
+    function evalRPN(rpn, scope) {
+      const stack = [];
+      for (const t of rpn) {
+        if (t.type === 'num') { stack.push(t.value); continue; }
+        if (t.type === 'id') {
+          if (t.value in FUNCTIONS) {
+            const fn = FUNCTIONS[t.value];
+            const arg = stack.pop();
+            stack.push(fn(arg));
+          } else if (t.value === 'pi' || t.value === 'PI') {
+            stack.push(Math.PI);
+          } else if (t.value === 'e' || t.value === 'E') {
+            stack.push(Math.E);
+          } else if (t.value === 'x') {
+            stack.push(scope.x);
+          } else {
+            throw new Error('Unknown identifier: ' + t.value);
+          }
+          continue;
+        }
+        if (t.type === 'op') {
+          const b = stack.pop(); const a = stack.pop();
+          switch (t.value) {
+            case '+': stack.push(a + b); break;
+            case '-': stack.push(a - b); break;
+            case '*': stack.push(a * b); break;
+            case '/': stack.push(a / b); break;
+            case '^': stack.push(Math.pow(a, b)); break;
+            default: throw new Error('Unknown operator: ' + t.value);
+          }
+        }
+      }
+      if (stack.length !== 1) throw new Error('Invalid expression');
+      return stack[0];
+    }
+
+    // Step-by-step solving for f(x)=0: handle linear and quadratic, else show bisection demonstration
+    function showSolveSteps() {
+      const expr = document.getElementById('exprInput').value.replace(/\s+/g,'');
+      const stepsEl = document.getElementById('solveSteps');
+      stepsEl.innerHTML = '';
+
+      // Try to parse linear ax + b
+      const linMatch = expr.match(/^([+-]?\d*\.?\d*)?x([+-]\d*\.?\d+)?$/i) || expr.match(/^([+-]?\d*\.?\d*)?x([+-]\d*\.?\d+)?=0$/i);
+      if (linMatch) {
+        // extract a and b
+        let aStr = linMatch[1];
+        let bStr = linMatch[2] || '0';
+        if (expr.includes('=')) bStr = (bStr||'0').replace('=0','');
+        const a = aStr === '' || aStr === '+' || aStr === undefined ? 1 : (aStr === '-' ? -1 : parseFloat(aStr));
+        const b = parseFloat(bStr || '0');
+        const x = -b / a;
+        stepsEl.innerHTML = [
+          'Recognize a linear equation f(x) = ax + b.',
+          `Given a = ${a}, b = ${b}.`,
+          'Set f(x) = 0: ax + b = 0.',
+          'Subtract b: ax = -b.',
+          'Divide by a: x = -b/a.',
+          `<strong>Solution:</strong> x = ${x}.`
+        ].map(s=>`<div>${s}</div>`).join('');
+        return;
+      }
+
+      // Try to parse quadratic ax^2+bx+c
+      const quadMatch = expr.match(/^([+-]?\d*\.?\d*)?x\^2([+-]\d*\.?\d*)?x?([+-]\d*\.?\d+)?$/i);
+      if (quadMatch) {
+        const a = parseNumCoeff(quadMatch[1], 1);
+        const b = parseNumCoeff(quadMatch[2], 0);
+        const c = parseFloat(quadMatch[3] || '0');
+        const disc = b*b - 4*a*c;
+        let roots;
+        if (disc < 0) roots = 'No real roots'; else if (disc === 0) roots = `x = ${(-b/(2*a)).toFixed(4)}`; else {
+          const r1 = (-b + Math.sqrt(disc)) / (2*a);
+          const r2 = (-b - Math.sqrt(disc)) / (2*a);
+          roots = `x = ${r1.toFixed(4)}, ${r2.toFixed(4)}`;
+        }
+        stepsEl.innerHTML = [
+          'Recognize a quadratic: f(x) = ax^2 + bx + c.',
+          `a = ${a}, b = ${b}, c = ${c}.`,
+          'Quadratic formula: x = (-b ± √(b² - 4ac)) / (2a).',
+          `Discriminant: Δ = b² - 4ac = ${disc.toFixed(4)}.`,
+          `<strong>Solutions:</strong> ${roots}`
+        ].map(s=>`<div>${s}</div>`).join('');
+        return;
+      }
+
+      // Fallback: show bisection progression around a numeric root
+      let f;
+      try { f = compileExpression(expr); } catch (e) { stepsEl.textContent = e.message; return; }
+      // Try a bracket around 0 within view
+      const view = state.graph;
+      const a0 = view.xMin, b0 = view.xMax; const steps = [];
+      let a = a0, b = b0; let fa = f({x:a}), fb = f({x:b});
+      if (isFinite(fa) && isFinite(fb) && Math.sign(fa) !== Math.sign(fb)) {
+        for (let i = 0; i < 12; i++) {
+          const m = (a+b)/2; const fm = f({x:m});
+          steps.push(`Step ${i+1}: Interval [${a.toFixed(3)}, ${b.toFixed(3)}], f(m=${m.toFixed(3)}) = ${fm.toFixed(6)}`);
+          if (Math.sign(fa) !== Math.sign(fm)) { b = m; fb = fm; }
+          else { a = m; fa = fm; }
+        }
+        steps.push(`<strong>Approx root:</strong> x ≈ ${((a+b)/2).toFixed(6)}`);
+        stepsEl.innerHTML = steps.map(s=>`<div>${s}</div>`).join('');
+      } else {
+        stepsEl.textContent = 'Could not bracket a root in the current view. Try panning/zooming to include a sign change.';
+      }
+    }
+
+    function parseNumCoeff(str, def) {
+      if (str === undefined) return def;
+      if (str === '' || str === '+') return 1;
+      if (str === '-') return -1;
+      return parseFloat(str);
+    }
+
+    // Interactions for graph canvas
+    function attachGraphInteractions() {
+      const canvas = graphCanvasEl();
+      let pointerDown = false; let lastX = 0; let lastY = 0;
+      canvas.addEventListener('pointerdown', e => { pointerDown = true; lastX = e.clientX; lastY = e.clientY; canvas.setPointerCapture(e.pointerId); });
+      canvas.addEventListener('pointerup', e => { pointerDown = false; canvas.releasePointerCapture(e.pointerId); });
+      canvas.addEventListener('pointercancel', () => { pointerDown = false; });
+      canvas.addEventListener('pointermove', e => {
+        if (!pointerDown) return;
+        const dx = e.clientX - lastX; const dy = e.clientY - lastY; lastX = e.clientX; lastY = e.clientY;
+        const v = state.graph; const W = canvas.width, H = canvas.height;
+        const xScale = (v.xMax - v.xMin) / W; const yScale = (v.yMax - v.yMin) / H;
+        v.xMin -= dx * xScale; v.xMax -= dx * xScale;
+        v.yMin += dy * yScale; v.yMax += dy * yScale;
+        drawGraph();
+      });
+      canvas.addEventListener('wheel', e => { e.preventDefault(); zoomGraph(e.deltaY, e.clientX, e.clientY); }, { passive: false });
+
+      // Pinch zoom
+      let pinchDist = 0; let isPinching = false;
+      canvas.addEventListener('touchstart', e => { if (e.touches.length === 2) { isPinching = true; pinchDist = touchDist(e.touches[0], e.touches[1]); } }, { passive: true });
+      canvas.addEventListener('touchmove', e => {
+        if (isPinching && e.touches.length === 2) {
+          const d = touchDist(e.touches[0], e.touches[1]);
+          const delta = d - pinchDist; pinchDist = d;
+          zoomGraph(-delta, (e.touches[0].clientX+e.touches[1].clientX)/2, (e.touches[0].clientY+e.touches[1].clientY)/2);
+        }
+      }, { passive: true });
+      canvas.addEventListener('touchend', () => { isPinching = false; }, { passive: true });
+
+      // Keyboard support
+      window.addEventListener('keydown', e => {
+        const v = state.graph; const pan = 0.1 * (v.xMax - v.xMin);
+        if (e.key === '+') { zoomGraph(-100, canvas.width/2, canvas.height/2); }
+        if (e.key === '-') { zoomGraph( 100, canvas.width/2, canvas.height/2); }
+        if (e.key === 'ArrowLeft') { v.xMin -= pan; v.xMax -= pan; drawGraph(); }
+        if (e.key === 'ArrowRight') { v.xMin += pan; v.xMax += pan; drawGraph(); }
+        if (e.key === 'ArrowUp') { v.yMin += pan; v.yMax += pan; drawGraph(); }
+        if (e.key === 'ArrowDown') { v.yMin -= pan; v.yMax -= pan; drawGraph(); }
+      });
+    }
+
+    function zoomGraph(deltaY, clientX, clientY) {
+      const canvas = graphCanvasEl();
+      const rect = canvas.getBoundingClientRect();
+      const v = state.graph;
+      const zoomFactor = deltaY > 0 ? 1.1 : 0.9;
+      const x = v.xMin + (clientX - rect.left) / rect.width * (v.xMax - v.xMin);
+      const y = v.yMin + (rect.bottom - clientY) / rect.height * (v.yMax - v.yMin);
+      const newWidth = (v.xMax - v.xMin) * zoomFactor;
+      const newHeight = (v.yMax - v.yMin) * zoomFactor;
+      v.xMin = x - (x - v.xMin) * zoomFactor;
+      v.xMax = v.xMin + newWidth;
+      v.yMin = y - (y - v.yMin) * zoomFactor;
+      v.yMax = v.yMin + newHeight;
+      drawGraph();
+    }
+
+    /* ============================================================
+       Teach-Back Module with Progressive Hints
+       ============================================================ */
+    function lessonHints(lessonId) {
+      const base = [
+        'First, name the key idea in one sentence.',
+        'What definition or rule is central here? State it clearly.',
+        'Give a concrete example with numbers or a sketch.',
+        'Explain why the steps work, not just what to do.'
+      ];
+      // Add lesson-specific prompt
+      const lesson = LESSONS.find(l => l.id === lessonId);
+      const extra = `Focus: ${lesson.title.replace(/Day \d+: /,'')}.`;
+      return [extra, ...base];
+    }
+
+    function renderHints() {
+      const list = document.getElementById('hintsList');
+      list.innerHTML = '';
+      const hints = lessonHints(state.selectedLessonId);
+      for (let i = 0; i < Math.min(2, hints.length); i++) {
+        const div = document.createElement('div'); div.className = 'hint'; div.textContent = hints[i]; list.appendChild(div);
+      }
+      list.dataset.idx = '1'; // next index to reveal (0 already shown in extra)
+    }
+
+    function nextHint() {
+      const list = document.getElementById('hintsList');
+      const hints = lessonHints(state.selectedLessonId);
+      let idx = parseInt(list.dataset.idx || '0', 10);
+      if (idx >= hints.length) return;
+      const div = document.createElement('div'); div.className = 'hint'; div.textContent = hints[idx]; list.appendChild(div);
+      list.dataset.idx = String(idx + 1);
+    }
+
+    function loadTeachBack(progress) {
+      const lessonId = state.selectedLessonId;
+      const t = progress.teach?.[lessonId] || { text: '', rating: 1, updated: 0 };
+      document.getElementById('teachInput').value = t.text || '';
+      document.getElementById('selfRate').value = String(t.rating || 1);
+      const saved = document.getElementById('teachSavedMsg');
+      saved.textContent = t.updated ? `Saved ${new Date(t.updated).toLocaleString()}` : '';
+    }
+
+    function saveTeachBack(progress) {
+      const lessonId = state.selectedLessonId;
+      const text = document.getElementById('teachInput').value.trim();
+      const rating = parseInt(document.getElementById('selfRate').value, 10);
+      progress.teach = progress.teach || {};
+      progress.teach[lessonId] = { text, rating, updated: Date.now() };
+      saveState(progress, getSrsState());
+      document.getElementById('teachSavedMsg').textContent = `Saved ${new Date().toLocaleString()}`;
+      // Automatic encouragement
+      if (text.length >= 60 && rating >= 3) toast('Great reflection — you are consolidating understanding.');
+    }
+
+    function markLessonComplete(progress) {
+      const lessonId = state.selectedLessonId;
+      const teach = progress.teach?.[lessonId];
+      if (!teach || (teach.text || '').length < 30 || (teach.rating || 0) < 3) {
+        toast('To complete: write a short explanation (≥30 chars) and rate ≥3.');
+        return;
+      }
+      progress.completed[lessonId] = true;
+      const nextId = determineCurrentLesson(progress);
+      progress.lastLesson = nextId;
+      saveState(progress, getSrsState());
+      updateProgressUI(progress);
+      renderLessons(progress);
+      updateOverview(progress);
+      celebrate('Lesson completed! Onward.');
+    }
+
+    function toast(msg) {
+      const note = document.createElement('div');
+      note.style.position = 'fixed'; note.style.bottom = '16px'; note.style.left = '50%'; note.style.transform = 'translateX(-50%)';
+      note.style.background = 'rgba(0,0,0,0.8)'; note.style.padding = '10px 14px'; note.style.borderRadius = '10px';
+      note.style.border = `1px solid ${getVar('--accent')}`; note.style.zIndex = 10000; note.textContent = msg;
+      document.body.appendChild(note);
+      setTimeout(() => note.remove(), 2500);
+    }
+
+    /* ============================================================
+       UI Wiring, Tabs, Filters, High Contrast, Accessibility
+       ============================================================ */
+    function init() {
+      const { progress } = loadState();
+
+      // High contrast persisted
+      if (state.highContrast) {
+        document.body.classList.add('high-contrast');
+        document.getElementById('contrastToggle').setAttribute('aria-pressed','true');
+      }
+
+      // Filters
+      document.querySelectorAll('.filters button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderLessons(progress);
+        });
+      });
+
+      // Lessons list
+      renderLessons(progress);
+      updateProgressUI(progress);
+      selectLesson(progress.lastLesson || determineCurrentLesson(progress), progress);
+
+      // Buttons
+      document.getElementById('startCurrentBtn').addEventListener('click', () => {
+        const current = determineCurrentLesson(progress);
+        selectLesson(current, progress);
+      });
+      document.getElementById('resetProgressBtn').addEventListener('click', () => {
+        if (!confirm('Reset all progress and spaced repetition scheduling?')) return;
+        store.remove(`${NS}.progress`); store.remove(`${NS}.srs`); store.remove(`${NS}.ui`);
+        location.reload();
+      });
+
+      // Tabs
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+          btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+          const tab = btn.dataset.tab;
+          document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+          document.getElementById(`panel-${tab}`).classList.add('active');
+          if (tab === 'visualize') drawVisualization();
+          if (tab === 'graph') drawGraph();
+        });
+      });
+
+      // Overview actions
+      document.getElementById('markCompleteBtn').addEventListener('click', () => markLessonComplete(loadState().progress));
+      document.getElementById('openFlashcardsBtn').addEventListener('click', () => {
+        document.querySelector('.tab-btn[data-tab="flashcards"]').click();
+      });
+
+      // Flashcards
+      populateDeckFilter();
+      document.getElementById('deckFilter').addEventListener('change', buildDeck);
+      document.getElementById('shuffleDeckBtn').addEventListener('click', buildDeck);
+      document.getElementById('dueOnlyToggle').addEventListener('click', (e) => {
+        state.dueOnly = !state.dueOnly; e.currentTarget.setAttribute('aria-pressed', String(state.dueOnly)); buildDeck();
+        saveState(loadState().progress, getSrsState());
+      });
+      document.getElementById('flashcard').addEventListener('click', flipCard);
+      document.getElementById('rateAgainBtn').addEventListener('click', () => rateCurrent(1));
+      document.getElementById('rateHardBtn').addEventListener('click', () => rateCurrent(2));
+      document.getElementById('rateGoodBtn').addEventListener('click', () => rateCurrent(3));
+      document.getElementById('rateEasyBtn').addEventListener('click', () => rateCurrent(4));
+      document.getElementById('flashcard').addEventListener('keydown', e => {
+        if (e.code === 'Space') { e.preventDefault(); flipCard(); }
+        if (e.key === '1') rateCurrent(1);
+        if (e.key === '2') rateCurrent(2);
+        if (e.key === '3') rateCurrent(3);
+        if (e.key === '4') rateCurrent(4);
+        if (e.key === 'ArrowRight') nextCard();
+      });
+
+      // Visualization controls
+      ensureVizControls();
+      document.getElementById('vizMode').addEventListener('change', () => {
+        const mode = document.getElementById('vizMode').value;
+        document.getElementById('viz2dControls').style.display = mode === '2d' ? '' : 'none';
+        document.getElementById('viz3dControls').style.display = mode === '3d' ? '' : 'none';
+        drawVisualization();
+      });
+      document.getElementById('shape2d').addEventListener('change', () => { ensureVizControls(); drawVisualization(); });
+      document.getElementById('shape3d').addEventListener('change', () => { ensureVizControls(); drawVisualization(); });
+      document.getElementById('vizResetBtn').addEventListener('click', () => { state.viz.scale = 1; state.viz.offsetX = 0; state.viz.offsetY = 0; state.viz.rotX = Math.PI/6; state.viz.rotY = Math.PI/6; drawVisualization(); });
+      attachVizInteractions();
+
+      // Graph controls
+      document.getElementById('plotBtn').addEventListener('click', drawGraph);
+      document.getElementById('resetViewBtn').addEventListener('click', () => { state.graph = { xMin:-10, xMax:10, yMin:-6, yMax:6 }; drawGraph(); });
+      document.getElementById('solveBtn').addEventListener('click', showSolveSteps);
+      attachGraphInteractions();
+      drawGraph();
+
+      // Teachback
+      document.getElementById('saveTeachBtn').addEventListener('click', () => saveTeachBack(loadState().progress));
+      document.getElementById('nextHintBtn').addEventListener('click', nextHint);
+      renderHints();
+      loadTeachBack(progress);
+
+      // High contrast toggle
+      document.getElementById('contrastToggle').addEventListener('click', () => {
+        state.highContrast = !state.highContrast;
+        document.body.classList.toggle('high-contrast', state.highContrast);
+        document.getElementById('contrastToggle').setAttribute('aria-pressed', String(state.highContrast));
+        saveState(loadState().progress, getSrsState());
+      });
+
+      // Keyboard shortcut for contrast
+      window.addEventListener('keydown', e => { if (e.key.toLowerCase() === 'h') document.getElementById('contrastToggle').click(); });
+
+      // Resize handlers
+      window.addEventListener('resize', () => { drawVisualization(); drawGraph(); });
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
