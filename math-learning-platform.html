@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathJourney - 30-Day Interactive Mathematics Learning Platform</title>
+    <style>
+        /* CSS Variables for Consistent Design */
+        :root {
+            --primary-blue: #2563eb;
+            --primary-green: #16a34a;
+            --primary-orange: #ea580c;
+            --primary-yellow: #ca8a04;
+            --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --border-radius: 12px;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --surface: rgba(255, 255, 255, 0.95);
+            --surface-elevated: rgba(255, 255, 255, 0.98);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            background: var(--surface-elevated);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, var(--primary-blue), var(--primary-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+            max-width: 800px;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            background: var(--surface);
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            box-shadow: var(--card-shadow);
+        }
+
+        .nav-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-tab.active {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        /* Progress Overview */
+        .progress-overview {
+            background: var(--surface-elevated);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-green), var(--primary-blue));
+            transition: width 0.5s ease;
+            border-radius: 6px;
+        }
+
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 5px;
+        }
+
+        /* Main Content Areas */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Day Cards Grid */
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .day-card {
+            background: var(--surface);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+
+        .day-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+        }
+
+        .day-card.completed {
+            border-color: var(--primary-green);
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        }
+
+        .day-card.current {
+            border-color: var(--primary-orange);
+            background: linear-gradient(135deg, #fff7ed, #fed7aa);
+        }
+
+        .day-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .day-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+        }
+
+        .day-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .day-description {
+            color: var(--text-secondary);
+            font-size: 0.95em;
+            margin-bottom: 15px;
+        }
+
+        .day-progress {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .day-progress-fill {
+            height: 100%;
+            background: var(--primary-green);
+            transition: width 0.3s ease;
+        }
+
+        /* Flashcard System */
+        .flashcard-container {
+            perspective: 1000px;
+            max-width: 600px;
+            margin: 0 auto;
+            margin-bottom: 30px;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            font-size: 1.2em;
+        }
+
+        .flashcard-front {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .flashcard-back {
+            background: var(--surface-elevated);
+            color: var(--text-primary);
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: var(--transition);
+            margin: 0 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--text-secondary);
+        }
+
+        .btn-success {
+            background: var(--primary-green);
+        }
+
+        .btn-warning {
+            background: var(--primary-orange);
+        }
+
+        /* Canvas Container */
+        .canvas-container {
+            background: var(--surface-elevated);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+        }
+
+        .canvas-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        #mathCanvas, #graphCanvas {
+            border: 2px solid #e5e7eb;
+            border-radius: var(--border-radius);
+            background: white;
+            display: block;
+            margin: 0 auto;
+            touch-action: none;
+        }
+
+        /* Teach-Back Section */
+        .teachback-container {
+            background: var(--surface-elevated);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+        }
+
+        .concept-explanation {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .hint-system {
+            margin-top: 20px;
+        }
+
+        .hint {
+            background: #fef3c7;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary-yellow);
+            display: none;
+        }
+
+        .hint.visible {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; height: 0; }
+            to { opacity: 1; height: auto; }
+        }
+
+        /* Expression Input */
+        .expression-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: var(--border-radius);
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        .expression-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .nav-tab {
+                width: 100%;
+                text-align: center;
+            }
+
+            .days-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .flashcard {
+                height: 300px;
+            }
+
+            .canvas-controls {
+                flex-direction: column;
+            }
+
+            #mathCanvas, #graphCanvas {
+                width: 100%;
+                height: 300px;
+            }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* High Contrast Mode */
+        @media (prefers-contrast: high) {
+            :root {
+                --surface: #ffffff;
+                --surface-elevated: #ffffff;
+                --text-primary: #000000;
+                --text-secondary: #333333;
+            }
+        }
+
+        /* Celebration Animation */
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--surface-elevated);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            text-align: center;
+            animation: celebrationPop 0.5s ease;
+        }
+
+        @keyframes celebrationPop {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>MathJourney</h1>
+            <p>Your 30-day interactive mathematics learning adventure. Rediscover the beauty and power of mathematics through engaging visualizations, step-by-step guidance, and confidence-building exercises designed specifically for adult learners.</p>
+        </header>
+
+        <!-- Progress Overview -->
+        <div class="progress-overview">
+            <h2>Your Learning Progress</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="overallProgress" style="width: 0%"></div>
+            </div>
+            <div class="progress-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="completedDays">0</div>
+                    <div>Days Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="currentStreak">0</div>
+                    <div>Current Streak</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="masteredConcepts">0</div>
+                    <div>Concepts Mastered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="nextMilestone">Day 5</div>
+                    <div>Next Milestone</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('overview')">Overview</button>
+            <button class="nav-tab" onclick="showSection('flashcards')">Flashcards</button>
+            <button class="nav-tab" onclick="showSection('visualization')">3D Visualization</button>
+            <button class="nav-tab" onclick="showSection('graphing')">Function Graphing</button>
+            <button class="nav-tab" onclick="showSection('teachback')">Teach-Back</button>
+        </nav>
+
+        <!-- Overview Section -->
+        <section id="overview" class="content-section active">
+            <h2>30-Day Learning Journey</h2>
+            <div class="days-grid" id="daysGrid">
+                <!-- Days will be dynamically generated -->
+            </div>
+        </section>
+
+        <!-- Flashcards Section -->
+        <section id="flashcards" class="content-section">
+            <h2>Interactive Flashcards</h2>
+            <div class="flashcard-container">
+                <div class="flashcard" id="flashcard" onclick="flipCard()">
+                    <div class="flashcard-face flashcard-front">
+                        <div id="flashcardFront">
+                            <h3>Welcome to Flashcards!</h3>
+                            <p>Click to start learning with interactive cards that adapt to your progress.</p>
+                        </div>
+                    </div>
+                    <div class="flashcard-face flashcard-back">
+                        <div id="flashcardBack">
+                            <p>Select a day from the overview to begin practicing with flashcards.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flashcard-controls">
+                <button class="btn btn-warning" onclick="markDifficult()">Difficult</button>
+                <button class="btn btn-secondary" onclick="nextCard()">Next Card</button>
+                <button class="btn btn-success" onclick="markEasy()">Easy</button>
+            </div>
+        </section>
+
+        <!-- 3D Visualization Section -->
+        <section id="visualization" class="content-section">
+            <h2>3D Geometric Visualization</h2>
+            <div class="canvas-container">
+                <div class="canvas-controls">
+                    <button class="btn" onclick="drawCube()">Cube</button>
+                    <button class="btn" onclick="drawSphere()">Sphere</button>
+                    <button class="btn" onclick="drawPyramid()">Pyramid</button>
+                    <button class="btn" onclick="drawCylinder()">Cylinder</button>
+                    <button class="btn btn-secondary" onclick="clearCanvas()">Clear</button>
+                </div>
+                <canvas id="mathCanvas" width="800" height="600"></canvas>
+                <div id="shapeProperties" style="margin-top: 15px; padding: 15px; background: var(--surface); border-radius: var(--border-radius);"></div>
+            </div>
+        </section>
+
+        <!-- Function Graphing Section -->
+        <section id="graphing" class="content-section">
+            <h2>Function Graphing & Analysis</h2>
+            <div class="canvas-container">
+                <input type="text" class="expression-input" id="functionInput" placeholder="Enter function (e.g., x^2, sin(x), 2*x + 3)" value="x^2">
+                <div class="canvas-controls">
+                    <button class="btn" onclick="graphFunction()">Graph Function</button>
+                    <button class="btn" onclick="findIntercepts()">Find Intercepts</button>
+                    <button class="btn" onclick="showSteps()">Show Steps</button>
+                    <button class="btn btn-secondary" onclick="resetZoom()">Reset Zoom</button>
+                </div>
+                <canvas id="graphCanvas" width="800" height="600"></canvas>
+                <div id="functionAnalysis" style="margin-top: 15px; padding: 15px; background: var(--surface); border-radius: var(--border-radius);"></div>
+            </div>
+        </section>
+
+        <!-- Teach-Back Section -->
+        <section id="teachback" class="content-section">
+            <h2>Teach-Back Assessment</h2>
+            <div class="teachback-container">
+                <div class="concept-explanation">
+                    <h3>Explain a Mathematical Concept</h3>
+                    <p>Choose a concept you've learned and explain it in your own words. This reinforces understanding and builds confidence.</p>
+                    <textarea class="expression-input" id="explanationText" rows="6" placeholder="Explain a mathematical concept you've learned today..."></textarea>
+                </div>
+                
+                <div class="hint-system">
+                    <h4>Need help? Progressive hints available:</h4>
+                    <button class="btn" onclick="showHint(1)">Hint 1: Getting Started</button>
+                    <button class="btn" onclick="showHint(2)">Hint 2: Key Points</button>
+                    <button class="btn" onclick="showHint(3)">Hint 3: Complete Explanation</button>
+                    
+                    <div class="hint" id="hint1">
+                        <strong>Getting Started:</strong> Think about what the concept means and how it's used. What problem does it solve?
+                    </div>
+                    <div class="hint" id="hint2">
+                        <strong>Key Points:</strong> Consider the fundamental principles, formulas, or steps involved. How would you recognize this concept in a problem?
+                    </div>
+                    <div class="hint" id="hint3">
+                        <strong>Complete Explanation:</strong> Provide a real-world example or analogy that makes the concept relatable and memorable.
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-success" onclick="submitExplanation()">Submit Explanation</button>
+                    <button class="btn btn-secondary" onclick="clearExplanation()">Start Over</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Global State Management
+        const AppState = {
+            currentDay: 1,
+            completedDays: [],
+            currentStreak: 0,
+            masteredConcepts: 0,
+            flashcardIndex: 0,
+            flashcardDifficulty: {},
+            isFlipped: false,
+            currentSection: 'overview'
+        };
+
+        // 30-Day Curriculum Data
+        const curriculumData = [
+            // Stage 1: Foundation Reconstruction (Days 1-10)
+            { day: 1, stage: 1, title: "PEMDAS & Order of Operations", description: "Master the fundamental rules that govern mathematical calculations", concepts: ["Order of operations", "Parentheses priority", "Exponent evaluation"] },
+            { day: 2, stage: 1, title: "Variable Manipulation Basics", description: "Learn to work with algebraic expressions and unknown values", concepts: ["Variable definition", "Expression simplification", "Substitution methods"] },
+            { day: 3, stage: 1, title: "Linear Equations Foundations", description: "Solve for unknowns using systematic approaches", concepts: ["Equation solving", "Isolation techniques", "Verification methods"] },
+            { day: 4, stage: 1, title: "Basic Geometric Shapes", description: "Explore properties of fundamental geometric forms", concepts: ["Shape identification", "Perimeter calculations", "Area formulas"] },
+            { day: 5, stage: 1, title: "Fraction Operations", description: "Master addition, subtraction, multiplication, and division of fractions", concepts: ["Common denominators", "Fraction multiplication", "Mixed numbers"] },
+            { day: 6, stage: 1, title: "Decimal & Percentage Conversions", description: "Convert between different number representations", concepts: ["Decimal conversion", "Percentage calculations", "Proportion problems"] },
+            { day: 7, stage: 1, title: "Exponents & Radicals", description: "Understand powers and roots in mathematical expressions", concepts: ["Exponent rules", "Square roots", "Radical simplification"] },
+            { day: 8, stage: 1, title: "Polynomial Basics", description: "Work with expressions containing multiple terms", concepts: ["Polynomial identification", "Like terms", "Basic operations"] },
+            { day: 9, stage: 1, title: "Factoring Fundamentals", description: "Break down complex expressions into simpler components", concepts: ["Common factors", "Grouping methods", "Special patterns"] },
+            { day: 10, stage: 1, title: "Introduction to Functions", description: "Understand the relationship between inputs and outputs", concepts: ["Function notation", "Domain and range", "Function evaluation"] },
+
+            // Stage 2: Intermediate Integration (Days 11-18)
+            { day: 11, stage: 2, title: "Trigonometric Ratios", description: "Explore relationships in right triangles", concepts: ["Sine, cosine, tangent", "Special angles", "Unit circle introduction"] },
+            { day: 12, stage: 2, title: "Advanced Geometric Properties", description: "Dive deeper into shape characteristics and theorems", concepts: ["Triangle properties", "Circle theorems", "Polygon angles"] },
+            { day: 13, stage: 2, title: "Coordinate Geometry", description: "Merge algebra with geometric visualization", concepts: ["Plotting points", "Distance formula", "Slope calculations"] },
+            { day: 14, stage: 2, title: "Transformations", description: "Understand how shapes move and change in space", concepts: ["Translations", "Rotations", "Reflections", "Scaling"] },
+            { day: 15, stage: 2, title: "Quadratic Functions", description: "Explore parabolic relationships and their properties", concepts: ["Quadratic formula", "Vertex form", "Graphing parabolas"] },
+            { day: 16, stage: 2, title: "Systems of Equations", description: "Solve problems with multiple unknown variables", concepts: ["Substitution method", "Elimination method", "Graphical solutions"] },
+            { day: 17, stage: 2, title: "Logarithms & Exponential Functions", description: "Understand inverse relationships and growth patterns", concepts: ["Logarithm properties", "Exponential growth", "Natural logarithms"] },
+            { day: 18, stage: 2, title: "Probability & Statistics Basics", description: "Analyze data and understand uncertainty", concepts: ["Probability rules", "Statistical measures", "Data interpretation"] },
+
+            // Stage 3: Classical Mathematical Thinking (Days 19-25)
+            { day: 19, stage: 3, title: "Euclidean Geometry Principles", description: "Explore the foundations of geometric reasoning", concepts: ["Euclidean postulates", "Geometric proofs", "Parallel lines"] },
+            { day: 20, stage: 3, title: "Golden Ratio & Divine Proportion", description: "Discover mathematical beauty in nature and art", concepts: ["Golden ratio calculation", "Fibonacci connections", "Aesthetic applications"] },
+            { day: 21, stage: 3, title: "Fibonacci Sequences", description: "Understand recursive patterns in mathematics", concepts: ["Sequence generation", "Mathematical patterns", "Natural occurrences"] },
+            { day: 22, stage: 3, title: "Conic Sections", description: "Explore curves created by intersecting planes and cones", concepts: ["Circles", "Ellipses", "Parabolas", "Hyperbolas"] },
+            { day: 23, stage: 3, title: "Mathematical Proofs", description: "Learn logical reasoning and mathematical argumentation", concepts: ["Direct proofs", "Proof by contradiction", "Mathematical induction"] },
+            { day: 24, stage: 3, title: "Calculus Foundations", description: "Introduction to rates of change and accumulation", concepts: ["Limits", "Derivatives", "Basic integration"] },
+            { day: 25, stage: 3, title: "Complex Numbers", description: "Extend number systems beyond real numbers", concepts: ["Imaginary units", "Complex operations", "Geometric interpretation"] },
+
+            // Stage 4: Sacred Geometry Synthesis (Days 26-30)
+            { day: 26, stage: 4, title: "Sacred Geometric Patterns", description: "Explore mathematical harmony in ancient wisdom", concepts: ["Platonic solids", "Geometric meditation", "Pattern recognition"] },
+            { day: 27, stage: 4, title: "Ancient Mathematical Insights", description: "Connect modern math with historical discoveries", concepts: ["Pythagorean theorem", "Ancient calculations", "Historical context"] },
+            { day: 28, stage: 4, title: "Geometric Construction", description: "Create precise figures using classical methods", concepts: ["Compass constructions", "Angle bisection", "Perfect shapes"] },
+            { day: 29, stage: 4, title: "Mathematical Philosophy", description: "Reflect on the nature and meaning of mathematics", concepts: ["Mathematical truth", "Beauty in equations", "Real-world applications"] },
+            { day: 30, stage: 4, title: "Integration & Future Learning", description: "Synthesize your learning journey and plan next steps", concepts: ["Knowledge integration", "Learning reflection", "Future pathways"] }
+        ];
+
+        // Flashcard Data
+        const flashcardData = {
+            1: [
+                { front: "What does PEMDAS stand for?", back: "Parentheses, Exponents, Multiplication, Division, Addition, Subtraction - the order of operations in mathematics." },
+                { front: "Calculate: 2 + 3 × 4", back: "14 (First multiply 3 × 4 = 12, then add 2 + 12 = 14)" },
+                { front: "Why is order of operations important?", back: "It ensures everyone gets the same answer when solving mathematical expressions, providing consistency and avoiding ambiguity." }
+            ],
+            2: [
+                { front: "What is a variable in mathematics?", back: "A variable is a symbol (usually a letter) that represents an unknown or changing value in mathematical expressions." },
+                { front: "Simplify: 3x + 2x", back: "5x (Combine like terms by adding coefficients: 3 + 2 = 5)" },
+                { front: "If x = 4, what is 2x + 3?", back: "11 (Substitute: 2(4) + 3 = 8 + 3 = 11)" }
+            ]
+            // Additional flashcard data would be populated for each day
+        };
+
+        // Initialize Application
+        function initializeApp() {
+            loadProgressFromStorage();
+            generateDayCards();
+            updateProgressDisplay();
+            initializeCanvas();
+            initializeGraphCanvas();
+            
+            // Load current day's flashcards if available
+            if (flashcardData[AppState.currentDay]) {
+                loadFlashcards(AppState.currentDay);
+            }
+        }
+
+        // Local Storage Management
+        function saveProgressToStorage() {
+            localStorage.setItem('mathJourneyProgress', JSON.stringify(AppState));
+        }
+
+        function loadProgressFromStorage() {
+            const saved = localStorage.getItem('mathJourneyProgress');
+            if (saved) {
+                const savedState = JSON.parse(saved);
+                Object.assign(AppState, savedState);
+            }
+        }
+
+        // Progress Management System
+        function updateProgressDisplay() {
+            const progressPercentage = (AppState.completedDays.length / 30) * 100;
+            document.getElementById('overallProgress').style.width = progressPercentage + '%';
+            document.getElementById('completedDays').textContent = AppState.completedDays.length;
+            document.getElementById('currentStreak').textContent = AppState.currentStreak;
+            document.getElementById('masteredConcepts').textContent = AppState.masteredConcepts;
+            
+            // Calculate next milestone
+            const milestones = [5, 10, 15, 20, 25, 30];
+            const nextMilestone = milestones.find(m => m > AppState.completedDays.length) || 30;
+            document.getElementById('nextMilestone').textContent = `Day ${nextMilestone}`;
+        }
+
+        function generateDayCards() {
+            const daysGrid = document.getElementById('daysGrid');
+            daysGrid.innerHTML = '';
+
+            curriculumData.forEach(dayData => {
+                const dayCard = document.createElement('div');
+                dayCard.className = 'day-card';
+                
+                // Determine card status
+                if (AppState.completedDays.includes(dayData.day)) {
+                    dayCard.classList.add('completed');
+                } else if (dayData.day === AppState.currentDay) {
+                    dayCard.classList.add('current');
+                } else if (dayData.day > AppState.currentDay) {
+                    dayCard.classList.add('locked');
+                }
+
+                dayCard.innerHTML = `
+                    <div class="day-number">Day ${dayData.day}</div>
+                    <div class="day-title">${dayData.title}</div>
+                    <div class="day-description">${dayData.description}</div>
+                    <div class="day-progress">
+                        <div class="day-progress-fill" style="width: ${AppState.completedDays.includes(dayData.day) ? '100%' : '0%'}"></div>
+                    </div>
+                `;
+
+                if (dayData.day <= AppState.currentDay) {
+                    dayCard.addEventListener('click', () => selectDay(dayData.day));
+                }
+
+                daysGrid.appendChild(dayCard);
+            });
+        }
+
+        function selectDay(dayNumber) {
+            AppState.currentDay = dayNumber;
+            loadFlashcards(dayNumber);
+            generateDayCards();
+            showSection('flashcards');
+            saveProgressToStorage();
+        }
+
+        function completeDay(dayNumber) {
+            if (!AppState.completedDays.includes(dayNumber)) {
+                AppState.completedDays.push(dayNumber);
+                AppState.masteredConcepts += 3; // Each day has 3 concepts
+                updateStreak();
+                showCelebration(dayNumber);
+                
+                if (dayNumber === AppState.currentDay) {
+                    AppState.currentDay = Math.min(30, dayNumber + 1);
+                }
+                
+                updateProgressDisplay();
+                generateDayCards();
+                saveProgressToStorage();
+            }
+        }
+
+        function updateStreak() {
+            // Calculate current streak based on consecutive completed days
+            let streak = 0;
+            for (let i = AppState.completedDays.length - 1; i >= 0; i--) {
+                const sortedDays = [...AppState.completedDays].sort((a, b) => a - b);
+                if (i === 0 || sortedDays[i] === sortedDays[i-1] + 1) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+            AppState.currentStreak = streak;
+        }
+
+        function showCelebration(dayNumber) {
+            const overlay = document.createElement('div');
+            overlay.className = 'overlay';
+            
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            celebration.innerHTML = `
+                <h2>🎉 Congratulations! 🎉</h2>
+                <p>You've completed Day ${dayNumber}!</p>
+                <p>Keep up the excellent work on your mathematical journey.</p>
+                <button class="btn btn-success" onclick="closeCelebration()">Continue Learning</button>
+            `;
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(celebration);
+            
+            // Auto-close after 5 seconds
+            setTimeout(closeCelebration, 5000);
+        }
+
+        function closeCelebration() {
+            const overlay = document.querySelector('.overlay');
+            const celebration = document.querySelector('.celebration');
+            if (overlay) overlay.remove();
+            if (celebration) celebration.remove();
+        }
+
+        // Navigation System
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.add('active');
+            
+            // Add active class to corresponding tab
+            event.target.classList.add('active');
+            
+            AppState.currentSection = sectionName;
+        }
+
+        // Flashcard System with Spaced Repetition
+        function loadFlashcards(dayNumber) {
+            if (!flashcardData[dayNumber]) {
+                // Generate placeholder flashcards for days without specific data
+                generatePlaceholderFlashcards(dayNumber);
+            }
+            
+            AppState.flashcardIndex = 0;
+            AppState.isFlipped = false;
+            displayCurrentFlashcard();
+        }
+
+        function generatePlaceholderFlashcards(dayNumber) {
+            const dayData = curriculumData.find(d => d.day === dayNumber);
+            if (!dayData) return;
+            
+            flashcardData[dayNumber] = [
+                {
+                    front: `What is the main focus of Day ${dayNumber}?`,
+                    back: `${dayData.title}: ${dayData.description}`
+                },
+                {
+                    front: `Name the key concepts for ${dayData.title}`,
+                    back: dayData.concepts.join(', ')
+                },
+                {
+                    front: `How does ${dayData.title} connect to real-world applications?`,
+                    back: `This concept helps in problem-solving, logical thinking, and understanding patterns in mathematics and beyond.`
+                }
+            ];
+        }
+
+        function displayCurrentFlashcard() {
+            const cards = flashcardData[AppState.currentDay] || [];
+            if (cards.length === 0) return;
+            
+            const currentCard = cards[AppState.flashcardIndex];
+            document.getElementById('flashcardFront').innerHTML = `<h3>Question ${AppState.flashcardIndex + 1}</h3><p>${currentCard.front}</p>`;
+            document.getElementById('flashcardBack').innerHTML = `<h3>Answer</h3><p>${currentCard.back}</p>`;
+            
+            // Reset card to front
+            document.getElementById('flashcard').classList.remove('flipped');
+            AppState.isFlipped = false;
+        }
+
+        function flipCard() {
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.toggle('flipped');
+            AppState.isFlipped = !AppState.isFlipped;
+        }
+
+        function nextCard() {
+            const cards = flashcardData[AppState.currentDay] || [];
+            if (cards.length === 0) return;
+            
+            AppState.flashcardIndex = (AppState.flashcardIndex + 1) % cards.length;
+            displayCurrentFlashcard();
+        }
+
+        function markDifficult() {
+            const cardKey = `${AppState.currentDay}-${AppState.flashcardIndex}`;
+            AppState.flashcardDifficulty[cardKey] = 'difficult';
+            nextCard();
+            saveProgressToStorage();
+        }
+
+        function markEasy() {
+            const cardKey = `${AppState.currentDay}-${AppState.flashcardIndex}`;
+            AppState.flashcardDifficulty[cardKey] = 'easy';
+            nextCard();
+            saveProgressToStorage();
+        }
+
+        // 3D Visualization System
+        function initializeCanvas() {
+            const canvas = document.getElementById('mathCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set up canvas interaction
+            let isDragging = false;
+            let lastX, lastY;
+            let rotationX = 0, rotationY = 0;
+            
+            canvas.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                lastX = e.clientX;
+                lastY = e.clientY;
+            });
+            
+            canvas.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const deltaX = e.clientX - lastX;
+                    const deltaY = e.clientY - lastY;
+                    rotationY += deltaX * 0.01;
+                    rotationX += deltaY * 0.01;
+                    lastX = e.clientX;
+                    lastY = e.clientY;
+                    redrawCurrentShape();
+                }
+            });
+            
+            canvas.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+            
+            // Draw initial welcome message
+            ctx.fillStyle = '#667eea';
+            ctx.font = '24px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.fillText('3D Geometric Visualization', canvas.width/2, canvas.height/2 - 20);
+            ctx.font = '16px Segoe UI';
+            ctx.fillText('Click a shape button to begin exploring!', canvas.width/2, canvas.height/2 + 20);
+        }
+
+        let currentShape = null;
+
+        function redrawCurrentShape() {
+            if (currentShape) {
+                currentShape();
+            }
+        }
+
+        function drawCube() {
+            const canvas = document.getElementById('mathCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            currentShape = drawCube;
+            
+            // 3D cube vertices
+            const size = 100;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            // Define cube vertices in 3D space
+            const vertices = [
+                [-size, -size, -size], [size, -size, -size], [size, size, -size], [-size, size, -size],
+                [-size, -size, size], [size, -size, size], [size, size, size], [-size, size, size]
+            ];
+            
+            // Project 3D to 2D (simple isometric projection)
+            const projected = vertices.map(vertex => {
+                const [x, y, z] = vertex;
+                return [
+                    centerX + x * 0.8 + z * 0.4,
+                    centerY + y * 0.8 - z * 0.4
+                ];
+            });
+            
+            // Draw cube faces
+            ctx.strokeStyle = '#2563eb';
+            ctx.fillStyle = 'rgba(37, 99, 235, 0.1)';
+            ctx.lineWidth = 2;
+            
+            // Front face
+            ctx.beginPath();
+            ctx.moveTo(projected[0][0], projected[0][1]);
+            ctx.lineTo(projected[1][0], projected[1][1]);
+            ctx.lineTo(projected[2][0], projected[2][1]);
+            ctx.lineTo(projected[3][0], projected[3][1]);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Back face
+            ctx.beginPath();
+            ctx.moveTo(projected[4][0], projected[4][1]);
+            ctx.lineTo(projected[5][0], projected[5][1]);
+            ctx.lineTo(projected[6][0], projected[6][1]);
+            ctx.lineTo(projected[7][0], projected[7][1]);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Connecting edges
+            for (let i = 0; i < 4; i++) {
+                ctx.beginPath();
+                ctx.moveTo(projected[i][0], projected[i][1]);
+                ctx.lineTo(projected[i + 4][0], projected[i + 4][1]);
+                ctx.stroke();
+            }
+            
+            updateShapeProperties('Cube', 'Volume: 8a³', 'Surface Area: 6a²', 'Edges: 12', 'Vertices: 8');
+        }
+
+        function drawSphere() {
+            const canvas = document.getElementById('mathCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            currentShape = drawSphere;
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 120;
+            
+            // Draw main sphere
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(37, 99, 235, 0.2)';
+            ctx.fill();
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Draw latitude lines
+            ctx.strokeStyle = 'rgba(37, 99, 235, 0.5)';
+            ctx.lineWidth = 1;
+            for (let i = 1; i < 4; i++) {
+                const y = centerY + (radius * 0.6) * Math.cos(i * Math.PI / 4) - radius * 0.6;
+                const width = radius * Math.sin(i * Math.PI / 4) * 2;
+                ctx.beginPath();
+                ctx.ellipse(centerX, centerY + y, width, width * 0.3, 0, 0, 2 * Math.PI);
+                ctx.stroke();
+            }
+            
+            // Draw longitude lines
+            for (let i = 0; i < 4; i++) {
+                ctx.beginPath();
+                ctx.ellipse(centerX, centerY, radius, radius * 0.3, i * Math.PI / 4, 0, 2 * Math.PI);
+                ctx.stroke();
+            }
+            
+            updateShapeProperties('Sphere', 'Volume: (4/3)πr³', 'Surface Area: 4πr²', 'Radius: 120px', 'Perfectly round');
+        }
+
+        function drawPyramid() {
+            const canvas = document.getElementById('mathCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            currentShape = drawPyramid;
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const baseSize = 120;
+            const height = 150;
+            
+            // Base vertices
+            const base = [
+                [centerX - baseSize, centerY + baseSize/2],
+                [centerX + baseSize, centerY + baseSize/2],
+                [centerX + baseSize/2, centerY - baseSize/2],
+                [centerX - baseSize/2, centerY - baseSize/2]
+            ];
+            
+            // Apex
+            const apex = [centerX, centerY - height/2];
+            
+            // Draw base
+            ctx.fillStyle = 'rgba(37, 99, 235, 0.2)';
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(base[0][0], base[0][1]);
+            for (let i = 1; i < base.length; i++) {
+                ctx.lineTo(base[i][0], base[i][1]);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Draw faces
+            for (let i = 0; i < base.length; i++) {
+                const next = (i + 1) % base.length;
+                ctx.beginPath();
+                ctx.moveTo(base[i][0], base[i][1]);
+                ctx.lineTo(base[next][0], base[next][1]);
+                ctx.lineTo(apex[0], apex[1]);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+            
+            updateShapeProperties('Pyramid', 'Volume: (1/3) × base area × height', 'Surface Area: base area + face areas', 'Faces: 5', 'Base: Square');
+        }
+
+        function drawCylinder() {
+            const canvas = document.getElementById('mathCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            currentShape = drawCylinder;
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 80;
+            const height = 160;
+            
+            // Draw main cylinder body
+            ctx.fillStyle = 'rgba(37, 99, 235, 0.2)';
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 2;
+            ctx.fillRect(centerX - radius, centerY - height/2, radius * 2, height);
+            ctx.strokeRect(centerX - radius, centerY - height/2, radius * 2, height);
+            
+            // Draw top ellipse
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - height/2, radius, radius * 0.3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Draw bottom ellipse
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + height/2, radius, radius * 0.3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Draw side curves
+            ctx.beginPath();
+            ctx.moveTo(centerX - radius, centerY - height/2);
+            ctx.lineTo(centerX - radius, centerY + height/2);
+            ctx.moveTo(centerX + radius, centerY - height/2);
+            ctx.lineTo(centerX + radius, centerY + height/2);
+            ctx.stroke();
+            
+            updateShapeProperties('Cylinder', 'Volume: πr²h', 'Surface Area: 2πr² + 2πrh', 'Curved Surface: 2πrh', 'Circular Bases: 2');
+        }
+
+        function clearCanvas() {
+            const canvas = document.getElementById('mathCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            currentShape = null;
+            
+            ctx.fillStyle = '#667eea';
+            ctx.font = '24px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.fillText('3D Geometric Visualization', canvas.width/2, canvas.height/2 - 20);
+            ctx.font = '16px Segoe UI';
+            ctx.fillText('Click a shape button to begin exploring!', canvas.width/2, canvas.height/2 + 20);
+            
+            document.getElementById('shapeProperties').innerHTML = '';
+        }
+
+        function updateShapeProperties(name, ...properties) {
+            const propertiesDiv = document.getElementById('shapeProperties');
+            propertiesDiv.innerHTML = `
+                <h3>${name} Properties</h3>
+                ${properties.map(prop => `<p>${prop}</p>`).join('')}
+            `;
+        }
+
+        // Function Graphing System
+        function initializeGraphCanvas() {
+            const canvas = document.getElementById('graphCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            drawCoordinateSystem();
+        }
+
+        function drawCoordinateSystem() {
+            const canvas = document.getElementById('graphCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scale = 40; // pixels per unit
+            
+            // Draw grid
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 1;
+            
+            // Vertical grid lines
+            for (let x = 0; x <= canvas.width; x += scale) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            // Horizontal grid lines
+            for (let y = 0; y <= canvas.height; y += scale) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(canvas.width, centerY);
+            ctx.stroke();
+            
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, canvas.height);
+            ctx.stroke();
+            
+            // Add axis labels
+            ctx.fillStyle = '#374151';
+            ctx.font = '14px Segoe UI';
+            ctx.textAlign = 'center';
+            
+            // X-axis numbers
+            for (let i = -10; i <= 10; i++) {
+                if (i !== 0) {
+                    const x = centerX + i * scale;
+                    if (x > 0 && x < canvas.width) {
+                        ctx.fillText(i.toString(), x, centerY + 20);
+                    }
+                }
+            }
+            
+            // Y-axis numbers
+            ctx.textAlign = 'right';
+            for (let i = -7; i <= 7; i++) {
+                if (i !== 0) {
+                    const y = centerY - i * scale;
+                    if (y > 0 && y < canvas.height) {
+                        ctx.fillText(i.toString(), centerX - 10, y + 5);
+                    }
+                }
+            }
+            
+            // Origin
+            ctx.textAlign = 'right';
+            ctx.fillText('0', centerX - 10, centerY + 20);
+        }
+
+        function graphFunction() {
+            const expression = document.getElementById('functionInput').value;
+            if (!expression.trim()) return;
+            
+            drawCoordinateSystem();
+            
+            const canvas = document.getElementById('graphCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scale = 40;
+            
+            ctx.strokeStyle = '#dc2626';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            let firstPoint = true;
+            
+            for (let pixelX = 0; pixelX <= canvas.width; pixelX += 2) {
+                const mathX = (pixelX - centerX) / scale;
+                const mathY = evaluateExpression(expression, mathX);
+                
+                if (mathY !== null && !isNaN(mathY) && isFinite(mathY)) {
+                    const pixelY = centerY - mathY * scale;
+                    
+                    if (pixelY >= 0 && pixelY <= canvas.height) {
+                        if (firstPoint) {
+                            ctx.moveTo(pixelX, pixelY);
+                            firstPoint = false;
+                        } else {
+                            ctx.lineTo(pixelX, pixelY);
+                        }
+                    }
+                }
+            }
+            
+            ctx.stroke();
+            
+            updateFunctionAnalysis(expression);
+        }
+
+        function evaluateExpression(expression, x) {
+            try {
+                // Replace mathematical notation with JavaScript equivalents
+                let jsExpression = expression
+                    .replace(/\^/g, '**')
+                    .replace(/x/g, `(${x})`)
+                    .replace(/sin/g, 'Math.sin')
+                    .replace(/cos/g, 'Math.cos')
+                    .replace(/tan/g, 'Math.tan')
+                    .replace(/log/g, 'Math.log')
+                    .replace(/sqrt/g, 'Math.sqrt')
+                    .replace(/pi/g, 'Math.PI')
+                    .replace(/e/g, 'Math.E');
+                
+                return eval(jsExpression);
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function findIntercepts() {
+            const expression = document.getElementById('functionInput').value;
+            if (!expression.trim()) return;
+            
+            // Find y-intercept (x = 0)
+            const yIntercept = evaluateExpression(expression, 0);
+            
+            // Find x-intercepts (approximate)
+            const xIntercepts = [];
+            for (let x = -10; x <= 10; x += 0.1) {
+                const y = evaluateExpression(expression, x);
+                if (y !== null && Math.abs(y) < 0.1) {
+                    xIntercepts.push(x.toFixed(1));
+                }
+            }
+            
+            // Remove duplicates
+            const uniqueXIntercepts = [...new Set(xIntercepts)];
+            
+            const canvas = document.getElementById('graphCanvas');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scale = 40;
+            
+            // Mark y-intercept
+            if (yIntercept !== null && !isNaN(yIntercept)) {
+                ctx.fillStyle = '#16a34a';
+                ctx.beginPath();
+                ctx.arc(centerX, centerY - yIntercept * scale, 6, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            
+            // Mark x-intercepts
+            uniqueXIntercepts.forEach(x => {
+                const pixelX = centerX + parseFloat(x) * scale;
+                ctx.fillStyle = '#dc2626';
+                ctx.beginPath();
+                ctx.arc(pixelX, centerY, 6, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+            
+            updateFunctionAnalysis(expression, yIntercept, uniqueXIntercepts);
+        }
+
+        function updateFunctionAnalysis(expression, yIntercept = null, xIntercepts = []) {
+            const analysisDiv = document.getElementById('functionAnalysis');
+            let html = `<h3>Function Analysis: f(x) = ${expression}</h3>`;
+            
+            if (yIntercept !== null) {
+                html += `<p><strong>Y-intercept:</strong> (0, ${yIntercept.toFixed(2)})</p>`;
+            }
+            
+            if (xIntercepts.length > 0) {
+                html += `<p><strong>X-intercepts:</strong> ${xIntercepts.map(x => `(${x}, 0)`).join(', ')}</p>`;
+            }
+            
+            // Determine function type
+            if (expression.includes('^2') || expression.includes('**2')) {
+                html += `<p><strong>Type:</strong> Quadratic function (parabola)</p>`;
+            } else if (expression.includes('sin') || expression.includes('cos')) {
+                html += `<p><strong>Type:</strong> Trigonometric function</p>`;
+            } else if (expression.includes('^') || expression.includes('**')) {
+                html += `<p><strong>Type:</strong> Polynomial function</p>`;
+            } else {
+                html += `<p><strong>Type:</strong> Linear function</p>`;
+            }
+            
+            analysisDiv.innerHTML = html;
+        }
+
+        function showSteps() {
+            const expression = document.getElementById('functionInput').value;
+            const analysisDiv = document.getElementById('functionAnalysis');
+            
+            let steps = '<h4>Step-by-step Analysis:</h4>';
+            steps += '<ol>';
+            steps += '<li>Identify the function type and domain</li>';
+            steps += '<li>Find the y-intercept by setting x = 0</li>';
+            steps += '<li>Find x-intercepts by setting f(x) = 0</li>';
+            steps += '<li>Analyze behavior at boundaries</li>';
+            steps += '<li>Sketch the graph using key points</li>';
+            steps += '</ol>';
+            
+            analysisDiv.innerHTML += steps;
+        }
+
+        function resetZoom() {
+            drawCoordinateSystem();
+            document.getElementById('functionAnalysis').innerHTML = '';
+        }
+
+        // Teach-Back Assessment System
+        function showHint(hintNumber) {
+            const hint = document.getElementById(`hint${hintNumber}`);
+            hint.classList.add('visible');
+        }
+
+        function submitExplanation() {
+            const explanation = document.getElementById('explanationText').value;
+            if (explanation.trim().length < 50) {
+                alert('Please provide a more detailed explanation (at least 50 characters).');
+                return;
+            }
+            
+            // Simple assessment based on length and key terms
+            const score = assessExplanation(explanation);
+            showExplanationFeedback(score);
+            
+            // Mark current day as completed if explanation is good
+            if (score >= 70) {
+                completeDay(AppState.currentDay);
+            }
+        }
+
+        function assessExplanation(explanation) {
+            let score = 0;
+            const text = explanation.toLowerCase();
+            
+            // Length scoring
+            if (text.length > 100) score += 20;
+            if (text.length > 200) score += 20;
+            
+            // Key mathematical terms
+            const mathTerms = ['equation', 'function', 'variable', 'formula', 'calculate', 'solve', 'graph', 'geometry', 'algebra'];
+            mathTerms.forEach(term => {
+                if (text.includes(term)) score += 5;
+            });
+            
+            // Explanation quality indicators
+            if (text.includes('because') || text.includes('therefore') || text.includes('since')) score += 15;
+            if (text.includes('example') || text.includes('for instance')) score += 10;
+            if (text.includes('step') || text.includes('first') || text.includes('then')) score += 10;
+            
+            return Math.min(100, score);
+        }
+
+        function showExplanationFeedback(score) {
+            let feedback = '';
+            if (score >= 90) {
+                feedback = '🌟 Excellent explanation! You clearly understand the concept.';
+            } else if (score >= 70) {
+                feedback = '👍 Good explanation! You demonstrate solid understanding.';
+            } else if (score >= 50) {
+                feedback = '📚 Your explanation shows some understanding. Consider adding more detail or examples.';
+            } else {
+                feedback = '💡 Try to elaborate more on the concept. Use the hints for guidance.';
+            }
+            
+            alert(feedback);
+        }
+
+        function clearExplanation() {
+            document.getElementById('explanationText').value = '';
+            document.querySelectorAll('.hint').forEach(hint => {
+                hint.classList.remove('visible');
+            });
+        }
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && AppState.currentSection === 'flashcards') {
+                markDifficult();
+            } else if (e.key === 'ArrowRight' && AppState.currentSection === 'flashcards') {
+                markEasy();
+            } else if (e.key === ' ' && AppState.currentSection === 'flashcards') {
+                e.preventDefault();
+                flipCard();
+            } else if (e.key === 'Enter' && AppState.currentSection === 'graphing') {
+                graphFunction();
+            }
+        });
+
+        // Touch Support for Mobile
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            if (!e.changedTouches[0]) return;
+            
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const diffX = touchStartX - touchEndX;
+            const diffY = touchStartY - touchEndY;
+            
+            // Only handle swipes on flashcards
+            if (AppState.currentSection === 'flashcards' && Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    markDifficult(); // Swipe left
+                } else {
+                    markEasy(); // Swipe right
+                }
+            }
+        });
+
+        // Initialize the application when the page loads
+        window.addEventListener('load', initializeApp);
+        
+        // Auto-save progress periodically
+        setInterval(saveProgressToStorage, 30000); // Save every 30 seconds
+    </script>
+</body>
+</html>
