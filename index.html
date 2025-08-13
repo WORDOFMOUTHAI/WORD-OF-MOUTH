@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>30-Day Math Revival</title>
+    <!--
+        30-Day Math Revival – A comprehensive interactive mathematics platform for adult learners.
+        This single-file application contains all markup, styles, and scripts required to run in any modern browser with no external dependencies.
+        Author: (Your Name)
+        Date: (YYYY-MM-DD)
+    -->
+    <style>
+        /* ===========================
+           GLOBAL RESET & VARIABLES
+        ============================ */
+        :root {
+            --clr-primary: #1e88e5; /* Blue for progress */
+            --clr-secondary: #43a047; /* Green for completions */
+            --clr-accent: #fb8c00; /* Orange for interactions */
+            --clr-bg: #f5f7fa; /* Light background */
+            --clr-text: #222;
+            --transition-fast: 0.2s ease;
+            --transition-medium: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --border-radius: 8px;
+        }
+        [data-theme="high-contrast"] {
+            --clr-bg: #000;
+            --clr-text: #fff;
+            --clr-primary: #00e5ff;
+            --clr-secondary: #00e676;
+            --clr-accent: #ffea00;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            background: var(--clr-bg);
+            color: var(--clr-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        h1, h2, h3 {
+            margin-bottom: 0.5em;
+            line-height: 1.2;
+        }
+        /* ===========================
+           LAYOUT
+        ============================ */
+        header {
+            background: linear-gradient(135deg, var(--clr-primary), var(--clr-secondary));
+            color: #fff;
+            padding: 1rem 2rem;
+            text-align: center;
+        }
+        main {
+            flex: 1;
+            padding: 1rem;
+            display: grid;
+            gap: 1.5rem;
+        }
+        .card {
+            background: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+        }
+        /* Responsive grid */
+        @media (min-width: 768px) {
+            main {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 1200px) {
+            main {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        /* Progress Bar */
+        #progress-bar-wrapper {
+            background: rgba(0, 0, 0, 0.08);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            height: 24px;
+            margin-top: 0.5rem;
+        }
+        #progress-bar {
+            background: var(--clr-secondary);
+            height: 100%;
+            width: 0%;
+            transition: width var(--transition-medium);
+        }
+        /* Flashcard Styles */
+        .flashcard-container {
+            perspective: 1000px;
+        }
+        .flashcard {
+            position: relative;
+            width: 100%;
+            min-height: 200px;
+            transform-style: preserve-3d;
+            transition: transform var(--transition-medium);
+            cursor: pointer;
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flash-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            font-size: 1.1rem;
+        }
+        .flash-back {
+            transform: rotateY(180deg);
+            background: var(--clr-accent);
+            color: #fff;
+        }
+        /* Canvas Wrapper */
+        #visualization-canvas {
+            width: 100%;
+            height: 300px;
+            background: #fff;
+        }
+        /* Graphing Canvas */
+        #graph-canvas {
+            width: 100%;
+            height: 300px;
+            background: #fff;
+        }
+        /* Teach-Back */
+        #teachback-area textarea {
+            width: 100%;
+            height: 120px;
+            padding: 0.75rem;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: var(--border-radius);
+            resize: vertical;
+            font-size: 1rem;
+        }
+        .hint {
+            background: var(--clr-accent);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            margin-top: 0.5rem;
+        }
+        /* Accessibility Toggle */
+        #contrast-toggle {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>30-Day Math Revival</h1>
+        <p>Rediscover mathematics with confidence and clarity</p>
+        <div id="progress-bar-wrapper">
+            <div id="progress-bar"></div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Flashcard Engine -->
+        <section class="card" id="flashcard-section">
+            <h2 style="padding:1rem">Flashcards</h2>
+            <div class="flashcard-container" style="padding:1rem">
+                <div class="flashcard" id="flashcard">
+                    <div class="flash-face flash-front">Loading…</div>
+                    <div class="flash-face flash-back">Answer</div>
+                </div>
+            </div>
+            <button id="next-card" style="margin:1rem">Next Card</button>
+        </section>
+
+        <!-- Visualization Canvas -->
+        <section class="card" id="visualization-section">
+            <h2 style="padding:1rem">3D Visualization</h2>
+            <canvas id="visualization-canvas"></canvas>
+        </section>
+
+        <!-- Function Graphing -->
+        <section class="card" id="graph-section">
+            <h2 style="padding:1rem">Function Grapher</h2>
+            <div style="padding:1rem">
+                <input type="text" id="function-input" placeholder="Enter f(x)", style="width:70%" />
+                <button id="plot-btn">Plot</button>
+            </div>
+            <canvas id="graph-canvas"></canvas>
+        </section>
+
+        <!-- Teach-Back Module -->
+        <section class="card" id="teachback-section">
+            <h2 style="padding:1rem">Teach-Back</h2>
+            <div id="teachback-area" style="padding:1rem">
+                <textarea placeholder="Explain the concept in your own words"></textarea>
+                <button id="hint-btn" style="margin-top:0.5rem">Need a Hint?</button>
+                <div id="hints-wrapper"></div>
+            </div>
+        </section>
+    </main>
+
+    <button id="contrast-toggle" title="Toggle High Contrast">🌗</button>
+
+    <script>
+        /********************************************
+         * Utility Helpers
+         *******************************************/
+        const $ = (sel) => document.querySelector(sel);
+
+        /********************************************
+         * Progress Management System
+         *******************************************/
+        const TOTAL_DAYS = 30;
+        const STORAGE_KEY = "mathRevivalProgress";
+        let progress = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { completed: 0 };
+
+        function updateProgressBar() {
+            const pct = (progress.completed / TOTAL_DAYS) * 100;
+            $("#progress-bar").style.width = pct + "%";
+        }
+
+        function completeLesson() {
+            progress.completed = Math.min(TOTAL_DAYS, progress.completed + 1);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+            updateProgressBar();
+            if ([10, 18, 25, 30].includes(progress.completed)) {
+                alert("🎉 Milestone reached! You've completed " + progress.completed + " days of learning.");
+            }
+        }
+
+        updateProgressBar();
+
+        /********************************************
+         * Flashcard Engine with Spaced Repetition
+         *******************************************/
+        const flashcards = [
+            { q: "What is the order of operations acronym?", a: "PEMDAS", score: 0 },
+            { q: "Solve for x: 2x + 3 = 11", a: "x = 4", score: 0 },
+            { q: "Define a right angle.", a: "90° angle", score: 0 },
+            { q: "What is sin(90°)?", a: "1", score: 0 },
+            // ... Add more sample cards
+        ];
+
+        function sortCards() {
+            flashcards.sort((a, b) => a.score - b.score + (Math.random() - 0.5));
+        }
+
+        let currentCardIndex = 0;
+
+        function showCard() {
+            const card = flashcards[currentCardIndex];
+            $(".flash-front").textContent = card.q;
+            $(".flash-back").textContent = card.a;
+        }
+
+        function nextCard() {
+            currentCardIndex = (currentCardIndex + 1) % flashcards.length;
+            showCard();
+            const flashcardEl = $("#flashcard");
+            if (flashcardEl.classList.contains("is-flipped")) flashcardEl.classList.remove("is-flipped");
+        }
+
+        $("#flashcard").addEventListener("click", () => {
+            $("#flashcard").classList.toggle("is-flipped");
+            if ($("#flashcard").classList.contains("is-flipped")) {
+                // Mark card as understood slightly
+                flashcards[currentCardIndex].score += 1;
+            }
+            sortCards();
+        });
+
+        $("#next-card").addEventListener("click", () => {
+            nextCard();
+        });
+
+        sortCards();
+        showCard();
+
+        /********************************************
+         * 3D Visualization Canvas (Rotating Cube)
+         *******************************************/
+        const visCanvas = $("#visualization-canvas");
+        const visCtx = visCanvas.getContext("2d");
+        function resizeCanvas() {
+            visCanvas.width = visCanvas.clientWidth;
+            visCanvas.height = visCanvas.clientHeight;
+        }
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+
+        // Simple cube vertices
+        const cube = [
+            [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
+            [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]
+        ];
+        const edges = [
+            [0,1], [1,2], [2,3], [3,0],
+            [4,5], [5,6], [6,7], [7,4],
+            [0,4], [1,5], [2,6], [3,7]
+        ];
+        let angle = 0;
+        function drawCube() {
+            visCtx.clearRect(0,0,visCanvas.width,visCanvas.height);
+            const scale = Math.min(visCanvas.width, visCanvas.height) / 4;
+            const projected = cube.map(v => {
+                const [x,y,z] = v;
+                const rotY = x * Math.cos(angle) - z * Math.sin(angle);
+                const rotZ = z * Math.cos(angle) + x * Math.sin(angle);
+                const rotX = y * Math.cos(angle) - rotZ * Math.sin(angle);
+                const rotZ2 = rotZ * Math.cos(angle) + y * Math.sin(angle);
+                const perspective = 4 / (4 + rotZ2);
+                return [visCanvas.width/2 + rotY * scale * perspective, visCanvas.height/2 + rotX * scale * perspective];
+            });
+            visCtx.strokeStyle = "#333";
+            visCtx.lineWidth = 2;
+            edges.forEach(([a,b]) => {
+                const [x1,y1] = projected[a];
+                const [x2,y2] = projected[b];
+                visCtx.beginPath();
+                visCtx.moveTo(x1,y1);
+                visCtx.lineTo(x2,y2);
+                visCtx.stroke();
+            });
+            angle += 0.01;
+            requestAnimationFrame(drawCube);
+        }
+        drawCube();
+
+        /********************************************
+         * Function Graphing System
+         *******************************************/
+        const graphCanvas = $("#graph-canvas");
+        const gCtx = graphCanvas.getContext("2d");
+        let graph = { scale: 40, offsetX: 0, offsetY: 0 };
+        function resizeGraph() {
+            graphCanvas.width = graphCanvas.clientWidth;
+            graphCanvas.height = graphCanvas.clientHeight;
+            drawGraph();
+        }
+        window.addEventListener("resize", resizeGraph);
+        resizeGraph();
+
+        function drawAxes() {
+            gCtx.strokeStyle = "#bbb";
+            gCtx.lineWidth = 1;
+            const { scale, offsetX, offsetY } = graph;
+            // Vertical axis
+            gCtx.beginPath();
+            gCtx.moveTo(offsetX + graphCanvas.width/2, 0);
+            gCtx.lineTo(offsetX + graphCanvas.width/2, graphCanvas.height);
+            gCtx.stroke();
+            // Horizontal axis
+            gCtx.beginPath();
+            gCtx.moveTo(0, offsetY + graphCanvas.height/2);
+            gCtx.lineTo(graphCanvas.width, offsetY + graphCanvas.height/2);
+            gCtx.stroke();
+        }
+
+        function plotFunction(fn) {
+            gCtx.strokeStyle = varGet("--clr-primary") || "#1e88e5";
+            gCtx.lineWidth = 2;
+            gCtx.beginPath();
+            const { scale, offsetX, offsetY } = graph;
+            for(let px=0; px<graphCanvas.width; px++) {
+                const x = (px - graphCanvas.width/2 - offsetX) / scale;
+                let y;
+                try { y = fn(x); }
+                catch { continue; }
+                const py = graphCanvas.height/2 - (y * scale) - offsetY;
+                if(px === 0) gCtx.moveTo(px, py);
+                else gCtx.lineTo(px, py);
+            }
+            gCtx.stroke();
+        }
+
+        function drawGraph(fn) {
+            gCtx.clearRect(0,0,graphCanvas.width,graphCanvas.height);
+            drawAxes();
+            if(fn) plotFunction(fn);
+        }
+
+        function varGet(name){return getComputedStyle(document.documentElement).getPropertyValue(name);} // CSS var helper
+
+        $("#plot-btn").addEventListener("click", () => {
+            const expr = $("#function-input").value.trim();
+            if(!expr) return;
+            // VERY basic and unsafe evaluation – for demo only
+            const fn = new Function("x", `with (Math) { return ${expr}; }`);
+            drawGraph(fn);
+        });
+
+        /********************************************
+         * Teach-Back Module with Hints
+         *******************************************/
+        const hints = [
+            "Think about isolating the variable.",
+            "Remember the distributive property.",
+            "Break the problem into smaller parts.",
+            "Review the solution in the lesson notes."
+        ];
+        let hintIndex = 0;
+        $("#hint-btn").addEventListener("click", () => {
+            if(hintIndex < hints.length) {
+                const div = document.createElement("div");
+                div.className = "hint";
+                div.textContent = hints[hintIndex++];
+                $("#hints-wrapper").appendChild(div);
+            } else {
+                alert("No more hints available! Try reviewing the lesson notes.");
+            }
+        });
+
+        /********************************************
+         * Accessibility: High Contrast Toggle
+         *******************************************/
+        const contrastBtn = $("#contrast-toggle");
+        contrastBtn.addEventListener("click", () => {
+            const isHC = document.documentElement.dataset.theme === "high-contrast";
+            if(isHC) delete document.documentElement.dataset.theme;
+            else document.documentElement.dataset.theme = "high-contrast";
+        });
+
+        /********************************************
+         * Example Lesson Completion Simulation
+         *******************************************/
+        // For demonstration, mark Lesson 1 complete after 3 seconds if not already
+        if(progress.completed === 0) {
+            setTimeout(() => {
+                completeLesson();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
