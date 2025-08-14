@@ -1,0 +1,2161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>30-Day Math Journey — Confidence + Rigor</title>
+  <style>
+    /*
+      30-Day Interactive Mathematics Learning Platform
+      - Single-file, no external dependencies
+      - Responsive, accessible, high-contrast mode supported
+      - Card-based UI with smooth CSS transforms
+    */
+
+    :root {
+      --bg-gradient-start: #0e1f2f;
+      --bg-gradient-end: #1b3a57;
+      --surface: #0f2538;
+      --surface-2: #0b1b2a;
+      --text: #e8f1f8;
+      --muted: #a7c1d6;
+      --accent: #7dd3fc; /* cyan */
+      --accent-2: #60a5fa; /* blue */
+      --good: #34d399; /* green */
+      --warn: #f59e0b; /* amber */
+      --future: #6b7280; /* gray */
+      --danger: #ef4444; /* red */
+      --shadow: rgba(0,0,0,0.3);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --radius-lg: 18px;
+      --focus: #fde68a;
+    }
+
+    /* High contrast mode overrides */
+    .high-contrast {
+      --bg-gradient-start: #000000;
+      --bg-gradient-end: #000000;
+      --surface: #000000;
+      --surface-2: #111111;
+      --text: #ffffff;
+      --muted: #ffffff;
+      --accent: #00ffff;
+      --accent-2: #00a2ff;
+      --good: #00ff87;
+      --warn: #ffd000;
+      --future: #bdbdbd;
+      --danger: #ff3b3b;
+      --focus: #ffff00;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(135deg, rgba(14,31,47,0.95), rgba(27,58,87,0.95));
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .header-inner {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 16px;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent-2));
+      box-shadow: 0 6px 18px var(--shadow) inset, 0 8px 20px rgba(96,165,250,0.35);
+      transform: rotate(6deg);
+    }
+
+    .title {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .title h1 {
+      font-size: 20px;
+      margin: 0;
+      letter-spacing: 0.4px;
+    }
+    .title small { color: var(--muted); }
+
+    .progress-wrap {
+      min-width: 280px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 0%;
+      background: linear-gradient(90deg, var(--good), var(--accent));
+      border-radius: 999px;
+      transition: width 600ms ease;
+    }
+
+    .progress-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button, .btn {
+      background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: transform 120ms ease, background 200ms;
+    }
+    button:hover, .btn:hover { transform: translateY(-1px); }
+    button:active, .btn:active { transform: translateY(0px) scale(0.98); }
+    button:focus-visible, .btn:focus-visible {
+      outline: 2px dashed var(--focus);
+      outline-offset: 2px;
+    }
+
+    .nav {
+      display: grid;
+      grid-auto-flow: column;
+      gap: 12px;
+    }
+
+    .nav button[aria-current="page"] {
+      background: linear-gradient(90deg, rgba(125,211,252,0.2), rgba(96,165,250,0.15));
+      border-color: rgba(96,165,250,0.5);
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 18px auto 80px auto;
+      padding: 0 16px;
+      width: 100%;
+      display: grid;
+      gap: 20px;
+    }
+
+    /* Card layout */
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 24px var(--shadow);
+      padding: 16px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    @media (min-width: 900px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+      .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+    }
+
+    .stage-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .lesson-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .lesson-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      transition: transform 140ms ease, background 200ms ease;
+      cursor: pointer;
+    }
+    .lesson-card:hover { transform: translateY(-2px); }
+    .lesson-card.completed {
+      background: rgba(16,185,129,0.15);
+      border-color: rgba(16,185,129,0.4);
+    }
+    .lesson-card.current {
+      background: rgba(245,158,11,0.15);
+      border-color: rgba(245,158,11,0.4);
+    }
+
+    .lesson-title { font-weight: 600; }
+
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 11px;
+      border-radius: 999px;
+      color: #fff;
+    }
+    .pill.green { background: var(--good); }
+    .pill.yellow { background: var(--warn); color: #111; }
+    .pill.gray { background: var(--future); }
+
+    .celebration {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    /* Flashcards */
+    .flashcard-wrap {
+      perspective: 1200px;
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .flashcard {
+      position: relative;
+      width: 100%;
+      min-height: 240px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.06));
+      border: 1px solid rgba(255,255,255,0.12);
+      transform-style: preserve-3d;
+      transition: transform 500ms ease;
+      box-shadow: 0 16px 28px var(--shadow);
+    }
+    .flashcard.flipped { transform: rotateY(180deg); }
+    .face {
+      position: absolute;
+      inset: 0;
+      padding: 18px;
+      backface-visibility: hidden;
+      display: grid;
+      align-content: center;
+      gap: 12px;
+    }
+    .face.back { transform: rotateY(180deg); }
+
+    .flash-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    .chip {
+      border-radius: 999px;
+      padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      font-size: 13px;
+    }
+
+    /* Geometry Canvas */
+    .canvas-wrap {
+      position: relative;
+      width: 100%;
+      height: 360px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    canvas { display: block; width: 100%; height: 100%; }
+
+    .canvas-toolbar {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      z-index: 2;
+    }
+
+    /* Graphing */
+    .graph-wrap { height: 420px; }
+    .overlay-steps {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 10px;
+      border-radius: var(--radius);
+      width: min(360px, 90vw);
+      max-height: 80%;
+      overflow: auto;
+      font-size: 13px;
+    }
+
+    /* Teach-Back */
+    .teach-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text);
+      padding: 10px;
+      font-size: 14px;
+      resize: vertical;
+    }
+
+    .footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, rgba(14,31,47,0.95), rgba(27,58,87,0.95));
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 8px 16px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      z-index: 30;
+    }
+
+    .kbd {
+      display: inline-block;
+      border: 1px solid rgba(255,255,255,0.35);
+      border-bottom-width: 3px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 12px;
+      background: rgba(255,255,255,0.08);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header role="banner">
+      <div class="header-inner">
+        <div class="brand" aria-label="App title and identity">
+          <div class="logo" aria-hidden="true"></div>
+          <div class="title">
+            <h1>30-Day Math Journey</h1>
+            <small>Rigor meets confidence. Welcome back to math.</small>
+          </div>
+        </div>
+        <div class="progress-wrap" aria-live="polite">
+          <div class="progress-bar" aria-label="Overall progress">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-stats"><span id="progressText">0/30 lessons (0%)</span><span id="milestoneText">Let’s begin</span></div>
+        </div>
+        <div class="actions">
+          <nav class="nav" aria-label="Primary">
+            <button class="tab-btn" data-tab="progress" aria-current="page">Progress</button>
+            <button class="tab-btn" data-tab="flash">Flashcards</button>
+            <button class="tab-btn" data-tab="geometry">Geometry</button>
+            <button class="tab-btn" data-tab="graph">Graphing</button>
+            <button class="tab-btn" data-tab="teach">Teach-Back</button>
+            <button class="tab-btn" data-tab="settings">Settings</button>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- PROGRESS TAB -->
+      <section class="card" id="tab-progress" role="region" aria-labelledby="tab-progress-title">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+          <h2 id="tab-progress-title" style="margin:0">Your Journey</h2>
+          <div class="stage-chip">Color key:
+            <span class="pill green">Completed</span>
+            <span class="pill yellow">Current</span>
+            <span class="pill gray">Future</span>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div>
+            <h3 style="margin-top:8px">Stages</h3>
+            <div id="stagesContainer" class="grid"></div>
+          </div>
+          <div>
+            <h3 style="margin-top:8px">Lessons</h3>
+            <div class="lesson-grid" id="lessonGrid"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <h3 style="margin-top:0">Current Lesson</h3>
+          <div id="currentLessonDetail">Select a lesson to view objectives and an activity.</div>
+        </div>
+      </section>
+
+      <!-- FLASHCARDS TAB -->
+      <section class="card" id="tab-flash" role="region" aria-labelledby="tab-flash-title" hidden>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+          <h2 id="tab-flash-title" style="margin:0">Spaced-Repetition Flashcards</h2>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button id="shuffleDeckBtn" title="Shuffle deck (S)">Shuffle</button>
+            <button id="addCardBtn" title="Add your own card">Add Card</button>
+            <span class="chip" id="dueCount">Due: 0</span>
+            <span class="chip" id="cardProgress">0/0</span>
+          </div>
+        </div>
+        <div class="flashcard-wrap">
+          <div class="flashcard" id="flashcard" tabindex="0" aria-label="Flashcard. Press Enter to flip." role="button">
+            <div class="face front">
+              <div id="flashFront">Front</div>
+            </div>
+            <div class="face back">
+              <div id="flashBack">Back</div>
+            </div>
+          </div>
+        </div>
+        <div class="flash-controls" aria-label="Answer quality">
+          <button id="flipBtn">Flip (Enter)</button>
+          <button id="againBtn" style="background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.5);">Again (1)</button>
+          <button id="hardBtn" style="background:rgba(245,158,11,0.2);border-color:rgba(245,158,11,0.5);">Hard (2)</button>
+          <button id="goodBtn" style="background:rgba(16,185,129,0.2);border-color:rgba(16,185,129,0.5);">Good (3)</button>
+          <button id="easyBtn" style="background:rgba(96,165,250,0.2);border-color:rgba(96,165,250,0.5);">Easy (4)</button>
+        </div>
+        <div style="margin-top:8px;color:var(--muted);text-align:center;">
+          Keyboard: <span class="kbd">Enter</span> flip, <span class="kbd">1-4</span> rate, <span class="kbd">S</span> shuffle
+        </div>
+      </section>
+
+      <!-- GEOMETRY TAB -->
+      <section class="card" id="tab-geometry" role="region" aria-labelledby="tab-geometry-title" hidden>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+          <h2 id="tab-geometry-title" style="margin:0">Geometry Lab (2D + Isometric)</h2>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select id="shapeSelect" title="Choose shape">
+              <option value="triangle">Triangle (2D)</option>
+              <option value="rectangle">Rectangle (2D)</option>
+              <option value="circle">Circle (2D)</option>
+              <option value="cube">Cube (Isometric)</option>
+            </select>
+            <button id="resetGeometryBtn">Reset</button>
+          </div>
+        </div>
+        <div class="canvas-wrap" id="geomWrap">
+          <div class="canvas-toolbar">
+            <span class="chip">Drag vertices/shape • Scroll to zoom</span>
+          </div>
+          <canvas id="geomCanvas" aria-label="Geometry canvas" role="img"></canvas>
+        </div>
+        <div class="grid grid-2">
+          <div class="card">
+            <h3 style="margin-top:0">Measurements</h3>
+            <div id="geomProps">Move points to see live measurements.</div>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">Concept Notes</h3>
+            <ul id="geomNotes" style="margin-top:0"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- GRAPHING TAB -->
+      <section class="card" id="tab-graph" role="region" aria-labelledby="tab-graph-title" hidden>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+          <h2 id="tab-graph-title" style="margin:0">Function Graphing</h2>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input id="exprInput" placeholder="Enter f(x), e.g., sin(x) + 0.5x" style="min-width:280px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:var(--text)" />
+            <button id="plotBtn">Plot (Enter)</button>
+            <button id="resetViewBtn">Reset View</button>
+          </div>
+        </div>
+        <div class="canvas-wrap graph-wrap" id="graphWrap">
+          <canvas id="graphCanvas" aria-label="Graph canvas" role="img"></canvas>
+          <div class="overlay-steps" id="solveOverlay" hidden></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;color:var(--muted);">
+          <span>Pan: drag • Zoom: wheel or <span class="kbd">+</span>/<span class="kbd">-</span> • Reset: <span class="kbd">0</span></span>
+          <span>| Steps: linear/quadratic show formulas; otherwise Newton iterations</span>
+        </div>
+      </section>
+
+      <!-- TEACH-BACK TAB -->
+      <section class="card" id="tab-teach" role="region" aria-labelledby="tab-teach-title" hidden>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+          <h2 id="tab-teach-title" style="margin:0">Teach-Back: Explain to Learn</h2>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select id="teachConceptSelect"></select>
+            <button id="newPromptBtn">New Prompt</button>
+          </div>
+        </div>
+        <div class="teach-grid">
+          <div class="card">
+            <div id="teachPrompt">Pick a concept and generate a teach-back prompt.</div>
+          </div>
+          <div class="card">
+            <label for="teachResponse"><strong>Your explanation</strong></label>
+            <textarea id="teachResponse" placeholder="Explain as if to a curious friend. Use examples."></textarea>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <button id="saveTeachBtn">Save Reflection</button>
+              <span id="teachSaveMsg" style="color:var(--muted)"></span>
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">Progressive Hints</h3>
+            <ol id="hintList" style="margin-top:0"></ol>
+            <button id="revealNextHintBtn">Reveal next hint</button>
+            <button id="showFullAnswerBtn">Show full example answer</button>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">Self-Assessment</h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <button class="selfBtn" data-score="3" style="background:rgba(16,185,129,0.2);border-color:rgba(16,185,129,0.5)">Nailed it</button>
+              <button class="selfBtn" data-score="2" style="background:rgba(245,158,11,0.2);border-color:rgba(245,158,11,0.5)">Almost</button>
+              <button class="selfBtn" data-score="1" style="background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.5)">Need practice</button>
+              <span id="selfMsg" style="color:var(--muted)"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS TAB -->
+      <section class="card" id="tab-settings" role="region" aria-labelledby="tab-settings-title" hidden>
+        <h2 id="tab-settings-title" style="margin-top:0">Settings & Help</h2>
+        <div class="grid grid-2">
+          <div class="card">
+            <h3 style="margin-top:0">Accessibility</h3>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <button id="contrastToggleBtn">Toggle High Contrast</button>
+              <span class="chip">Keyboard tips live in the footer</span>
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">Data</h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <button id="exportBtn">Export Progress</button>
+              <input type="file" id="importInput" accept="application/json" style="display:none" />
+              <button id="importBtn">Import</button>
+              <button id="resetAllBtn" style="background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.5)">Reset All</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">About</h3>
+          <p>This single-file application was designed for adults returning to mathematics. It blends structure and warmth: rigorous visuals and step-by-step reasoning with encouragement and reflection.</p>
+          <ul>
+            <li>Four stages guiding 30 days of learning</li>
+            <li>Spaced repetition to reinforce concepts that need attention</li>
+            <li>Canvas-based geometry and graphing to engage visual intuition</li>
+            <li>Teach-back prompts and self-assessment to consolidate understanding</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <div class="footer" role="contentinfo">
+      <span>Flashcards: <span class="kbd">Enter</span> flip, <span class="kbd">1-4</span> rate</span>
+      <span>Graphing: <span class="kbd">Drag</span> pan, <span class="kbd">Wheel / + / -</span> zoom, <span class="kbd">0</span> reset</span>
+      <span>Global: <span class="kbd">Tab</span> navigate, <span class="kbd">Shift+?</span> help</span>
+    </div>
+
+    <!-- Celebration Canvas -->
+    <canvas class="celebration" id="confettiCanvas" aria-hidden="true"></canvas>
+  </div>
+
+  <script>
+    /*
+      Application State and Utilities
+      - localStorage for persistence
+      - Simple pub/sub to update UI
+      - Utility helpers: clamp, lerp, formatPercent, UUID
+    */
+
+    const APP_KEY = 'math_journey_v1';
+
+    /**
+     * Shape of persisted state. The schema is versioned via APP_KEY.
+     * state = {
+     *   progress: { completed: boolean[30] },
+     *   currentLessonIndex: number,
+     *   flashcards: { deck: Flashcard[], stats: Record<id, CardStats> },
+     *   settings: { highContrast: boolean },
+     *   teachBack: { reflections: Array<{concept:string, prompt:string, text:string, timestamp:number, selfScore?:number}> },
+     * }
+     */
+
+    function createInitialState() {
+      return {
+        progress: {
+          completed: Array.from({ length: 30 }, () => false),
+        },
+        currentLessonIndex: 0,
+        flashcards: {
+          deck: getDefaultDeck(),
+          stats: {},
+        },
+        settings: {
+          highContrast: false,
+        },
+        teachBack: {
+          reflections: [],
+        }
+      };
+    }
+
+    // Utility helpers
+    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const formatPercent = (n) => `${Math.round(n * 100)}%`;
+    const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(APP_KEY);
+        if (!raw) return createInitialState();
+        const parsed = JSON.parse(raw);
+        // Shallow schema migration safety
+        const initial = createInitialState();
+        return { ...initial, ...parsed, progress: { ...initial.progress, ...parsed.progress } };
+      } catch (e) {
+        console.warn('Failed to load state, using fresh', e);
+        return createInitialState();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(APP_KEY, JSON.stringify(state));
+      updateProgressUI();
+    }
+
+    let state = loadState();
+
+    // Pub/sub minimal
+    const listeners = new Set();
+    function subscribe(listener) { listeners.add(listener); }
+    function notify() { listeners.forEach((l) => l(state)); }
+
+    /*
+      Lesson and Stage Definitions (30 lessons, 4 stages)
+    */
+    const stages = [
+      { id: 1, title: 'Stage 1: Foundation Reconstruction', range: [1, 10], color: '#7dd3fc' },
+      { id: 2, title: 'Stage 2: Intermediate Integration', range: [11, 18], color: '#60a5fa' },
+      { id: 3, title: 'Stage 3: Classical Mathematical Thinking', range: [19, 25], color: '#34d399' },
+      { id: 4, title: 'Stage 4: Sacred Geometry Synthesis', range: [26, 30], color: '#f59e0b' },
+    ];
+
+    // Example lessons content (objectives and a quick activity)
+    const lessons = (() => {
+      const L = [];
+      const push = (day, title, objective, activity) => L.push({ day, title, objective, activity });
+      // Stage 1 (1-10)
+      push(1, 'PEMDAS Warm-up', 'Rebuild order of operations intuition', 'Evaluate: 3 + 6 × 2^2 − 4');
+      push(2, 'Variables & Expressions', 'Translate words to symbols and back', 'Simplify: 2a + 3a − a');
+      push(3, 'Linear Expressions', 'Distribute, combine, and factor basics', 'Solve: 5(x − 2) = 3x + 6');
+      push(4, 'Solving Linear Equations I', 'Balance operations on both sides', 'Solve: 7x − 9 = 3x + 15');
+      push(5, 'Solving Linear Equations II', 'Work multi-step equations', 'Solve: (x/3) + 4 = 9');
+      push(6, 'Basic Geometry', 'Angles, triangles, and perimeter', 'Find perimeter of triangle with sides 3, 4, 5');
+      push(7, 'Area & Units', 'Compute area accurately with units', 'Area of rectangle 8 by 3');
+      push(8, 'Proportions & Ratios', 'Scale quantities sensibly', 'A map uses 1 cm : 5 km. 7 cm means?');
+      push(9, 'Graphs of Lines', 'Slope as rate of change', 'Find slope through (2,3) and (5,11)');
+      push(10, 'Review & Confidence', 'Integrate week 1 learnings', 'Reflect: what felt easier this time?');
+      // Stage 2 (11-18)
+      push(11, 'Right Triangle Trig', 'Sine, cosine, tangent basics', 'Find sin(30°), cos(60°)');
+      push(12, 'Angles & Trig Applications', 'Heights, shadows, slopes', 'A ladder 10 ft at 60°: height reached?');
+      push(13, 'Advanced Geometry', 'Similarity and congruence', 'Are two triangles with sides 3:4:5 and 6:8:10 similar?');
+      push(14, 'Coordinate Geometry', 'Distance and midpoint', 'Distance between (−2,5) and (4,−1)');
+      push(15, 'Transformations', 'Translate, rotate, reflect', 'Reflect (3,−1) over x-axis');
+      push(16, 'Quadratic Basics', 'Parabolas and factoring', 'Find vertex of y = x^2 − 4x + 1');
+      push(17, 'Quadratic Solving', 'Quadratic formula and roots', 'Solve: x^2 − 5x + 6 = 0');
+      push(18, 'Week 2 Review', 'Connect trigonometry and algebra', 'Explain one real use of trig');
+      // Stage 3 (19-25)
+      push(19, 'Euclidean Geometry', 'Axioms and constructions', 'Sum of angles in triangle?');
+      push(20, 'Golden Ratio', 'Phi in art and nature', 'Compute (1 + sqrt(5))/2');
+      push(21, 'Fibonacci Patterns', 'Sequences and growth', 'Find F(10) given F(0)=0, F(1)=1');
+      push(22, 'Conic Sections I', 'Parabola properties', 'Focus-directrix insight: what defines a parabola?');
+      push(23, 'Conic Sections II', 'Ellipse and hyperbola', 'Sum of distances to foci in ellipse equals?');
+      push(24, 'Classical Proofs', 'Logic clarity and structure', 'Prove: sum of two even numbers is even');
+      push(25, 'Week 3 Synthesis', 'Big-picture patterns', 'Where do you see math in your work?');
+      // Stage 4 (26-30)
+      push(26, 'Sacred Geometry I', 'Basic constructions and symbolism', 'Draw a seed of life pattern');
+      push(27, 'Sacred Geometry II', 'Proportions and harmony', 'Find ratio in pentagon star');
+      push(28, 'Geometric Proofs', 'Rigor with diagrams', 'Explain why base angles of isosceles equal');
+      push(29, 'Patterns & Cosmology', 'Ancient insights as patterns', 'Identify symmetry in nature photo');
+      push(30, 'Capstone Day', 'Showcase your understanding', 'Teach a mini-lesson to someone');
+      return L;
+    })();
+
+    // Progress UI rendering and logic
+    const progressFillEl = document.getElementById('progressFill');
+    const progressTextEl = document.getElementById('progressText');
+    const milestoneTextEl = document.getElementById('milestoneText');
+    const stagesContainerEl = document.getElementById('stagesContainer');
+    const lessonGridEl = document.getElementById('lessonGrid');
+    const currentLessonDetailEl = document.getElementById('currentLessonDetail');
+
+    function updateProgressUI() {
+      const completedCount = state.progress.completed.filter(Boolean).length;
+      const pct = completedCount / lessons.length;
+      progressFillEl.style.width = formatPercent(pct);
+      progressTextEl.textContent = `${completedCount}/${lessons.length} lessons (${Math.round(pct*100)}%)`;
+      const ms = milestoneMessage(pct);
+      milestoneTextEl.textContent = ms;
+      renderStages();
+      renderLessons();
+    }
+
+    function milestoneMessage(pct) {
+      if (pct >= 1) return 'Incredible! You finished. 🎉';
+      if (pct >= 0.75) return '75% milestone—momentum is yours!';
+      if (pct >= 0.5) return 'Halfway there—keep going!';
+      if (pct >= 0.25) return 'Great start—25% complete!';
+      return 'Let’s begin';
+    }
+
+    function renderStages() {
+      stagesContainerEl.innerHTML = '';
+      stages.forEach(st => {
+        const [start, end] = st.range;
+        const total = end - start + 1;
+        const done = state.progress.completed.slice(start-1, end).filter(Boolean).length;
+        const pct = Math.round((done/total) * 100);
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:14px;height:14px;border-radius:3px;background:${st.color}"></div>
+              <strong>${st.title}</strong>
+            </div>
+            <span class="chip">${pct}% complete</span>
+          </div>
+          <div class="progress-bar" style="margin-top:8px">
+            <div class="progress-fill" style="background:${st.color};width:${pct}%"></div>
+          </div>
+        `;
+        stagesContainerEl.appendChild(div);
+      });
+    }
+
+    function renderLessons() {
+      lessonGridEl.innerHTML = '';
+      const currentIdx = getCurrentLessonIndex();
+      lessons.forEach((lesson, i) => {
+        const completed = !!state.progress.completed[i];
+        const card = document.createElement('div');
+        card.className = 'lesson-card' + (completed ? ' completed' : (i === currentIdx ? ' current' : ''));
+        const stageId = getStageIdForDay(lesson.day);
+        const statusPill = completed ? '<span class="pill green">Done</span>' : (i === currentIdx ? '<span class="pill yellow">Now</span>' : '<span class="pill gray">Next</span>');
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+            <div>
+              <div class="lesson-title">Day ${lesson.day}: ${lesson.title}</div>
+              <div style="color:var(--muted);font-size:12px;">Stage ${stageId}</div>
+            </div>
+            ${statusPill}
+          </div>
+        `;
+        card.addEventListener('click', () => selectLesson(i));
+        lessonGridEl.appendChild(card);
+      });
+    }
+
+    function getStageIdForDay(day) {
+      for (const st of stages) {
+        if (day >= st.range[0] && day <= st.range[1]) return st.id;
+      }
+      return 1;
+    }
+
+    function getCurrentLessonIndex() {
+      const firstIncomplete = state.progress.completed.findIndex(c => !c);
+      return firstIncomplete === -1 ? lessons.length - 1 : firstIncomplete;
+    }
+
+    function selectLesson(index) {
+      state.currentLessonIndex = index;
+      saveState();
+      renderCurrentLesson();
+      // if newly selected lesson is next not completed, mark as current visually
+      updateProgressUI();
+    }
+
+    function renderCurrentLesson() {
+      const i = state.currentLessonIndex ?? getCurrentLessonIndex();
+      const L = lessons[i];
+      currentLessonDetailEl.innerHTML = `
+        <div style="display:grid;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+            <div>
+              <strong>Day ${L.day}: ${L.title}</strong>
+              <div style="color:var(--muted);font-size:13px">Stage ${getStageIdForDay(L.day)}</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <button id="markCompleteBtn">Mark Complete</button>
+              <button id="jumpToFlashBtn">Practice Flashcards</button>
+              <button id="openGraphWithSampleBtn">Graph Example</button>
+            </div>
+          </div>
+          <div><em>Objective:</em> ${L.objective}</div>
+          <div><em>Quick Activity:</em> ${L.activity}</div>
+          <div style="color:var(--muted);font-size:13px">Tip: After completing, celebrate progress and revisit any tricky flashcards.</div>
+        </div>
+      `;
+      document.getElementById('markCompleteBtn').addEventListener('click', () => {
+        if (!state.progress.completed[i]) {
+          state.progress.completed[i] = true;
+          saveState();
+          celebrateIfMilestone();
+        }
+      });
+      document.getElementById('jumpToFlashBtn').addEventListener('click', () => switchTab('flash'));
+      document.getElementById('openGraphWithSampleBtn').addEventListener('click', () => {
+        switchTab('graph');
+        // Pre-fill an expression based on the lesson theme
+        const sample = suggestExpressionForLesson(L.day);
+        exprInput.value = sample;
+        plotCurrentExpression();
+      });
+    }
+
+    function suggestExpressionForLesson(day) {
+      if (day <= 10) return '2x + 3';
+      if (day <= 18) return 'sin(x) + cos(2x)';
+      if (day <= 25) return 'x^2 - 4x + 1';
+      return 'sqrt(x) * sin(x)';
+    }
+
+    function celebrateIfMilestone() {
+      const count = state.progress.completed.filter(Boolean).length;
+      const milestones = [1, 5, 10, 15, 20, 25, 30];
+      if (milestones.includes(count)) {
+        launchConfetti();
+      }
+    }
+
+    /*
+      Confetti celebration (lightweight, no dependency)
+    */
+    const confettiCanvas = document.getElementById('confettiCanvas');
+    const cctx = confettiCanvas.getContext('2d');
+    let confettiParticles = [];
+    let confettiRunning = false;
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeConfetti);
+    resizeConfetti();
+
+    function launchConfetti() {
+      const colors = ['#7dd3fc','#60a5fa','#34d399','#f59e0b','#ef4444'];
+      for (let i = 0; i < 180; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: -20 - Math.random()*200,
+          vx: (Math.random()-0.5) * 2,
+          vy: 2 + Math.random() * 3,
+          size: 4 + Math.random()*4,
+          color: colors[Math.floor(Math.random()*colors.length)],
+          tilt: Math.random()*Math.PI,
+          life: 200 + Math.random()*200
+        });
+      }
+      if (!confettiRunning) {
+        confettiRunning = true;
+        requestAnimationFrame(confettiLoop);
+      }
+    }
+
+    function confettiLoop() {
+      cctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+      confettiParticles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.tilt += 0.1;
+        p.life -= 1;
+        cctx.save();
+        cctx.translate(p.x, p.y);
+        cctx.rotate(p.tilt);
+        cctx.fillStyle = p.color;
+        cctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+        cctx.restore();
+      });
+      confettiParticles = confettiParticles.filter(p => p.life > 0 && p.y < confettiCanvas.height + 20);
+      if (confettiParticles.length > 0) requestAnimationFrame(confettiLoop);
+      else confettiRunning = false;
+    }
+
+    /*
+      Flashcard Engine with Spaced Repetition (SM-2 inspired simplified)
+      - Card: { id, front, back, tags }
+      - Stats: { ease: number, intervalDays: number, reps: number, due: number, lapse: number }
+      - Algorithm:
+        When rating:
+          again(1): ease = max(1.3, ease - 0.2), reps=0, interval=0, due=now+10min
+          hard(2):  ease = max(1.3, ease - 0.15), interval = max(1, round(interval*0.5)) or 1
+          good(3):  ease += 0.1, reps++, interval progression (1, 6, interval*ease)
+          easy(4):  ease += 0.15, reps++, interval progression accelerated
+        Due queue favors cards with due <= now and then nearest due, and sprinkles a few new cards
+    */
+
+    function getDefaultDeck() {
+      // A compact deck across stages, users can add more
+      const d = [];
+      const add = (front, back, tags=[]) => d.push({ id: uid(), front, back, tags });
+      // Stage 1
+      add('Order of operations acronym?', 'PEMDAS: Parentheses, Exponents, Multiplication, Division, Addition, Subtraction', ['stage1']);
+      add('Simplify: 2a + 3a − a', '4a', ['stage1']);
+      add('Solve: 7x − 9 = 3x + 15', 'x = 6', ['stage1']);
+      add('Slope formula between (x1,y1) and (x2,y2)?', 'm = (y2−y1)/(x2−x1)', ['stage1']);
+      // Stage 2
+      add('sin(30°) and cos(60°)', 'sin(30°)=1/2, cos(60°)=1/2', ['trig','stage2']);
+      add('Distance formula in coordinate plane?', 'd = sqrt((x2−x1)^2 + (y2−y1)^2)', ['stage2']);
+      add('Quadratic formula?', 'x = [−b ± sqrt(b^2 − 4ac)] / (2a)', ['quadratic','stage2']);
+      // Stage 3
+      add('Define the golden ratio φ', 'φ = (1 + sqrt(5))/2 ≈ 1.618', ['stage3']);
+      add('Fibonacci recursion', 'F(n) = F(n−1) + F(n−2), F(0)=0, F(1)=1', ['stage3']);
+      // Stage 4
+      add('Sacred geometry: what is a “seed of life”?', 'A pattern of seven overlapping circles symbolizing creation', ['stage4']);
+      return d;
+    }
+
+    // DOM elements for flashcards
+    const flashcardEl = document.getElementById('flashcard');
+    const flashFrontEl = document.getElementById('flashFront');
+    const flashBackEl = document.getElementById('flashBack');
+    const flipBtn = document.getElementById('flipBtn');
+    const shuffleDeckBtn = document.getElementById('shuffleDeckBtn');
+    const addCardBtn = document.getElementById('addCardBtn');
+    const againBtn = document.getElementById('againBtn');
+    const hardBtn = document.getElementById('hardBtn');
+    const goodBtn = document.getElementById('goodBtn');
+    const easyBtn = document.getElementById('easyBtn');
+    const dueCountEl = document.getElementById('dueCount');
+    const cardProgressEl = document.getElementById('cardProgress');
+
+    let currentCardIndex = 0; // index in the dueQueue
+    let dueQueue = [];
+
+    function getCardStats(id) {
+      if (!state.flashcards.stats[id]) {
+        state.flashcards.stats[id] = {
+          ease: 2.4,
+          intervalDays: 0,
+          reps: 0,
+          due: Date.now(),
+          lapse: 0,
+        };
+      }
+      return state.flashcards.stats[id];
+    }
+
+    function scheduleCards() {
+      const now = Date.now();
+      const cards = [...state.flashcards.deck];
+      // Prioritize due cards
+      const due = cards.filter(c => getCardStats(c.id).due <= now);
+      const notDue = cards.filter(c => getCardStats(c.id).due > now)
+                          .sort((a,b) => getCardStats(a.id).due - getCardStats(b.id).due);
+      // Sprinkle some not-due near future
+      const sprinkleCount = Math.min(3, notDue.length);
+      dueQueue = [...due, ...notDue.slice(0, sprinkleCount)];
+      if (dueQueue.length === 0 && cards.length > 0) {
+        // ensure at least one card present
+        dueQueue = [notDue[0] || cards[0]];
+      }
+      currentCardIndex = 0;
+      updateFlashcardUI();
+    }
+
+    function updateFlashcardUI() {
+      const total = state.flashcards.deck.length;
+      const dueN = dueQueue.length;
+      dueCountEl.textContent = `Due: ${dueN}`;
+      cardProgressEl.textContent = `${Math.min(currentCardIndex+1, Math.max(1, dueN))}/${Math.max(1,dueN)}`;
+
+      if (dueN === 0) {
+        flashFrontEl.innerHTML = 'No cards due. Great moment to practice finished lessons or add new cards!';
+        flashBackEl.innerHTML = 'Tip: Click Add Card to include your own concepts.';
+        flashcardEl.classList.remove('flipped');
+        return;
+      }
+      const card = dueQueue[currentCardIndex];
+      flashFrontEl.innerHTML = sanitize(card.front);
+      flashBackEl.innerHTML = sanitize(card.back);
+      flashcardEl.classList.remove('flipped');
+    }
+
+    function sanitize(html) {
+      // Very light sanitizer for this demo (prevents script tags)
+      return String(html).replace(/<\s*script/gi, '&lt;script');
+    }
+
+    function rateCurrentCard(grade) {
+      const card = dueQueue[currentCardIndex];
+      if (!card) return;
+      const stats = getCardStats(card.id);
+      const now = Date.now();
+
+      switch (grade) {
+        case 1: // Again
+          stats.ease = Math.max(1.3, stats.ease - 0.2);
+          stats.reps = 0;
+          stats.intervalDays = 0;
+          stats.lapse += 1;
+          stats.due = now + 10 * 60 * 1000; // 10 minutes
+          break;
+        case 2: // Hard
+          stats.ease = Math.max(1.3, stats.ease - 0.15);
+          stats.reps = Math.max(1, stats.reps);
+          stats.intervalDays = Math.max(1, Math.round(Math.max(1, stats.intervalDays) * 0.5));
+          stats.due = now + stats.intervalDays * 24 * 60 * 60 * 1000;
+          break;
+        case 3: // Good
+          stats.ease = Math.min(2.8, stats.ease + 0.1);
+          stats.reps += 1;
+          if (stats.reps === 1) stats.intervalDays = 1;
+          else if (stats.reps === 2) stats.intervalDays = 6;
+          else stats.intervalDays = Math.round(stats.intervalDays * stats.ease);
+          stats.due = now + stats.intervalDays * 24 * 60 * 60 * 1000;
+          break;
+        case 4: // Easy
+          stats.ease = Math.min(3.0, stats.ease + 0.15);
+          stats.reps += 1;
+          if (stats.reps === 1) stats.intervalDays = 2;
+          else if (stats.reps === 2) stats.intervalDays = 8;
+          else stats.intervalDays = Math.round(stats.intervalDays * (stats.ease + 0.1));
+          stats.due = now + stats.intervalDays * 24 * 60 * 60 * 1000;
+          break;
+      }
+      saveState();
+      // Remove from current queue view
+      dueQueue.splice(currentCardIndex, 1);
+      if (currentCardIndex >= dueQueue.length) currentCardIndex = Math.max(0, dueQueue.length - 1);
+      updateFlashcardUI();
+    }
+
+    // Flashcard events
+    flashcardEl.addEventListener('click', () => flashcardEl.classList.toggle('flipped'));
+    flipBtn.addEventListener('click', () => flashcardEl.classList.toggle('flipped'));
+    shuffleDeckBtn.addEventListener('click', () => {
+      state.flashcards.deck.sort(() => Math.random() - 0.5);
+      saveState();
+      scheduleCards();
+    });
+    addCardBtn.addEventListener('click', () => {
+      const front = prompt('New card front (question/prompt):');
+      if (!front) return;
+      const back = prompt('New card back (answer/explanation):') || '';
+      state.flashcards.deck.push({ id: uid(), front, back, tags: ['custom'] });
+      saveState();
+      scheduleCards();
+    });
+
+    againBtn.addEventListener('click', () => rateCurrentCard(1));
+    hardBtn.addEventListener('click', () => rateCurrentCard(2));
+    goodBtn.addEventListener('click', () => rateCurrentCard(3));
+    easyBtn.addEventListener('click', () => rateCurrentCard(4));
+
+    document.addEventListener('keydown', (e) => {
+      const activeTab = getActiveTabId();
+      if (activeTab === 'tab-flash') {
+        if (e.key === 'Enter') { flashcardEl.classList.toggle('flipped'); }
+        if (e.key === '1') rateCurrentCard(1);
+        if (e.key === '2') rateCurrentCard(2);
+        if (e.key === '3') rateCurrentCard(3);
+        if (e.key === '4') rateCurrentCard(4);
+        if (e.key.toLowerCase() === 's') {
+          state.flashcards.deck.sort(() => Math.random() - 0.5);
+          saveState();
+          scheduleCards();
+        }
+      }
+    });
+
+    /*
+      Geometry Canvas (2D shapes and pseudo-3D isometric cube)
+      - Support dragging vertices
+      - Compute measurements (area, perimeter, etc.)
+      - Scroll to zoom and reset button
+    */
+    const geomCanvas = document.getElementById('geomCanvas');
+    const geomWrap = document.getElementById('geomWrap');
+    const shapeSelect = document.getElementById('shapeSelect');
+    const resetGeometryBtn = document.getElementById('resetGeometryBtn');
+    const geomPropsEl = document.getElementById('geomProps');
+    const geomNotesEl = document.getElementById('geomNotes');
+    const gctx = geomCanvas.getContext('2d');
+
+    const geomState = {
+      shape: 'triangle',
+      zoom: 1,
+      offset: { x: 0, y: 0 },
+      dragging: null, // { type: 'vertex'|'shape', index?: number, start:{x,y} }
+      vertices: [ {x:-80,y:60}, {x:0,y:-60}, {x:80,y:60} ], // triangle default
+      rect: { x:-100, y:-60, w: 200, h: 120 },
+      circle: { x: 0, y: 0, r: 80 },
+      cube: { center: {x:0,y:0}, size: 120, rot: 0.3 },
+    };
+
+    function resizeGeom() {
+      const rect = geomWrap.getBoundingClientRect();
+      geomCanvas.width = rect.width * devicePixelRatio;
+      geomCanvas.height = rect.height * devicePixelRatio;
+      gctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+      drawGeometry();
+    }
+    new ResizeObserver(resizeGeom).observe(geomWrap);
+
+    function worldToScreen(p) {
+      const cx = geomCanvas.width / devicePixelRatio / 2 + geomState.offset.x;
+      const cy = geomCanvas.height / devicePixelRatio / 2 + geomState.offset.y;
+      return { x: cx + p.x * geomState.zoom, y: cy + p.y * geomState.zoom };
+    }
+    function screenToWorld(p) {
+      const cx = geomCanvas.width / devicePixelRatio / 2 + geomState.offset.x;
+      const cy = geomCanvas.height / devicePixelRatio / 2 + geomState.offset.y;
+      return { x: (p.x - cx) / geomState.zoom, y: (p.y - cy) / geomState.zoom };
+    }
+
+    function drawHandle(p) {
+      gctx.beginPath();
+      gctx.arc(p.x, p.y, 6, 0, Math.PI*2);
+      gctx.fillStyle = 'rgba(255,255,255,0.9)';
+      gctx.fill();
+      gctx.strokeStyle = 'rgba(0,0,0,0.4)';
+      gctx.stroke();
+    }
+
+    function drawGeometry() {
+      const w = geomCanvas.width / devicePixelRatio;
+      const h = geomCanvas.height / devicePixelRatio;
+      gctx.clearRect(0,0,w,h);
+
+      // Axes
+      gctx.save();
+      gctx.translate(w/2 + geomState.offset.x, h/2 + geomState.offset.y);
+      gctx.scale(geomState.zoom, geomState.zoom);
+      gctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      gctx.lineWidth = 1 / geomState.zoom;
+      gctx.beginPath();
+      gctx.moveTo(-w, 0); gctx.lineTo(w, 0);
+      gctx.moveTo(0, -h); gctx.lineTo(0, h);
+      gctx.stroke();
+      gctx.restore();
+
+      // Draw shape
+      const shape = geomState.shape;
+      if (shape === 'triangle') drawTriangle();
+      if (shape === 'rectangle') drawRectangle();
+      if (shape === 'circle') drawCircle();
+      if (shape === 'cube') drawCube();
+
+      updateGeomProps();
+    }
+
+    function drawTriangle() {
+      const pts = geomState.vertices.map(worldToScreen);
+      gctx.beginPath();
+      gctx.moveTo(pts[0].x, pts[0].y);
+      gctx.lineTo(pts[1].x, pts[1].y);
+      gctx.lineTo(pts[2].x, pts[2].y);
+      gctx.closePath();
+      gctx.fillStyle = 'rgba(125,211,252,0.25)';
+      gctx.strokeStyle = 'rgba(125,211,252,0.9)';
+      gctx.lineWidth = 2;
+      gctx.fill(); gctx.stroke();
+      pts.forEach(drawHandle);
+    }
+
+    function drawRectangle() {
+      const r = geomState.rect;
+      const p = worldToScreen({x:r.x,y:r.y});
+      const size = { w: r.w * geomState.zoom, h: r.h * geomState.zoom };
+      gctx.fillStyle = 'rgba(96,165,250,0.25)';
+      gctx.strokeStyle = 'rgba(96,165,250,0.9)';
+      gctx.lineWidth = 2;
+      gctx.fillRect(p.x, p.y, size.w, size.h);
+      gctx.strokeRect(p.x, p.y, size.w, size.h);
+      // handles at corners
+      [
+        {x:r.x, y:r.y}, {x:r.x+r.w, y:r.y}, {x:r.x+r.w, y:r.y+r.h}, {x:r.x, y:r.y+r.h}
+      ].map(worldToScreen).forEach(drawHandle);
+    }
+
+    function drawCircle() {
+      const c = geomState.circle;
+      const p = worldToScreen({x:c.x, y:c.y});
+      const r = c.r * geomState.zoom;
+      gctx.beginPath();
+      gctx.arc(p.x, p.y, r, 0, Math.PI*2);
+      gctx.fillStyle = 'rgba(52,211,153,0.25)';
+      gctx.strokeStyle = 'rgba(52,211,153,0.9)';
+      gctx.lineWidth = 2;
+      gctx.fill(); gctx.stroke();
+      drawHandle({x:p.x + r, y:p.y});
+      drawHandle(p);
+    }
+
+    function drawCube() {
+      const { center, size, rot } = geomState.cube;
+      // Isometric projection axes
+      const iso = (x,y,z) => {
+        const a = Math.cos(rot), b = Math.sin(rot);
+        const ix = (x - z) * a;
+        const iy = y + (x + z) * b * 0.5;
+        const p = worldToScreen({x:center.x + ix, y:center.y + iy});
+        return p;
+      };
+      const s = size/2;
+      const verts = [
+        [-s,-s,-s], [s,-s,-s], [s,-s,s], [-s,-s,s],
+        [-s,s,-s],  [s,s,-s],  [s,s,s],  [-s,s,s]
+      ].map(v => iso(v[0], v[1], v[2]));
+      const edges = [
+        [0,1],[1,2],[2,3],[3,0],
+        [4,5],[5,6],[6,7],[7,4],
+        [0,4],[1,5],[2,6],[3,7]
+      ];
+      gctx.strokeStyle = 'rgba(245,158,11,0.9)';
+      gctx.lineWidth = 2;
+      edges.forEach(([i,j]) => {
+        gctx.beginPath();
+        gctx.moveTo(verts[i].x, verts[i].y);
+        gctx.lineTo(verts[j].x, verts[j].y);
+        gctx.stroke();
+      });
+      // center handle
+      drawHandle(worldToScreen(center));
+    }
+
+    function updateGeomProps() {
+      const shape = geomState.shape;
+      let html = '';
+      let notes = [];
+      if (shape === 'triangle') {
+        const [A,B,C] = geomState.vertices;
+        const side = (P, Q) => Math.hypot(P.x - Q.x, P.y - Q.y);
+        const a = side(B,C), b = side(A,C), c = side(A,B);
+        const s = (a+b+c)/2;
+        const area = Math.sqrt(Math.max(0, s*(s-a)*(s-b)*(s-c)));
+        html = `Perimeter = ${ (a+b+c).toFixed(2) } units, Area = ${ area.toFixed(2) } sq units`;
+        notes = [
+          'Heron’s formula: A = sqrt(s(s−a)(s−b)(s−c))',
+          'Perimeter is the sum of side lengths',
+        ];
+      } else if (shape === 'rectangle') {
+        const r = geomState.rect;
+        const area = Math.abs(r.w*r.h);
+        const peri = 2*(Math.abs(r.w)+Math.abs(r.h));
+        html = `Perimeter = ${ peri.toFixed(2) }, Area = ${ area.toFixed(2) }`;
+        notes = [
+          'Area rectangle = width × height',
+          'Perimeter rectangle = 2(w+h)',
+        ];
+      } else if (shape === 'circle') {
+        const c = geomState.circle;
+        const area = Math.PI * c.r * c.r;
+        const circ = 2 * Math.PI * c.r;
+        html = `Circumference = ${ circ.toFixed(2) }, Area = ${ area.toFixed(2) }`;
+        notes = [
+          'Circumference = 2πr',
+          'Area circle = πr²',
+        ];
+      } else if (shape === 'cube') {
+        const s = geomState.cube.size;
+        const vol = Math.pow(s,3);
+        const sa = 6 * s * s;
+        html = `Edge = ${ s.toFixed(1) }, Surface Area = ${ sa.toFixed(1) }, Volume = ${ vol.toFixed(1) }`;
+        notes = [
+          'Surface area of a cube = 6s²',
+          'Volume of a cube = s³',
+          'Isometric is a pseudo-3D projection (equal angles)',
+        ];
+      }
+      geomPropsEl.textContent = html;
+      geomNotesEl.innerHTML = notes.map(n => `<li>${n}</li>`).join('');
+    }
+
+    // Geometry interactions
+    geomCanvas.addEventListener('mousedown', geomPointerDown);
+    geomCanvas.addEventListener('mousemove', geomPointerMove);
+    geomCanvas.addEventListener('mouseup', geomPointerUp);
+    geomCanvas.addEventListener('mouseleave', geomPointerUp);
+
+    // Touch support for geometry
+    geomCanvas.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      const rect = geomCanvas.getBoundingClientRect();
+      geomPointerDown({ clientX: t.clientX, clientY: t.clientY, preventDefault: ()=>{}, target: geomCanvas, currentTarget: geomCanvas });
+      e.preventDefault();
+    }, { passive:false });
+    geomCanvas.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      geomPointerMove({ clientX: t.clientX, clientY: t.clientY });
+      e.preventDefault();
+    }, { passive:false });
+    geomCanvas.addEventListener('touchend', (e) => {
+      geomPointerUp();
+      e.preventDefault();
+    }, { passive:false });
+
+    geomCanvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = Math.sign(e.deltaY);
+      const factor = delta > 0 ? 0.9 : 1.1;
+      geomState.zoom = clamp(geomState.zoom * factor, 0.4, 5);
+      drawGeometry();
+    }, { passive:false });
+
+    function pickHandleAt(x, y) {
+      const pt = { x, y };
+      const hit = (p) => Math.hypot(p.x - pt.x, p.y - pt.y) <= 8;
+      if (geomState.shape === 'triangle') {
+        const pts = geomState.vertices.map(worldToScreen);
+        for (let i=0;i<pts.length;i++) if (hit(pts[i])) return { type:'vertex', index:i };
+      } else if (geomState.shape === 'rectangle') {
+        const r = geomState.rect;
+        const pts = [
+          {x:r.x,y:r.y}, {x:r.x+r.w,y:r.y}, {x:r.x+r.w,y:r.y+r.h}, {x:r.x,y:r.y+r.h}
+        ].map(worldToScreen);
+        for (let i=0;i<pts.length;i++) if (hit(pts[i])) return { type:'rectCorner', index:i };
+      } else if (geomState.shape === 'circle') {
+        const c = worldToScreen(geomState.circle);
+        const edge = { x: c.x + geomState.circle.r * geomState.zoom, y: c.y };
+        if (hit(edge)) return { type:'circleEdge' };
+        if (hit(c)) return { type:'circleCenter' };
+      } else if (geomState.shape === 'cube') {
+        const center = worldToScreen(geomState.cube.center);
+        if (hit(center)) return { type:'cubeCenter' };
+      }
+      return { type:'shape' };
+    }
+
+    function geomPointerDown(e) {
+      const rect = geomCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const hit = pickHandleAt(x, y);
+      geomState.dragging = { ...hit, start: { x, y } };
+    }
+    function geomPointerMove(e) {
+      if (!geomState.dragging) return;
+      const rect = geomCanvas.getBoundingClientRect();
+      const dx = e.clientX - rect.left - geomState.dragging.start.x;
+      const dy = e.clientY - rect.top - geomState.dragging.start.y;
+      geomState.dragging.start = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+
+      if (geomState.dragging.type === 'vertex') {
+        const idx = geomState.dragging.index;
+        const current = worldToScreen(geomState.vertices[idx]);
+        const moved = { x: current.x + dx, y: current.y + dy };
+        geomState.vertices[idx] = screenToWorld(moved);
+      } else if (geomState.dragging.type === 'rectCorner') {
+        const corners = [
+          {x: geomState.rect.x, y: geomState.rect.y},
+          {x: geomState.rect.x + geomState.rect.w, y: geomState.rect.y},
+          {x: geomState.rect.x + geomState.rect.w, y: geomState.rect.y + geomState.rect.h},
+          {x: geomState.rect.x, y: geomState.rect.y + geomState.rect.h}
+        ];
+        const idx = geomState.dragging.index;
+        const moved = screenToWorld({ x: (worldToScreen(corners[idx]).x + dx), y: (worldToScreen(corners[idx]).y + dy) });
+        // Adjust rectangle based on which corner moved
+        const opposite = corners[(idx+2)%4];
+        geomState.rect.x = Math.min(moved.x, opposite.x);
+        geomState.rect.y = Math.min(moved.y, opposite.y);
+        geomState.rect.w = Math.abs(moved.x - opposite.x);
+        geomState.rect.h = Math.abs(moved.y - opposite.y);
+      } else if (geomState.dragging.type === 'circleCenter') {
+        const center = worldToScreen(geomState.circle);
+        const newCenter = screenToWorld({ x: center.x + dx, y: center.y + dy });
+        geomState.circle.x = newCenter.x;
+        geomState.circle.y = newCenter.y;
+      } else if (geomState.dragging.type === 'circleEdge') {
+        const center = worldToScreen(geomState.circle);
+        const edge = { x: center.x + geomState.circle.r * geomState.zoom + dx, y: center.y + dy };
+        const w = screenToWorld(edge);
+        geomState.circle.r = Math.max(5, Math.hypot(w.x - geomState.circle.x, w.y - geomState.circle.y));
+      } else if (geomState.dragging.type === 'cubeCenter') {
+        const center = worldToScreen(geomState.cube.center);
+        geomState.cube.center = screenToWorld({ x: center.x + dx, y: center.y + dy });
+      } else {
+        // Pan shape/world
+        geomState.offset.x += dx;
+        geomState.offset.y += dy;
+      }
+      drawGeometry();
+    }
+    function geomPointerUp() { geomState.dragging = null; }
+
+    shapeSelect.addEventListener('change', (e) => {
+      geomState.shape = e.target.value;
+      drawGeometry();
+    });
+
+    resetGeometryBtn.addEventListener('click', () => {
+      geomState.zoom = 1;
+      geomState.offset = { x: 0, y: 0 };
+      geomState.vertices = [ {x:-80,y:60}, {x:0,y:-60}, {x:80,y:60} ];
+      geomState.rect = { x:-100, y:-60, w: 200, h: 120 };
+      geomState.circle = { x: 0, y: 0, r: 80 };
+      geomState.cube = { center: {x:0,y:0}, size: 120, rot: 0.3 };
+      drawGeometry();
+    });
+
+    /*
+      Graphing System
+      - Expression parser (shunting-yard) supporting + - * / ^, functions (sin, cos, tan, ln, log, sqrt, abs, exp), constants (pi, e)
+      - Canvas with pan/zoom, axes, grid
+      - Intercept highlighting, step overlays (linear/quadratic formulas; else Newton)
+    */
+    const graphCanvas = document.getElementById('graphCanvas');
+    const graphWrap = document.getElementById('graphWrap');
+    const g2 = graphCanvas.getContext('2d');
+    const exprInput = document.getElementById('exprInput');
+    const plotBtn = document.getElementById('plotBtn');
+    const resetViewBtn = document.getElementById('resetViewBtn');
+    const solveOverlay = document.getElementById('solveOverlay');
+
+    const graphState = {
+      expr: 'sin(x)',
+      compiled: null,
+      zoom: 60, // px per unit
+      origin: { x: 0, y: 0 }, // in pixels offset from center
+      dragging: false,
+      dragStart: { x: 0, y: 0 },
+      lastPan: { x: 0, y: 0 },
+      intercepts: { x: [], y: 0 },
+      stepsHtml: '',
+    };
+
+    function resizeGraph() {
+      const rect = graphWrap.getBoundingClientRect();
+      graphCanvas.width = rect.width * devicePixelRatio;
+      graphCanvas.height = rect.height * devicePixelRatio;
+      g2.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+      drawGraph();
+    }
+    new ResizeObserver(resizeGraph).observe(graphWrap);
+
+    function drawGraph() {
+      const w = graphCanvas.width / devicePixelRatio;
+      const h = graphCanvas.height / devicePixelRatio;
+      g2.clearRect(0, 0, w, h);
+
+      // Grid
+      const scale = graphState.zoom;
+      const step = niceGridStep(scale);
+      const left = -w/2 - graphState.origin.x;
+      const top = -h/2 - graphState.origin.y;
+
+      g2.save();
+      g2.translate(w/2 + graphState.origin.x, h/2 + graphState.origin.y);
+
+      // minor grid
+      g2.strokeStyle = 'rgba(255,255,255,0.07)';
+      g2.lineWidth = 1;
+      drawGrid(g2, w, h, scale, step/5);
+      // major grid
+      g2.strokeStyle = 'rgba(255,255,255,0.15)';
+      drawGrid(g2, w, h, scale, step);
+
+      // axes
+      g2.strokeStyle = 'rgba(255,255,255,0.6)';
+      g2.lineWidth = 1.5;
+      g2.beginPath();
+      g2.moveTo(-w, 0); g2.lineTo(w, 0);
+      g2.moveTo(0, -h); g2.lineTo(0, h);
+      g2.stroke();
+
+      // labels
+      g2.fillStyle = 'rgba(255,255,255,0.7)';
+      g2.font = '12px system-ui, sans-serif';
+      drawAxisLabels(g2, w, h, scale, step);
+
+      // Plot function
+      if (graphState.compiled) {
+        g2.strokeStyle = '#7dd3fc';
+        g2.lineWidth = 2;
+        g2.beginPath();
+        const sampleStep = 1 / scale; // pixel aligned sampling
+        let first = true;
+        for (let x = -w/2/scale - graphState.origin.x/scale - 2; x <= w/2/scale - graphState.origin.x/scale + 2; x += sampleStep) {
+          const y = safeEval(graphState.compiled, x);
+          if (!isFinite(y)) { first = true; continue; }
+          const px = x * scale;
+          const py = -y * scale;
+          if (first) { g2.moveTo(px, py); first = false; }
+          else g2.lineTo(px, py);
+        }
+        g2.stroke();
+
+        // Intercepts
+        g2.fillStyle = '#ef4444';
+        graphState.intercepts.x.forEach(ix => {
+          const px = ix * scale;
+          g2.beginPath(); g2.arc(px, 0, 4, 0, Math.PI*2); g2.fill();
+        });
+        g2.fillStyle = '#34d399';
+        const y0 = graphState.intercepts.y;
+        g2.beginPath(); g2.arc(0, -y0*scale, 4, 0, Math.PI*2); g2.fill();
+      }
+
+      g2.restore();
+    }
+
+    function niceGridStep(scalePxPerUnit) {
+      // choose world step s.t. pixel spacing ~ 60px
+      const targetPx = 60;
+      const raw = targetPx / scalePxPerUnit;
+      const pow = Math.pow(10, Math.floor(Math.log10(raw)));
+      const norm = raw / pow;
+      let step = 1;
+      if (norm < 1.5) step = 1;
+      else if (norm < 3.5) step = 2;
+      else if (norm < 7.5) step = 5;
+      else step = 10;
+      return step * pow;
+    }
+
+    function drawGrid(ctx, w, h, scale, step) {
+      const left = -w/2 - graphState.origin.x;
+      const right = w/2 - graphState.origin.x;
+      const top = -h/2 - graphState.origin.y;
+      const bottom = h/2 - graphState.origin.y;
+
+      // Draw vertical lines
+      const startX = Math.floor((left/scale) / step) * step;
+      for (let x = startX; x < (right/scale); x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x*scale, -h);
+        ctx.lineTo(x*scale, h);
+        ctx.stroke();
+      }
+      // Draw horizontal lines
+      const startY = Math.floor((top/scale) / step) * step;
+      for (let y = startY; y < (bottom/scale); y += step) {
+        ctx.beginPath();
+        ctx.moveTo(-w, y*scale);
+        ctx.lineTo(w, y*scale);
+        ctx.stroke();
+      }
+    }
+
+    function drawAxisLabels(ctx, w, h, scale, step) {
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      for (let x = -w/2/scale - graphState.origin.x/scale; x <= w/2/scale - graphState.origin.x/scale; x += step) {
+        const px = Math.round(x*scale) + 0.5; // crisp
+        if (Math.abs(x) < 1e-8) continue;
+        ctx.fillText(String(x.toFixed(2).replace(/\.00$/, '')), px, 4);
+      }
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      for (let y = -h/2/scale - graphState.origin.y/scale; y <= h/2/scale - graphState.origin.y/scale; y += step) {
+        const py = Math.round(-y*scale) + 0.5;
+        if (Math.abs(y) < 1e-8) continue;
+        ctx.fillText(String(y.toFixed(2).replace(/\.00$/, '')), -4, py);
+      }
+    }
+
+    // Parser: Shunting-yard to RPN then evaluator
+    const FUNCTIONS = {
+      sin: Math.sin,
+      cos: Math.cos,
+      tan: Math.tan,
+      asin: Math.asin,
+      acos: Math.acos,
+      atan: Math.atan,
+      sqrt: Math.sqrt,
+      abs: Math.abs,
+      ln: Math.log,
+      log: (v) => Math.log10(v),
+      exp: Math.exp,
+    };
+
+    const CONSTANTS = {
+      pi: Math.PI,
+      e: Math.E,
+    };
+
+    function tokenize(expr) {
+      // Insert explicit * for implicit multiplication: 2x -> 2*x, 2(x+1) -> 2*(x+1), )x -> )*x
+      let s = expr.replace(/\s+/g, '');
+      s = s.replace(/(\d)(x|\()/gi, '$1*$2');
+      s = s.replace(/(\))(x|\()/gi, '$1*$2');
+      const tokens = [];
+      const re = /([0-9]*\.?[0-9]+|pi|e|[a-zA-Z_][a-zA-Z_0-9]*|\^|\+|\-|\*|\/|\(|\)|,)/g;
+      let m;
+      while ((m = re.exec(s)) !== null) {
+        tokens.push(m[1]);
+      }
+      return tokens;
+    }
+
+    function toRPN(tokens) {
+      const out = [];
+      const ops = [];
+      const prec = { '+':1, '-':1, '*':2, '/':2, '^':3 };
+      const rightAssoc = { '^': true };
+      let prev = null;
+      for (let i=0;i<tokens.length;i++) {
+        const t = tokens[i];
+        if (/^[0-9]*\.?[0-9]+$/.test(t) || t === 'x' || t in CONSTANTS) {
+          out.push(t);
+        } else if (t in FUNCTIONS) {
+          ops.push(t);
+        } else if (t === ',') {
+          while (ops.length && ops[ops.length-1] !== '(') out.push(ops.pop());
+        } else if (t in prec) {
+          // handle unary minus
+          const isUnary = (t === '-' && (prev === null || (prev in prec) || prev === '(' || prev === ','));
+          const op = isUnary ? 'u-' : t;
+          if (isUnary) {
+            ops.push(op);
+          } else {
+            while (ops.length) {
+              const top = ops[ops.length-1];
+              if ((top in prec || top === 'u-' ) && ((prec[top] > prec[t]) || (prec[top] === prec[t] && !rightAssoc[t]))) {
+                out.push(ops.pop());
+              } else break;
+            }
+            ops.push(t);
+          }
+        } else if (t === '(') {
+          ops.push(t);
+        } else if (t === ')') {
+          while (ops.length && ops[ops.length-1] !== '(') out.push(ops.pop());
+          ops.pop(); // remove '('
+          if (ops.length && (ops[ops.length-1] in FUNCTIONS)) out.push(ops.pop());
+        }
+        prev = t;
+      }
+      while (ops.length) out.push(ops.pop());
+      return out;
+    }
+
+    function compile(expr) {
+      try {
+        const tokens = tokenize(expr);
+        const rpn = toRPN(tokens);
+        return rpn;
+      } catch (e) {
+        console.warn('Parse error', e);
+        return null;
+      }
+    }
+
+    function evalRPN(rpn, x) {
+      const stack = [];
+      for (const t of rpn) {
+        if (/^[0-9]*\.?[0-9]+$/.test(t)) stack.push(parseFloat(t));
+        else if (t === 'x') stack.push(x);
+        else if (t in CONSTANTS) stack.push(CONSTANTS[t]);
+        else if (t === 'u-') { stack.push(-stack.pop()); }
+        else if (t === '+') { const b = stack.pop(); const a = stack.pop(); stack.push(a + b); }
+        else if (t === '-') { const b = stack.pop(); const a = stack.pop(); stack.push(a - b); }
+        else if (t === '*') { const b = stack.pop(); const a = stack.pop(); stack.push(a * b); }
+        else if (t === '/') { const b = stack.pop(); const a = stack.pop(); stack.push(a / b); }
+        else if (t === '^') { const b = stack.pop(); const a = stack.pop(); stack.push(Math.pow(a, b)); }
+        else if (t in FUNCTIONS) {
+          const fn = FUNCTIONS[t];
+          const a = stack.pop();
+          stack.push(fn(a));
+        }
+      }
+      return stack.pop();
+    }
+
+    function safeEval(rpn, x) {
+      try { return evalRPN(rpn, x); } catch { return NaN; }
+    }
+
+    function findIntercepts(rpn) {
+      const xs = [];
+      const compiled = rpn;
+      // scan across visible domain for sign changes
+      const w = graphCanvas.width / devicePixelRatio;
+      const scale = graphState.zoom;
+      const minX = -w/2/scale - graphState.origin.x/scale - 10;
+      const maxX = w/2/scale - graphState.origin.x/scale + 10;
+      const step = (maxX - minX) / 200;
+      let prevX = minX;
+      let prevY = safeEval(compiled, prevX);
+      for (let x = minX + step; x <= maxX; x += step) {
+        const y = safeEval(compiled, x);
+        if (isFinite(prevY) && isFinite(y) && prevY * y <= 0) {
+          const root = refineRootBisection(compiled, prevX, x, 20);
+          if (isFinite(root)) xs.push(root);
+        }
+        prevX = x; prevY = y;
+      }
+      const y0 = safeEval(compiled, 0);
+      return { x: dedupeSorted(xs), y: y0 };
+    }
+
+    function refineRootBisection(rpn, a, b, iters=20) {
+      let fa = safeEval(rpn, a), fb = safeEval(rpn, b);
+      if (!isFinite(fa) || !isFinite(fb)) return NaN;
+      if (fa === 0) return a;
+      if (fb === 0) return b;
+      if (fa * fb > 0) return NaN;
+      for (let i=0;i<iters;i++) {
+        const m = (a+b)/2;
+        const fm = safeEval(rpn, m);
+        if (!isFinite(fm)) break;
+        if (Math.abs(fm) < 1e-6) return m;
+        if (fa * fm <= 0) { b = m; fb = fm; } else { a = m; fa = fm; }
+      }
+      return (a+b)/2;
+    }
+
+    function dedupeSorted(arr) {
+      arr.sort((a,b) => a-b);
+      const out = [];
+      for (const v of arr) if (out.length === 0 || Math.abs(out[out.length-1] - v) > 1e-3) out.push(v);
+      return out;
+    }
+
+    function trySymbolicSteps(expr, rpn) {
+      // Try to detect linear ax+b and quadratic ax^2+bx+c via sampling
+      const f = (x) => safeEval(rpn, x);
+      const f0 = f(0), f1 = f(1), f_1 = f(-1), f2 = f(2);
+      if ([f0,f1,f_1].every(Number.isFinite)) {
+        // Test linear: second difference ≈ 0
+        const d1 = f1 - f0; const d2 = f2 - f1;
+        if (Number.isFinite(f2) && Math.abs(d2 - d1) < 1e-6) {
+          const a = f1 - f0; // approx slope
+          const b = f0; // intercept
+          const steps = [
+            `<strong>Detected linear:</strong> f(x) ≈ ${a.toFixed(4)}x + ${b.toFixed(4)}`,
+            `Solve f(x)=0: ${a.toFixed(4)}x + ${b.toFixed(4)} = 0`,
+            `x = −b/a = ${( -b / a ).toFixed(6)}`
+          ];
+          return steps;
+        }
+      }
+      // Quadratic: second difference constant
+      if ([f0,f1,f2,f_1].every(Number.isFinite)) {
+        const s1 = f1 - f0; const s0 = f0 - f_1; const s2 = f2 - f1;
+        if (Math.abs(s2 - s1) < 1e-4 && Math.abs(s1 - s0) < 1e-4) {
+          // Fit coefficients via system on 0,1,2
+          const a = (f2 - 2*f1 + f0)/2; // from finite diff
+          const b = f1 - f0 - 3*a/2 + a; // rough
+          // Better: solve a,b,c from values
+          const A = f0; // at x=0, c = f0
+          const c = A;
+          const B = f1; // a + b + c = f1
+          const C = f2; // 4a + 2b + c = f2
+          const a2 = (C - 2*B + A)/2;
+          const b2 = B - a2 - c;
+          const steps = [
+            `<strong>Detected quadratic:</strong> f(x) ≈ ${a2.toFixed(4)}x² + ${b2.toFixed(4)}x + ${c.toFixed(4)}`,
+            `Discriminant Δ = b² − 4ac = ${(b2*b2 - 4*a2*c).toFixed(6)}`,
+            `Roots: x = [−b ± √Δ]/(2a)`
+          ];
+          return steps;
+        }
+      }
+      return null;
+    }
+
+    function plotCurrentExpression() {
+      const expr = exprInput.value.trim();
+      if (!expr) return;
+      const compiled = compile(expr);
+      graphState.expr = expr;
+      graphState.compiled = compiled;
+      graphState.intercepts = compiled ? findIntercepts(compiled) : { x:[], y:0 };
+      const symbolic = compiled ? trySymbolicSteps(expr, compiled) : null;
+      if (symbolic) {
+        graphState.stepsHtml = `<div><ol>${symbolic.map(s=>`<li>${s}</li>`).join('')}</ol></div>`;
+      } else if (compiled) {
+        // Newton iterations from x0=1 for 5 steps
+        let x = 1; const steps = [];
+        const df = (x) => { const h=1e-4; return (safeEval(compiled, x+h) - safeEval(compiled, x-h))/(2*h); };
+        for (let i=0;i<5;i++) {
+          const y = safeEval(compiled, x);
+          const d = df(x);
+          if (!isFinite(y) || !isFinite(d) || Math.abs(d) < 1e-6) break;
+          const nx = x - y/d;
+          steps.push(`Iter ${i+1}: x = ${x.toFixed(6)}, f(x) = ${y.toFixed(6)}, f'(x) ≈ ${d.toFixed(6)}, next ≈ ${nx.toFixed(6)}`);
+          x = nx;
+        }
+        graphState.stepsHtml = `<div><strong>Newton’s method steps:</strong><ul>${steps.map(s=>`<li>${s}</li>`).join('')}</ul></div>`;
+      } else {
+        graphState.stepsHtml = '<div>Parse error. Please check expression.</div>';
+      }
+      solveOverlay.innerHTML = graphState.stepsHtml;
+      solveOverlay.hidden = false;
+      drawGraph();
+    }
+
+    // Graph interactions
+    graphCanvas.addEventListener('mousedown', (e) => {
+      graphState.dragging = true;
+      graphState.dragStart = { x: e.clientX, y: e.clientY };
+      graphState.lastPan = { ...graphState.origin };
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!graphState.dragging) return;
+      const dx = e.clientX - graphState.dragStart.x;
+      const dy = e.clientY - graphState.dragStart.y;
+      graphState.origin.x = graphState.lastPan.x + dx;
+      graphState.origin.y = graphState.lastPan.y + dy;
+      drawGraph();
+    });
+    window.addEventListener('mouseup', () => graphState.dragging = false);
+
+    // Touch pan and pinch zoom
+    graphCanvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        const t = e.touches[0];
+        graphState.dragging = true;
+        graphState.dragStart = { x: t.clientX, y: t.clientY };
+        graphState.lastPan = { ...graphState.origin };
+      }
+      e.preventDefault();
+    }, { passive:false });
+    graphCanvas.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 1 && graphState.dragging) {
+        const t = e.touches[0];
+        const dx = t.clientX - graphState.dragStart.x;
+        const dy = t.clientY - graphState.dragStart.y;
+        graphState.origin.x = graphState.lastPan.x + dx;
+        graphState.origin.y = graphState.lastPan.y + dy;
+        drawGraph();
+      } else if (e.touches.length === 2) {
+        // pinch
+        const [a,b] = e.touches;
+        const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+        if (!graphState._pinchStart) {
+          graphState._pinchStart = dist;
+          graphState._zoomStart = graphState.zoom;
+        } else {
+          const factor = dist / graphState._pinchStart;
+          graphState.zoom = clamp(graphState._zoomStart * factor, 20, 400);
+          graphState.intercepts = graphState.compiled ? findIntercepts(graphState.compiled) : { x:[], y:0 };
+          drawGraph();
+        }
+      }
+      e.preventDefault();
+    }, { passive:false });
+    graphCanvas.addEventListener('touchend', (e) => {
+      if (e.touches.length === 0) {
+        graphState.dragging = false;
+        graphState._pinchStart = null;
+      }
+      e.preventDefault();
+    }, { passive:false });
+
+    graphCanvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = Math.sign(e.deltaY);
+      const factor = delta > 0 ? 0.9 : 1.1;
+      const mouse = { x: e.offsetX - graphCanvas.width/devicePixelRatio/2, y: e.offsetY - graphCanvas.height/devicePixelRatio/2 };
+      // Zoom towards mouse position
+      const before = { x: (mouse.x - graphState.origin.x)/graphState.zoom, y: (mouse.y - graphState.origin.y)/graphState.zoom };
+      graphState.zoom = clamp(graphState.zoom * factor, 20, 400);
+      const after = { x: (mouse.x - graphState.origin.x)/graphState.zoom, y: (mouse.y - graphState.origin.y)/graphState.zoom };
+      graphState.origin.x += (after.x - before.x) * graphState.zoom;
+      graphState.origin.y += (after.y - before.y) * graphState.zoom;
+      graphState.intercepts = graphState.compiled ? findIntercepts(graphState.compiled) : { x:[], y:0 };
+      drawGraph();
+    }, { passive:false });
+
+    plotBtn.addEventListener('click', plotCurrentExpression);
+    exprInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') plotCurrentExpression(); });
+    resetViewBtn.addEventListener('click', () => { graphState.zoom = 60; graphState.origin = {x:0,y:0}; drawGraph(); });
+
+    document.addEventListener('keydown', (e) => {
+      const tab = getActiveTabId();
+      if (tab === 'tab-graph') {
+        if (e.key === '+') { graphState.zoom = clamp(graphState.zoom * 1.1, 20, 400); drawGraph(); }
+        if (e.key === '-') { graphState.zoom = clamp(graphState.zoom * 0.9, 20, 400); drawGraph(); }
+        if (e.key === '0') { graphState.zoom = 60; graphState.origin = {x:0,y:0}; drawGraph(); }
+        if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
+          const pan = 40;
+          if (e.key === 'ArrowLeft') graphState.origin.x += pan;
+          if (e.key === 'ArrowRight') graphState.origin.x -= pan;
+          if (e.key === 'ArrowUp') graphState.origin.y += pan;
+          if (e.key === 'ArrowDown') graphState.origin.y -= pan;
+          drawGraph();
+        }
+      }
+    });
+
+    /*
+      Teach-Back Module
+      - Concept selection, prompt generator, hint progression, self-assessment
+    */
+    const teachConceptSelect = document.getElementById('teachConceptSelect');
+    const teachPromptEl = document.getElementById('teachPrompt');
+    const newPromptBtn = document.getElementById('newPromptBtn');
+    const teachResponse = document.getElementById('teachResponse');
+    const saveTeachBtn = document.getElementById('saveTeachBtn');
+    const teachSaveMsg = document.getElementById('teachSaveMsg');
+    const hintList = document.getElementById('hintList');
+    const revealNextHintBtn = document.getElementById('revealNextHintBtn');
+    const showFullAnswerBtn = document.getElementById('showFullAnswerBtn');
+    const selfMsg = document.getElementById('selfMsg');
+
+    const concepts = [
+      { key: 'pemdas', name: 'Order of Operations (PEMDAS)', hints: [
+        'Which operation should be handled first in 3 + 2 × 4?',
+        'Try rewriting 3 + 2 × 4 as 3 + (2 × 4). What next?',
+        'Multiplication comes before addition, so 3 + (8) = 11.'
+      ], example: 'PEMDAS organizes what to do first: parentheses, exponents, multiplication/division, then addition/subtraction.' },
+      { key: 'linear', name: 'Solving Linear Equations', hints: [
+        'Balance both sides by undoing operations in reverse order.',
+        'Isolate x: move constants to one side, x-terms to the other.',
+        'Divide by the coefficient of x to solve.'
+      ], example: 'For 7x − 9 = 3x + 15, subtract 3x both sides → 4x − 9 = 15, add 9 → 4x = 24, divide by 4 → x = 6.' },
+      { key: 'trig', name: 'Right Triangle Trigonometry', hints: [
+        'SOH-CAH-TOA helps map sides to functions.',
+        'Sine: opposite/hypotenuse. Cosine: adjacent/hypotenuse. Tangent: opposite/adjacent.',
+        'Relate an angle to a ratio of sides to solve.'
+      ], example: 'sin(30°)=0.5 because the opposite side is half of the hypotenuse in a 30-60-90 triangle.' },
+      { key: 'quadratic', name: 'Quadratics & Roots', hints: [
+        'Put equation in ax²+bx+c=0 form.',
+        'Compute discriminant Δ = b²−4ac to know number of roots.',
+        'Use formula x = [−b ± √Δ]/(2a).' 
+      ], example: 'x² − 5x + 6 = 0 has a=1,b=−5,c=6 → Δ=1 → roots: 2 and 3.' },
+      { key: 'geometry', name: 'Area and Perimeter', hints: [
+        'Perimeter adds all side lengths; area covers space within.',
+        'Match formula to shape: rectangle, circle, triangle.',
+        'Check units: area is in square units.'
+      ], example: 'Rectangle 8×3: perimeter 22, area 24.' },
+    ];
+
+    function populateTeachConcepts() {
+      teachConceptSelect.innerHTML = concepts.map(c => `<option value="${c.key}">${c.name}</option>`).join('');
+    }
+
+    function randomPromptForConcept(c) {
+      const prompts = [
+        'Explain this concept as if to a 12-year-old with one real-life example.',
+        'Teach it to a colleague returning to math after years; focus on confidence.',
+        'Write a step-by-step method in under 6 sentences.',
+        'Describe a common mistake and how to avoid it.',
+      ];
+      return prompts[Math.floor(Math.random()*prompts.length)];
+    }
+
+    function updateTeachPrompt() {
+      const key = teachConceptSelect.value;
+      const concept = concepts.find(c => c.key === key) || concepts[0];
+      const prompt = randomPromptForConcept(concept);
+      teachPromptEl.textContent = `${concept.name}: ${prompt}`;
+      // Reset hints
+      hintList.innerHTML = '';
+      concept.hints.slice(0,1).forEach(h => addHint(h));
+      revealNextHintBtn.onclick = () => {
+        const shown = hintList.querySelectorAll('li').length;
+        if (shown < concept.hints.length) addHint(concept.hints[shown]);
+      };
+      showFullAnswerBtn.onclick = () => {
+        addHint('Full example: ' + concept.example);
+      };
+    }
+
+    function addHint(text) {
+      const li = document.createElement('li');
+      li.textContent = text;
+      hintList.appendChild(li);
+    }
+
+    saveTeachBtn.addEventListener('click', () => {
+      const key = teachConceptSelect.value;
+      const concept = concepts.find(c => c.key === key) || concepts[0];
+      const entry = { concept: concept.name, prompt: teachPromptEl.textContent, text: teachResponse.value, timestamp: Date.now() };
+      state.teachBack.reflections.push(entry);
+      saveState();
+      teachSaveMsg.textContent = 'Saved! Reflecting builds mastery.';
+      setTimeout(() => teachSaveMsg.textContent = '', 2000);
+      teachResponse.value = '';
+    });
+
+    document.querySelectorAll('.selfBtn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const score = Number(btn.dataset.score);
+        const last = state.teachBack.reflections[state.teachBack.reflections.length-1];
+        if (last) {
+          last.selfScore = score;
+          saveState();
+          selfMsg.textContent = score === 3 ? 'Excellent clarity.' : score === 2 ? 'Good! Try one more example.' : 'Great effort. Revisit hints and try again.';
+          setTimeout(() => selfMsg.textContent = '', 2500);
+        }
+      });
+    });
+
+    newPromptBtn.addEventListener('click', updateTeachPrompt);
+
+    /*
+      Tabs & Settings
+    */
+    const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
+    function switchTab(id) {
+      tabButtons.forEach(btn => btn.setAttribute('aria-current', btn.dataset.tab === id ? 'page' : 'false'));
+      document.getElementById('tab-progress').hidden = id !== 'progress';
+      document.getElementById('tab-flash').hidden = id !== 'flash';
+      document.getElementById('tab-geometry').hidden = id !== 'geometry';
+      document.getElementById('tab-graph').hidden = id !== 'graph';
+      document.getElementById('tab-teach').hidden = id !== 'teach';
+      document.getElementById('tab-settings').hidden = id !== 'settings';
+      if (id === 'flash') scheduleCards();
+      if (id === 'geometry') drawGeometry();
+      if (id === 'graph') drawGraph();
+    }
+
+    function getActiveTabId() {
+      if (!document.getElementById('tab-progress').hidden) return 'tab-progress';
+      if (!document.getElementById('tab-flash').hidden) return 'tab-flash';
+      if (!document.getElementById('tab-geometry').hidden) return 'tab-geometry';
+      if (!document.getElementById('tab-graph').hidden) return 'tab-graph';
+      if (!document.getElementById('tab-teach').hidden) return 'tab-teach';
+      return 'tab-settings';
+    }
+
+    tabButtons.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+
+    // Settings
+    const contrastToggleBtn = document.getElementById('contrastToggleBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importInput = document.getElementById('importInput');
+    const resetAllBtn = document.getElementById('resetAllBtn');
+
+    function applyContrastSetting() {
+      document.documentElement.classList.toggle('high-contrast', !!state.settings.highContrast);
+    }
+
+    contrastToggleBtn.addEventListener('click', () => {
+      state.settings.highContrast = !state.settings.highContrast;
+      saveState();
+      applyContrastSetting();
+    });
+
+    exportBtn.addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'math_journey_export.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    importBtn.addEventListener('click', () => importInput.click());
+    importInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        state = { ...createInitialState(), ...data };
+        saveState();
+        applyContrastSetting();
+        updateProgressUI();
+        renderCurrentLesson();
+        scheduleCards();
+        drawGeometry();
+        drawGraph();
+        alert('Import successful');
+      } catch (err) {
+        alert('Import failed: ' + err.message);
+      } finally {
+        importInput.value = '';
+      }
+    });
+
+    resetAllBtn.addEventListener('click', () => {
+      if (!confirm('Reset all progress and settings? This cannot be undone.')) return;
+      state = createInitialState();
+      saveState();
+      applyContrastSetting();
+      updateProgressUI();
+      renderCurrentLesson();
+      scheduleCards();
+      drawGeometry();
+      drawGraph();
+    });
+
+    // Accessibility: help shortcut
+    document.addEventListener('keydown', (e) => {
+      if (e.shiftKey && e.key === '?') {
+        alert('Shortcuts:\nFlashcards: Enter flip, 1-4 rate\nGraphing: Drag to pan, wheel / + / - to zoom, 0 reset');
+      }
+    });
+
+    // Initialize
+    function init() {
+      applyContrastSetting();
+      updateProgressUI();
+      renderCurrentLesson();
+      scheduleCards();
+      resizeGeom();
+      resizeGraph();
+      populateTeachConcepts();
+      updateTeachPrompt();
+    }
+
+    window.addEventListener('load', init);
+
+  </script>
+</body>
+</html>
