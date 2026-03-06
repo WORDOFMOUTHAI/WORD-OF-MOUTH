@@ -3,2159 +3,2115 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>30-Day Math Journey — Confidence + Rigor</title>
+  <title>ProseCheck — AI Writing &amp; Fact-Checker for Freelancers</title>
   <style>
-    /*
-      30-Day Interactive Mathematics Learning Platform
-      - Single-file, no external dependencies
-      - Responsive, accessible, high-contrast mode supported
-      - Card-based UI with smooth CSS transforms
-    */
+    /* =============================================
+       PROSECHECK — Rose Gold · Black · Maroon
+       AI Writing &amp; Fact-Checking for Freelancers
+    ============================================= */
 
     :root {
-      --bg-gradient-start: #0e1f2f;
-      --bg-gradient-end: #1b3a57;
-      --surface: #0f2538;
-      --surface-2: #0b1b2a;
-      --text: #e8f1f8;
-      --muted: #a7c1d6;
-      --accent: #7dd3fc; /* cyan */
-      --accent-2: #60a5fa; /* blue */
-      --good: #34d399; /* green */
-      --warn: #f59e0b; /* amber */
-      --future: #6b7280; /* gray */
-      --danger: #ef4444; /* red */
-      --shadow: rgba(0,0,0,0.3);
-      --radius: 14px;
-      --radius-sm: 10px;
-      --radius-lg: 18px;
-      --focus: #fde68a;
+      --bg:          #0A0A0A;
+      --surface:     #141414;
+      --card:        #1C1C1C;
+      --card-hover:  #222222;
+      --border:      #2E2E2E;
+
+      --rose:        #C5937A;
+      --rose-light:  #E8C4B0;
+      --rose-dim:    #9A6A55;
+      --rose-glow:   rgba(197,147,122,0.18);
+
+      --maroon:      #8B0020;
+      --maroon-mid:  #A8002A;
+      --maroon-light:#C4003A;
+      --maroon-glow: rgba(139,0,32,0.25);
+
+      --text:        #F0EAE5;
+      --muted:       #9A8C84;
+      --muted-light: #C4B8B0;
+
+      --good:        #4CAF82;
+      --warn:        #D4A853;
+      --danger:      #E05252;
+      --info:        #6BAED4;
+
+      --radius:      16px;
+      --radius-sm:   10px;
+      --radius-xs:   6px;
+      --shadow:      0 4px 32px rgba(0,0,0,0.55);
+      --shadow-sm:   0 2px 12px rgba(0,0,0,0.35);
+      --transition:  0.25s cubic-bezier(.4,0,.2,1);
     }
 
-    /* High contrast mode overrides */
-    .high-contrast {
-      --bg-gradient-start: #000000;
-      --bg-gradient-end: #000000;
-      --surface: #000000;
-      --surface-2: #111111;
-      --text: #ffffff;
-      --muted: #ffffff;
-      --accent: #00ffff;
-      --accent-2: #00a2ff;
-      --good: #00ff87;
-      --warn: #ffd000;
-      --future: #bdbdbd;
-      --danger: #ff3b3b;
-      --focus: #ffff00;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
       color: var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      line-height: 1.65;
+      min-height: 100vh;
     }
 
-    .app {
-      display: flex;
-      flex-direction: column;
-      min-height: 100%;
-    }
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 7px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--maroon); border-radius: 99px; }
 
-    header {
+    /* ── HEADER / NAV ── */
+    .nav {
       position: sticky;
       top: 0;
-      z-index: 50;
-      background: linear-gradient(135deg, rgba(14,31,47,0.95), rgba(27,58,87,0.95));
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .header-inner {
-      display: grid;
-      grid-template-columns: 1fr auto auto;
-      gap: 16px;
-      align-items: center;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-
-    .brand {
+      z-index: 100;
       display: flex;
       align-items: center;
-      gap: 12px;
-    }
-
-    .logo {
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent-2));
-      box-shadow: 0 6px 18px var(--shadow) inset, 0 8px 20px rgba(96,165,250,0.35);
-      transform: rotate(6deg);
-    }
-
-    .title {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.2;
-    }
-
-    .title h1 {
-      font-size: 20px;
-      margin: 0;
-      letter-spacing: 0.4px;
-    }
-    .title small { color: var(--muted); }
-
-    .progress-wrap {
-      min-width: 280px;
-      display: grid;
-      gap: 8px;
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.08);
-      overflow: hidden;
-      position: relative;
-    }
-
-    .progress-fill {
-      position: absolute;
-      inset: 0 auto 0 0;
-      width: 0%;
-      background: linear-gradient(90deg, var(--good), var(--accent));
-      border-radius: 999px;
-      transition: width 600ms ease;
-    }
-
-    .progress-stats {
-      display: flex;
       justify-content: space-between;
-      font-size: 12px;
-      color: var(--muted);
+      padding: 0 32px;
+      height: 64px;
+      background: rgba(10,10,10,0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
     }
 
-    .actions {
+    .nav-logo {
       display: flex;
-      gap: 8px;
       align-items: center;
+      gap: 10px;
+      text-decoration: none;
     }
 
-    button, .btn {
-      background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,0.12);
-      padding: 10px 14px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: transform 120ms ease, background 200ms;
-    }
-    button:hover, .btn:hover { transform: translateY(-1px); }
-    button:active, .btn:active { transform: translateY(0px) scale(0.98); }
-    button:focus-visible, .btn:focus-visible {
-      outline: 2px dashed var(--focus);
-      outline-offset: 2px;
-    }
-
-    .nav {
-      display: grid;
-      grid-auto-flow: column;
-      gap: 12px;
-    }
-
-    .nav button[aria-current="page"] {
-      background: linear-gradient(90deg, rgba(125,211,252,0.2), rgba(96,165,250,0.15));
-      border-color: rgba(96,165,250,0.5);
-    }
-
-    main {
-      max-width: 1200px;
-      margin: 18px auto 80px auto;
-      padding: 0 16px;
-      width: 100%;
-      display: grid;
-      gap: 20px;
-    }
-
-    /* Card layout */
-    .card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: var(--radius);
-      box-shadow: 0 12px 24px var(--shadow);
-      padding: 16px;
-    }
-
-    .grid {
-      display: grid;
-      gap: 16px;
-    }
-
-    @media (min-width: 900px) {
-      .grid-2 { grid-template-columns: 1fr 1fr; }
-      .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-    }
-
-    .stage-chip {
-      display: inline-flex;
+    .nav-logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--maroon), var(--rose));
+      border-radius: 9px;
+      display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.1);
-      font-size: 12px;
-      color: var(--muted);
+      justify-content: center;
+      font-size: 18px;
     }
 
-    .lesson-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 12px;
+    .nav-logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--rose-light), var(--rose));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.3px;
     }
 
-    .lesson-card {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: var(--radius);
-      padding: 12px;
-      display: grid;
-      gap: 8px;
-      transition: transform 140ms ease, background 200ms ease;
-      cursor: pointer;
-    }
-    .lesson-card:hover { transform: translateY(-2px); }
-    .lesson-card.completed {
-      background: rgba(16,185,129,0.15);
-      border-color: rgba(16,185,129,0.4);
-    }
-    .lesson-card.current {
-      background: rgba(245,158,11,0.15);
-      border-color: rgba(245,158,11,0.4);
-    }
-
-    .lesson-title { font-weight: 600; }
-
-    .pill {
-      display: inline-block;
-      padding: 2px 8px;
+    .nav-badge {
       font-size: 11px;
-      border-radius: 999px;
-      color: #fff;
+      font-weight: 600;
+      color: var(--maroon-light);
+      background: var(--maroon-glow);
+      border: 1px solid rgba(139,0,32,0.4);
+      padding: 2px 8px;
+      border-radius: 99px;
+      letter-spacing: 0.5px;
     }
-    .pill.green { background: var(--good); }
-    .pill.yellow { background: var(--warn); color: #111; }
-    .pill.gray { background: var(--future); }
 
-    .celebration {
-      position: fixed;
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      text-align: center;
+      padding: 80px 24px 60px;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
       inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% -10%, rgba(139,0,32,0.3) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 80% 100%, rgba(197,147,122,0.12) 0%, transparent 60%);
       pointer-events: none;
     }
 
-    /* Flashcards */
-    .flashcard-wrap {
-      perspective: 1200px;
-      width: 100%;
-      max-width: 720px;
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--rose);
+      background: var(--rose-glow);
+      border: 1px solid rgba(197,147,122,0.25);
+      padding: 5px 14px;
+      border-radius: 99px;
+      margin-bottom: 24px;
+    }
+
+    .hero-eyebrow span { font-size: 15px; }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--rose-light) 0%, var(--rose) 50%, var(--maroon-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      max-width: 580px;
+      margin: 0 auto 36px;
+      color: var(--muted-light);
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .hero-stats {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .hero-stat {
+      text-align: center;
+    }
+
+    .hero-stat-num {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--rose);
+    }
+
+    .hero-stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .hero-divider {
+      width: 1px;
+      height: 36px;
+      background: var(--border);
+    }
+
+    /* ── MAIN CONTAINER ── */
+    .main {
+      max-width: 960px;
       margin: 0 auto;
+      padding: 0 20px 80px;
     }
-    .flashcard {
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .section-label-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--maroon);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 20px;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .card:hover {
+      border-color: rgba(197,147,122,0.2);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-size: 13.5px;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    /* ── UPLOAD ZONE ── */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 52px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition);
       position: relative;
-      width: 100%;
-      min-height: 240px;
-      border-radius: var(--radius-lg);
-      background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.06));
-      border: 1px solid rgba(255,255,255,0.12);
-      transform-style: preserve-3d;
-      transition: transform 500ms ease;
-      box-shadow: 0 16px 28px var(--shadow);
+      background: var(--surface);
     }
-    .flashcard.flipped { transform: rotateY(180deg); }
-    .face {
+
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: var(--rose);
+      background: var(--rose-glow);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(197,147,122,0.12);
+    }
+
+    .upload-zone input[type="file"] {
       position: absolute;
       inset: 0;
-      padding: 18px;
-      backface-visibility: hidden;
-      display: grid;
-      align-content: center;
-      gap: 12px;
-    }
-    .face.back { transform: rotateY(180deg); }
-
-    .flash-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-top: 12px;
-    }
-
-    .chip {
-      border-radius: 999px;
-      padding: 8px 12px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      font-size: 13px;
-    }
-
-    /* Geometry Canvas */
-    .canvas-wrap {
-      position: relative;
+      opacity: 0;
+      cursor: pointer;
       width: 100%;
-      height: 360px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-    canvas { display: block; width: 100%; height: 100%; }
-
-    .canvas-toolbar {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      z-index: 2;
+      height: 100%;
     }
 
-    /* Graphing */
-    .graph-wrap { height: 420px; }
-    .overlay-steps {
-      position: absolute;
-      right: 8px;
-      top: 8px;
-      background: rgba(0,0,0,0.55);
-      border: 1px solid rgba(255,255,255,0.15);
-      padding: 10px;
-      border-radius: var(--radius);
-      width: min(360px, 90vw);
-      max-height: 80%;
-      overflow: auto;
-      font-size: 13px;
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: block;
+      filter: drop-shadow(0 0 12px rgba(197,147,122,0.4));
     }
 
-    /* Teach-Back */
-    .teach-grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 120px;
-      border-radius: var(--radius);
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
+    .upload-title {
+      font-size: 18px;
+      font-weight: 700;
       color: var(--text);
-      padding: 10px;
-      font-size: 14px;
-      resize: vertical;
+      margin-bottom: 8px;
     }
 
-    .footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(135deg, rgba(14,31,47,0.95), rgba(27,58,87,0.95));
-      border-top: 1px solid rgba(255,255,255,0.06);
-      padding: 8px 16px;
+    .upload-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .upload-types {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .upload-type-badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--rose);
+      background: var(--rose-glow);
+      border: 1px solid rgba(197,147,122,0.25);
+      padding: 3px 10px;
+      border-radius: 99px;
+      letter-spacing: 0.5px;
+    }
+
+    /* file selected state */
+    .upload-zone.has-file {
+      border-color: var(--good);
+      background: rgba(76,175,130,0.05);
+    }
+
+    .file-info {
+      display: none;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      background: var(--surface);
+      border: 1px solid rgba(76,175,130,0.3);
+      border-radius: var(--radius-sm);
+      margin-top: 16px;
+    }
+
+    .file-info.visible { display: flex; }
+
+    .file-info-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .file-info-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .file-info-size {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .file-info-remove {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px;
+      border-radius: 4px;
+      transition: color var(--transition);
+      flex-shrink: 0;
+    }
+
+    .file-info-remove:hover { color: var(--danger); }
+
+    /* ── OPTIONAL TEXT INPUT ── */
+    .text-input-area {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      padding: 14px 16px;
+      resize: vertical;
+      min-height: 120px;
+      transition: border-color var(--transition);
+      outline: none;
+    }
+
+    .text-input-area:focus {
+      border-color: var(--rose);
+      box-shadow: 0 0 0 3px var(--rose-glow);
+    }
+
+    .text-input-area::placeholder { color: var(--muted); }
+
+    .or-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin: 20px 0;
+    }
+
+    .or-divider::before,
+    .or-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── ANALYSIS OPTIONS ── */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .option-chip {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition);
+      user-select: none;
+    }
+
+    .option-chip:hover {
+      border-color: rgba(197,147,122,0.35);
+      background: var(--rose-glow);
+    }
+
+    .option-chip.selected {
+      border-color: var(--rose);
+      background: var(--rose-glow);
+      box-shadow: 0 0 0 3px rgba(197,147,122,0.1);
+    }
+
+    .option-chip input[type="checkbox"] { display: none; }
+
+    .option-chip-icon {
+      font-size: 22px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .option-chip-label {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .option-chip-sub {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+
+    .option-chip-check {
+      margin-left: auto;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+      margin-top: 2px;
+    }
+
+    .option-chip.selected .option-chip-check {
+      background: var(--rose);
+      border-color: var(--rose);
+    }
+
+    .option-chip.selected .option-chip-check::after {
+      content: '✓';
+      font-size: 11px;
+      color: white;
+      font-weight: 700;
+    }
+
+    /* ── TONE SELECTOR ── */
+    .tone-row {
       display: flex;
       gap: 10px;
-      justify-content: center;
       flex-wrap: wrap;
-      z-index: 30;
     }
 
-    .kbd {
-      display: inline-block;
-      border: 1px solid rgba(255,255,255,0.35);
-      border-bottom-width: 3px;
-      padding: 2px 6px;
-      border-radius: 6px;
+    .tone-btn {
+      padding: 8px 18px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--muted-light);
+      transition: all var(--transition);
+    }
+
+    .tone-btn:hover {
+      border-color: var(--rose-dim);
+      color: var(--rose-light);
+    }
+
+    .tone-btn.active {
+      border-color: var(--maroon-mid);
+      background: linear-gradient(135deg, var(--maroon), var(--maroon-mid));
+      color: white;
+      box-shadow: 0 3px 14px rgba(139,0,32,0.4);
+    }
+
+    /* ── SUBMIT BUTTON ── */
+    .submit-btn {
+      width: 100%;
+      padding: 18px 32px;
+      background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-mid) 50%, var(--rose-dim) 100%);
+      border: none;
+      border-radius: var(--radius);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(139,0,32,0.5);
+    }
+
+    .submit-btn:active { transform: translateY(0); }
+
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .submit-btn-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    /* ── PROGRESS / LOADING ── */
+    #processingSection {
+      display: none;
+    }
+
+    .progress-card {
+      background: var(--card);
+      border: 1px solid rgba(197,147,122,0.2);
+      border-radius: var(--radius);
+      padding: 36px 28px;
+      text-align: center;
+    }
+
+    .progress-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .progress-sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    .progress-bar-wrap {
+      background: var(--surface);
+      border-radius: 99px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--maroon), var(--rose));
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    .progress-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 400px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    .progress-step {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 14px;
+      color: var(--muted);
+      transition: color var(--transition);
+    }
+
+    .progress-step.active { color: var(--text); }
+    .progress-step.done { color: var(--good); }
+
+    .step-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+    }
+
+    .progress-step.active .step-dot {
+      border-color: var(--rose);
+      background: var(--rose-glow);
+    }
+
+    .progress-step.active .step-dot::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--rose);
+      border-radius: 50%;
+      animation: pulse 1s ease infinite;
+    }
+
+    .progress-step.done .step-dot {
+      border-color: var(--good);
+      background: rgba(76,175,130,0.15);
+    }
+
+    .progress-step.done .step-dot::after {
+      content: '✓';
+      font-size: 11px;
+      color: var(--good);
+      font-weight: 700;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.6; }
+    }
+
+    /* ── RESULTS ── */
+    #resultsSection {
+      display: none;
+    }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .results-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .results-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .results-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-secondary {
+      padding: 9px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--muted-light);
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--rose-dim);
+      color: var(--rose-light);
+    }
+
+    .btn-primary-sm {
+      padding: 9px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: linear-gradient(135deg, var(--maroon), var(--rose-dim));
+      color: white;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary-sm:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(139,0,32,0.4);
+    }
+
+    /* ── SCORE OVERVIEW ── */
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .score-tile {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px 16px;
+      text-align: center;
+      transition: all var(--transition);
+    }
+
+    .score-tile:hover {
+      border-color: rgba(197,147,122,0.3);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .score-value {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .score-value.good { color: var(--good); }
+    .score-value.warn { color: var(--warn); }
+    .score-value.danger { color: var(--danger); }
+    .score-value.rose { color: var(--rose); }
+
+    .score-label {
       font-size: 12px;
-      background: rgba(255,255,255,0.08);
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.3px;
     }
 
+    .score-bar {
+      height: 4px;
+      background: var(--surface);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.8s cubic-bezier(.4,0,.2,1);
+    }
+
+    .score-bar-fill.good { background: var(--good); }
+    .score-bar-fill.warn { background: var(--warn); }
+    .score-bar-fill.danger { background: var(--danger); }
+    .score-bar-fill.rose { background: linear-gradient(90deg, var(--maroon), var(--rose)); }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      background: none;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .tab-btn:hover { color: var(--text); background: var(--card); }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--maroon), var(--maroon-mid));
+      color: white;
+      box-shadow: 0 2px 10px rgba(139,0,32,0.35);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── FACT-CHECK PANEL ── */
+    .fact-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .fact-item {
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      border-left: 3px solid transparent;
+      transition: all var(--transition);
+    }
+
+    .fact-item:hover { background: var(--card-hover); }
+
+    .fact-item.verified { border-left-color: var(--good); }
+    .fact-item.questionable { border-left-color: var(--warn); }
+    .fact-item.incorrect { border-left-color: var(--danger); }
+
+    .fact-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .fact-claim {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .fact-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 99px;
+      flex-shrink: 0;
+      letter-spacing: 0.3px;
+    }
+
+    .fact-badge.verified {
+      background: rgba(76,175,130,0.15);
+      color: var(--good);
+      border: 1px solid rgba(76,175,130,0.3);
+    }
+
+    .fact-badge.questionable {
+      background: rgba(212,168,83,0.15);
+      color: var(--warn);
+      border: 1px solid rgba(212,168,83,0.3);
+    }
+
+    .fact-badge.incorrect {
+      background: rgba(224,82,82,0.15);
+      color: var(--danger);
+      border: 1px solid rgba(224,82,82,0.3);
+    }
+
+    .fact-explanation {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .fact-source {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11.5px;
+      color: var(--info);
+      margin-top: 8px;
+      text-decoration: none;
+    }
+
+    /* ── VERSIONS PANEL ── */
+    .versions-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .version-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      transition: all var(--transition);
+    }
+
+    .version-card:hover {
+      border-color: rgba(197,147,122,0.3);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .version-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+    }
+
+    .version-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .version-icon {
+      font-size: 20px;
+    }
+
+    .version-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .version-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .version-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .version-btn {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      background: var(--card-hover);
+      color: var(--muted-light);
+      transition: all var(--transition);
+    }
+
+    .version-btn:hover {
+      border-color: var(--rose-dim);
+      color: var(--rose-light);
+    }
+
+    .version-btn.copy-btn.copied {
+      border-color: var(--good);
+      color: var(--good);
+    }
+
+    .version-body {
+      padding: 18px;
+      font-size: 14px;
+      color: var(--muted-light);
+      line-height: 1.75;
+      max-height: 200px;
+      overflow-y: auto;
+      cursor: pointer;
+    }
+
+    .version-body.expanded { max-height: none; }
+
+    .version-expand-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background: none;
+      border: none;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      letter-spacing: 0.3px;
+    }
+
+    .version-expand-btn:hover {
+      background: var(--card);
+      color: var(--rose);
+    }
+
+    /* ── IMPROVEMENTS PANEL ── */
+    .improvements-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .improvement-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      transition: all var(--transition);
+    }
+
+    .improvement-item:hover { background: var(--card-hover); }
+
+    .improvement-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .improvement-priority {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-top: 4px;
+      display: inline-block;
+    }
+
+    .improvement-priority.high {
+      background: rgba(224,82,82,0.12);
+      color: var(--danger);
+    }
+
+    .improvement-priority.medium {
+      background: rgba(212,168,83,0.12);
+      color: var(--warn);
+    }
+
+    .improvement-priority.low {
+      background: rgba(76,175,130,0.12);
+      color: var(--good);
+    }
+
+    .improvement-text {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .improvement-detail {
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* ── STRUCTURE PANEL ── */
+    .structure-overview {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 580px) {
+      .structure-overview { grid-template-columns: 1fr; }
+    }
+
+    .structure-metric {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+
+    .structure-metric-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .structure-metric-val {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--rose-light);
+    }
+
+    .structure-metric-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .outline-tree {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+
+    .outline-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13.5px;
+      color: var(--muted-light);
+      padding: 5px 8px;
+      border-radius: var(--radius-xs);
+      transition: background var(--transition);
+    }
+
+    .outline-item:hover { background: var(--card); }
+
+    .outline-item.h1 {
+      font-weight: 700;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .outline-item.h2 { padding-left: 22px; }
+    .outline-item.h3 { padding-left: 42px; font-size: 13px; color: var(--muted); }
+
+    .outline-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .outline-item.h1 .outline-dot { background: var(--rose); width: 8px; height: 8px; }
+    .outline-item.h2 .outline-dot { background: var(--maroon-light); }
+    .outline-item.h3 .outline-dot { background: var(--muted); }
+
+    /* ── TOAST ── */
+    .toast-wrap {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 999;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 18px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.3s ease;
+      pointer-events: all;
+    }
+
+    .toast.success { border-color: rgba(76,175,130,0.4); }
+    .toast.info { border-color: rgba(107,174,212,0.4); }
+
+    @keyframes slideIn {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(120%); opacity: 0; }
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 32px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .footer span {
+      color: var(--rose-dim);
+      font-weight: 600;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .nav { padding: 0 16px; }
+      .hero { padding: 52px 16px 40px; }
+      .main { padding: 0 14px 60px; }
+      .card { padding: 20px 16px; }
+      .hero-stats { gap: 20px; }
+      .results-header { flex-direction: column; align-items: flex-start; }
+    }
+
+    /* ── SHIMMER SKELETON ── */
+    @keyframes shimmer {
+      0% { background-position: -600px 0; }
+      100% { background-position: 600px 0; }
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface) 25%, var(--card) 50%, var(--surface) 75%);
+      background-size: 600px 100%;
+      animation: shimmer 1.4s ease infinite;
+      border-radius: var(--radius-xs);
+    }
   </style>
 </head>
 <body>
-  <div class="app" id="app">
-    <header role="banner">
-      <div class="header-inner">
-        <div class="brand" aria-label="App title and identity">
-          <div class="logo" aria-hidden="true"></div>
-          <div class="title">
-            <h1>30-Day Math Journey</h1>
-            <small>Rigor meets confidence. Welcome back to math.</small>
-          </div>
-        </div>
-        <div class="progress-wrap" aria-live="polite">
-          <div class="progress-bar" aria-label="Overall progress">
-            <div class="progress-fill" id="progressFill"></div>
-          </div>
-          <div class="progress-stats"><span id="progressText">0/30 lessons (0%)</span><span id="milestoneText">Let’s begin</span></div>
-        </div>
-        <div class="actions">
-          <nav class="nav" aria-label="Primary">
-            <button class="tab-btn" data-tab="progress" aria-current="page">Progress</button>
-            <button class="tab-btn" data-tab="flash">Flashcards</button>
-            <button class="tab-btn" data-tab="geometry">Geometry</button>
-            <button class="tab-btn" data-tab="graph">Graphing</button>
-            <button class="tab-btn" data-tab="teach">Teach-Back</button>
-            <button class="tab-btn" data-tab="settings">Settings</button>
-          </nav>
-        </div>
-      </div>
-    </header>
 
-    <main>
-      <!-- PROGRESS TAB -->
-      <section class="card" id="tab-progress" role="region" aria-labelledby="tab-progress-title">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-          <h2 id="tab-progress-title" style="margin:0">Your Journey</h2>
-          <div class="stage-chip">Color key:
-            <span class="pill green">Completed</span>
-            <span class="pill yellow">Current</span>
-            <span class="pill gray">Future</span>
-          </div>
-        </div>
-        <div class="grid grid-2">
-          <div>
-            <h3 style="margin-top:8px">Stages</h3>
-            <div id="stagesContainer" class="grid"></div>
-          </div>
-          <div>
-            <h3 style="margin-top:8px">Lessons</h3>
-            <div class="lesson-grid" id="lessonGrid"></div>
-          </div>
-        </div>
-        <div class="card" style="margin-top:12px">
-          <h3 style="margin-top:0">Current Lesson</h3>
-          <div id="currentLessonDetail">Select a lesson to view objectives and an activity.</div>
-        </div>
-      </section>
+<!-- ════════ NAV ════════ -->
+<nav class="nav">
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-icon">✍️</div>
+    <span class="nav-logo-text">ProseCheck</span>
+  </a>
+  <div class="nav-badge">AI-POWERED</div>
+</nav>
 
-      <!-- FLASHCARDS TAB -->
-      <section class="card" id="tab-flash" role="region" aria-labelledby="tab-flash-title" hidden>
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-          <h2 id="tab-flash-title" style="margin:0">Spaced-Repetition Flashcards</h2>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <button id="shuffleDeckBtn" title="Shuffle deck (S)">Shuffle</button>
-            <button id="addCardBtn" title="Add your own card">Add Card</button>
-            <span class="chip" id="dueCount">Due: 0</span>
-            <span class="chip" id="cardProgress">0/0</span>
-          </div>
-        </div>
-        <div class="flashcard-wrap">
-          <div class="flashcard" id="flashcard" tabindex="0" aria-label="Flashcard. Press Enter to flip." role="button">
-            <div class="face front">
-              <div id="flashFront">Front</div>
-            </div>
-            <div class="face back">
-              <div id="flashBack">Back</div>
-            </div>
-          </div>
-        </div>
-        <div class="flash-controls" aria-label="Answer quality">
-          <button id="flipBtn">Flip (Enter)</button>
-          <button id="againBtn" style="background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.5);">Again (1)</button>
-          <button id="hardBtn" style="background:rgba(245,158,11,0.2);border-color:rgba(245,158,11,0.5);">Hard (2)</button>
-          <button id="goodBtn" style="background:rgba(16,185,129,0.2);border-color:rgba(16,185,129,0.5);">Good (3)</button>
-          <button id="easyBtn" style="background:rgba(96,165,250,0.2);border-color:rgba(96,165,250,0.5);">Easy (4)</button>
-        </div>
-        <div style="margin-top:8px;color:var(--muted);text-align:center;">
-          Keyboard: <span class="kbd">Enter</span> flip, <span class="kbd">1-4</span> rate, <span class="kbd">S</span> shuffle
-        </div>
-      </section>
+<!-- ════════ HERO ════════ -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    <span>✦</span> For Freelancers &amp; Solopreneurs
+  </div>
+  <h1>Write Smarter.<br/><em>Fact-Check Faster.</em></h1>
+  <p class="hero-sub">
+    Upload any book, article, or document and get instant fact-checking,
+    polished rewrites, and quality feedback — all in one place.
+  </p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-num">6</div>
+      <div class="hero-stat-label">Analysis Modes</div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">3</div>
+      <div class="hero-stat-label">Rewritten Versions</div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">PDF &amp; DOC</div>
+      <div class="hero-stat-label">File Support</div>
+    </div>
+  </div>
+</section>
 
-      <!-- GEOMETRY TAB -->
-      <section class="card" id="tab-geometry" role="region" aria-labelledby="tab-geometry-title" hidden>
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-          <h2 id="tab-geometry-title" style="margin:0">Geometry Lab (2D + Isometric)</h2>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <select id="shapeSelect" title="Choose shape">
-              <option value="triangle">Triangle (2D)</option>
-              <option value="rectangle">Rectangle (2D)</option>
-              <option value="circle">Circle (2D)</option>
-              <option value="cube">Cube (Isometric)</option>
-            </select>
-            <button id="resetGeometryBtn">Reset</button>
-          </div>
-        </div>
-        <div class="canvas-wrap" id="geomWrap">
-          <div class="canvas-toolbar">
-            <span class="chip">Drag vertices/shape • Scroll to zoom</span>
-          </div>
-          <canvas id="geomCanvas" aria-label="Geometry canvas" role="img"></canvas>
-        </div>
-        <div class="grid grid-2">
-          <div class="card">
-            <h3 style="margin-top:0">Measurements</h3>
-            <div id="geomProps">Move points to see live measurements.</div>
-          </div>
-          <div class="card">
-            <h3 style="margin-top:0">Concept Notes</h3>
-            <ul id="geomNotes" style="margin-top:0"></ul>
-          </div>
-        </div>
-      </section>
+<!-- ════════ MAIN ════════ -->
+<main class="main">
 
-      <!-- GRAPHING TAB -->
-      <section class="card" id="tab-graph" role="region" aria-labelledby="tab-graph-title" hidden>
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-          <h2 id="tab-graph-title" style="margin:0">Function Graphing</h2>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <input id="exprInput" placeholder="Enter f(x), e.g., sin(x) + 0.5x" style="min-width:280px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:var(--text)" />
-            <button id="plotBtn">Plot (Enter)</button>
-            <button id="resetViewBtn">Reset View</button>
-          </div>
-        </div>
-        <div class="canvas-wrap graph-wrap" id="graphWrap">
-          <canvas id="graphCanvas" aria-label="Graph canvas" role="img"></canvas>
-          <div class="overlay-steps" id="solveOverlay" hidden></div>
-        </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;color:var(--muted);">
-          <span>Pan: drag • Zoom: wheel or <span class="kbd">+</span>/<span class="kbd">-</span> • Reset: <span class="kbd">0</span></span>
-          <span>| Steps: linear/quadratic show formulas; otherwise Newton iterations</span>
-        </div>
-      </section>
-
-      <!-- TEACH-BACK TAB -->
-      <section class="card" id="tab-teach" role="region" aria-labelledby="tab-teach-title" hidden>
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-          <h2 id="tab-teach-title" style="margin:0">Teach-Back: Explain to Learn</h2>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <select id="teachConceptSelect"></select>
-            <button id="newPromptBtn">New Prompt</button>
-          </div>
-        </div>
-        <div class="teach-grid">
-          <div class="card">
-            <div id="teachPrompt">Pick a concept and generate a teach-back prompt.</div>
-          </div>
-          <div class="card">
-            <label for="teachResponse"><strong>Your explanation</strong></label>
-            <textarea id="teachResponse" placeholder="Explain as if to a curious friend. Use examples."></textarea>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-              <button id="saveTeachBtn">Save Reflection</button>
-              <span id="teachSaveMsg" style="color:var(--muted)"></span>
-            </div>
-          </div>
-          <div class="card">
-            <h3 style="margin-top:0">Progressive Hints</h3>
-            <ol id="hintList" style="margin-top:0"></ol>
-            <button id="revealNextHintBtn">Reveal next hint</button>
-            <button id="showFullAnswerBtn">Show full example answer</button>
-          </div>
-          <div class="card">
-            <h3 style="margin-top:0">Self-Assessment</h3>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-              <button class="selfBtn" data-score="3" style="background:rgba(16,185,129,0.2);border-color:rgba(16,185,129,0.5)">Nailed it</button>
-              <button class="selfBtn" data-score="2" style="background:rgba(245,158,11,0.2);border-color:rgba(245,158,11,0.5)">Almost</button>
-              <button class="selfBtn" data-score="1" style="background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.5)">Need practice</button>
-              <span id="selfMsg" style="color:var(--muted)"></span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SETTINGS TAB -->
-      <section class="card" id="tab-settings" role="region" aria-labelledby="tab-settings-title" hidden>
-        <h2 id="tab-settings-title" style="margin-top:0">Settings & Help</h2>
-        <div class="grid grid-2">
-          <div class="card">
-            <h3 style="margin-top:0">Accessibility</h3>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-              <button id="contrastToggleBtn">Toggle High Contrast</button>
-              <span class="chip">Keyboard tips live in the footer</span>
-            </div>
-          </div>
-          <div class="card">
-            <h3 style="margin-top:0">Data</h3>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-              <button id="exportBtn">Export Progress</button>
-              <input type="file" id="importInput" accept="application/json" style="display:none" />
-              <button id="importBtn">Import</button>
-              <button id="resetAllBtn" style="background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.5)">Reset All</button>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <h3 style="margin-top:0">About</h3>
-          <p>This single-file application was designed for adults returning to mathematics. It blends structure and warmth: rigorous visuals and step-by-step reasoning with encouragement and reflection.</p>
-          <ul>
-            <li>Four stages guiding 30 days of learning</li>
-            <li>Spaced repetition to reinforce concepts that need attention</li>
-            <li>Canvas-based geometry and graphing to engage visual intuition</li>
-            <li>Teach-back prompts and self-assessment to consolidate understanding</li>
-          </ul>
-        </div>
-      </section>
-    </main>
-
-    <div class="footer" role="contentinfo">
-      <span>Flashcards: <span class="kbd">Enter</span> flip, <span class="kbd">1-4</span> rate</span>
-      <span>Graphing: <span class="kbd">Drag</span> pan, <span class="kbd">Wheel / + / -</span> zoom, <span class="kbd">0</span> reset</span>
-      <span>Global: <span class="kbd">Tab</span> navigate, <span class="kbd">Shift+?</span> help</span>
+  <!-- ══ STEP 1: UPLOAD ══ -->
+  <div id="inputSection">
+    <div class="section-label">
+      <div class="section-label-num">1</div>
+      Upload Your Document
     </div>
 
-    <!-- Celebration Canvas -->
-    <canvas class="celebration" id="confettiCanvas" aria-hidden="true"></canvas>
+    <div class="card">
+      <div class="card-title">Add Your Content</div>
+      <div class="card-desc">Upload a file or paste your text directly below. We support books, articles, reports, and more.</div>
+
+      <!-- Drag & Drop Zone -->
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.rtf,.odt" />
+        <span class="upload-icon">📄</span>
+        <div class="upload-title">Drop your file here</div>
+        <div class="upload-sub">or click anywhere to browse your computer</div>
+        <div class="upload-types">
+          <span class="upload-type-badge">PDF</span>
+          <span class="upload-type-badge">DOCX</span>
+          <span class="upload-type-badge">DOC</span>
+          <span class="upload-type-badge">TXT</span>
+          <span class="upload-type-badge">RTF</span>
+        </div>
+      </div>
+
+      <!-- File Info -->
+      <div class="file-info" id="fileInfo">
+        <span class="file-info-icon" id="fileInfoIcon">📄</span>
+        <div>
+          <div class="file-info-name" id="fileInfoName">—</div>
+          <div class="file-info-size" id="fileInfoSize">—</div>
+        </div>
+        <button class="file-info-remove" id="fileRemoveBtn" title="Remove file">✕</button>
+      </div>
+
+      <div class="or-divider">or paste text</div>
+
+      <textarea
+        class="text-input-area"
+        id="textInput"
+        placeholder="Paste your article, book chapter, or any written content here…"
+      ></textarea>
+    </div>
+
+    <!-- ══ STEP 2: OPTIONS ══ -->
+    <div class="section-label" style="margin-top:8px;">
+      <div class="section-label-num">2</div>
+      Choose What to Analyse
+    </div>
+
+    <div class="card">
+      <div class="card-title">Analysis Options</div>
+      <div class="card-desc">Pick one or more — we'll generate results for everything you select.</div>
+      <div class="options-grid" id="optionsGrid">
+
+        <label class="option-chip selected">
+          <input type="checkbox" value="factcheck" checked />
+          <span class="option-chip-icon">🔍</span>
+          <div>
+            <div class="option-chip-label">Fact-Check</div>
+            <div class="option-chip-sub">Verify claims &amp; flag errors</div>
+          </div>
+          <div class="option-chip-check"></div>
+        </label>
+
+        <label class="option-chip selected">
+          <input type="checkbox" value="rewrite" checked />
+          <span class="option-chip-icon">✨</span>
+          <div>
+            <div class="option-chip-label">Rewrite Versions</div>
+            <div class="option-chip-sub">3 polished variations</div>
+          </div>
+          <div class="option-chip-check"></div>
+        </label>
+
+        <label class="option-chip selected">
+          <input type="checkbox" value="improvements" checked />
+          <span class="option-chip-icon">🎯</span>
+          <div>
+            <div class="option-chip-label">Improvement Tips</div>
+            <div class="option-chip-sub">Clarity &amp; engagement fixes</div>
+          </div>
+          <div class="option-chip-check"></div>
+        </label>
+
+        <label class="option-chip">
+          <input type="checkbox" value="structure" />
+          <span class="option-chip-icon">🗂️</span>
+          <div>
+            <div class="option-chip-label">Structure Check</div>
+            <div class="option-chip-sub">Flow &amp; outline review</div>
+          </div>
+          <div class="option-chip-check"></div>
+        </label>
+
+        <label class="option-chip">
+          <input type="checkbox" value="seo" />
+          <span class="option-chip-icon">📈</span>
+          <div>
+            <div class="option-chip-label">SEO Analysis</div>
+            <div class="option-chip-sub">Keywords &amp; readability</div>
+          </div>
+          <div class="option-chip-check"></div>
+        </label>
+
+        <label class="option-chip">
+          <input type="checkbox" value="plagiarism" />
+          <span class="option-chip-icon">🛡️</span>
+          <div>
+            <div class="option-chip-label">Originality Check</div>
+            <div class="option-chip-sub">Detect duplicate content</div>
+          </div>
+          <div class="option-chip-check"></div>
+        </label>
+
+      </div>
+    </div>
+
+    <!-- ══ STEP 3: TONE ══ -->
+    <div class="section-label" style="margin-top:8px;">
+      <div class="section-label-num">3</div>
+      Output Tone
+    </div>
+
+    <div class="card">
+      <div class="card-title">Writing Style for Rewrites</div>
+      <div class="card-desc">How should the rewritten versions sound?</div>
+      <div class="tone-row" id="toneRow">
+        <button class="tone-btn active" data-tone="professional">💼 Professional</button>
+        <button class="tone-btn" data-tone="conversational">💬 Conversational</button>
+        <button class="tone-btn" data-tone="persuasive">🔥 Persuasive</button>
+        <button class="tone-btn" data-tone="academic">📚 Academic</button>
+        <button class="tone-btn" data-tone="creative">🎨 Creative</button>
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <button class="submit-btn" id="submitBtn">
+      <div class="submit-btn-inner">
+        <span>🚀</span>
+        <span>Analyse My Content</span>
+      </div>
+    </button>
   </div>
 
-  <script>
-    /*
-      Application State and Utilities
-      - localStorage for persistence
-      - Simple pub/sub to update UI
-      - Utility helpers: clamp, lerp, formatPercent, UUID
-    */
+  <!-- ════════ PROCESSING ════════ -->
+  <div id="processingSection">
+    <div class="progress-card">
+      <div class="progress-title">Analysing Your Content…</div>
+      <div class="progress-sub" id="progressMessage">Getting everything ready</div>
 
-    const APP_KEY = 'math_journey_v1';
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
 
-    /**
-     * Shape of persisted state. The schema is versioned via APP_KEY.
-     * state = {
-     *   progress: { completed: boolean[30] },
-     *   currentLessonIndex: number,
-     *   flashcards: { deck: Flashcard[], stats: Record<id, CardStats> },
-     *   settings: { highContrast: boolean },
-     *   teachBack: { reflections: Array<{concept:string, prompt:string, text:string, timestamp:number, selfScore?:number}> },
-     * }
-     */
+      <div class="progress-steps" id="progressSteps">
+        <div class="progress-step" data-step="0">
+          <div class="step-dot"></div>
+          <span>Reading and parsing your document</span>
+        </div>
+        <div class="progress-step" data-step="1">
+          <div class="step-dot"></div>
+          <span>Running fact-check on all claims</span>
+        </div>
+        <div class="progress-step" data-step="2">
+          <div class="step-dot"></div>
+          <span>Generating rewritten versions</span>
+        </div>
+        <div class="progress-step" data-step="3">
+          <div class="step-dot"></div>
+          <span>Scoring writing quality</span>
+        </div>
+        <div class="progress-step" data-step="4">
+          <div class="step-dot"></div>
+          <span>Compiling your full report</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    function createInitialState() {
-      return {
-        progress: {
-          completed: Array.from({ length: 30 }, () => false),
-        },
-        currentLessonIndex: 0,
-        flashcards: {
-          deck: getDefaultDeck(),
-          stats: {},
-        },
-        settings: {
-          highContrast: false,
-        },
-        teachBack: {
-          reflections: [],
-        }
-      };
-    }
+  <!-- ════════ RESULTS ════════ -->
+  <div id="resultsSection">
 
-    // Utility helpers
-    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-    const lerp = (a, b, t) => a + (b - a) * t;
-    const formatPercent = (n) => `${Math.round(n * 100)}%`;
-    const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+    <div class="results-header">
+      <div>
+        <div class="results-title">Your Analysis Report</div>
+        <div class="results-subtitle" id="resultsMeta">Analysis complete — 5 issues found, 3 versions generated</div>
+      </div>
+      <div class="results-actions">
+        <button class="btn-secondary" id="newAnalysisBtn">↩ New Analysis</button>
+        <button class="btn-primary-sm" id="exportBtn">⬇ Export Report</button>
+      </div>
+    </div>
 
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(APP_KEY);
-        if (!raw) return createInitialState();
-        const parsed = JSON.parse(raw);
-        // Shallow schema migration safety
-        const initial = createInitialState();
-        return { ...initial, ...parsed, progress: { ...initial.progress, ...parsed.progress } };
-      } catch (e) {
-        console.warn('Failed to load state, using fresh', e);
-        return createInitialState();
+    <!-- Score Overview -->
+    <div class="score-grid" id="scoreGrid">
+      <div class="score-tile">
+        <div class="score-value rose" id="scoreOverall">84</div>
+        <div class="score-label">Overall Score</div>
+        <div class="score-bar"><div class="score-bar-fill rose" style="width:84%"></div></div>
+      </div>
+      <div class="score-tile">
+        <div class="score-value good" id="scoreAccuracy">91</div>
+        <div class="score-label">Fact Accuracy</div>
+        <div class="score-bar"><div class="score-bar-fill good" style="width:91%"></div></div>
+      </div>
+      <div class="score-tile">
+        <div class="score-value warn" id="scoreClarity">73</div>
+        <div class="score-label">Clarity</div>
+        <div class="score-bar"><div class="score-bar-fill warn" style="width:73%"></div></div>
+      </div>
+      <div class="score-tile">
+        <div class="score-value good" id="scoreReadability">88</div>
+        <div class="score-label">Readability</div>
+        <div class="score-bar"><div class="score-bar-fill good" style="width:88%"></div></div>
+      </div>
+      <div class="score-tile">
+        <div class="score-value warn" id="scoreEngagement">70</div>
+        <div class="score-label">Engagement</div>
+        <div class="score-bar"><div class="score-bar-fill warn" style="width:70%"></div></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" id="resultsTabs">
+      <button class="tab-btn active" data-tab="factcheck">🔍 Fact-Check</button>
+      <button class="tab-btn" data-tab="versions">✨ Versions</button>
+      <button class="tab-btn" data-tab="improvements">🎯 Improvements</button>
+      <button class="tab-btn" data-tab="structure">🗂️ Structure</button>
+    </div>
+
+    <!-- ── TAB: FACT CHECK ── -->
+    <div class="tab-panel active" id="tab-factcheck">
+      <div class="card">
+        <div class="card-title">Fact-Check Results</div>
+        <div class="card-desc">Every claim in your document has been reviewed. Click any item to see details.</div>
+        <div class="fact-list" id="factList">
+
+          <div class="fact-item verified">
+            <div class="fact-header">
+              <div class="fact-claim">"The global freelance market is valued at over $1.5 trillion annually."</div>
+              <span class="fact-badge verified">✓ Verified</span>
+            </div>
+            <div class="fact-explanation">This figure aligns with multiple industry reports including Statista and McKinsey Global Institute data for 2023–2024.</div>
+            <a class="fact-source" href="#">📎 Source confirmed</a>
+          </div>
+
+          <div class="fact-item verified">
+            <div class="fact-header">
+              <div class="fact-claim">"Remote work adoption increased by 159% between 2020 and 2024."</div>
+              <span class="fact-badge verified">✓ Verified</span>
+            </div>
+            <div class="fact-explanation">Supported by data from Stanford's Work from Home Research and Global Workplace Analytics reports.</div>
+            <a class="fact-source" href="#">📎 Source confirmed</a>
+          </div>
+
+          <div class="fact-item questionable">
+            <div class="fact-header">
+              <div class="fact-claim">"Over 80% of businesses plan to hire freelancers exclusively by 2026."</div>
+              <span class="fact-badge questionable">⚠ Needs Source</span>
+            </div>
+            <div class="fact-explanation">This claim appears unsubstantiated. Similar studies (Upwork, MBO Partners) report lower figures around 36–48%. Consider citing a specific source or adjusting the statistic.</div>
+          </div>
+
+          <div class="fact-item incorrect">
+            <div class="fact-header">
+              <div class="fact-claim">"LinkedIn was founded in 2004 by Reid Hoffman."</div>
+              <span class="fact-badge incorrect">✗ Incorrect</span>
+            </div>
+            <div class="fact-explanation">LinkedIn was actually founded in December 2002 and officially launched in May 2003. The year 2004 is incorrect and should be updated.</div>
+          </div>
+
+          <div class="fact-item verified">
+            <div class="fact-header">
+              <div class="fact-claim">"The average freelancer works with 3–5 clients simultaneously."</div>
+              <span class="fact-badge verified">✓ Verified</span>
+            </div>
+            <div class="fact-explanation">Consistent with Upwork's Freelance Forward report and Fiverr Business studies on freelancer workload patterns.</div>
+            <a class="fact-source" href="#">📎 Source confirmed</a>
+          </div>
+
+          <div class="fact-item questionable">
+            <div class="fact-header">
+              <div class="fact-claim">"Solopreneurs earn 40% more than traditional employees on average."</div>
+              <span class="fact-badge questionable">⚠ Needs Source</span>
+            </div>
+            <div class="fact-explanation">The 40% figure varies significantly by industry and skill level. Add geographic and field-specific context, or cite a specific study to support this claim.</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: VERSIONS ── -->
+    <div class="tab-panel" id="tab-versions">
+      <div class="versions-grid" id="versionsList">
+
+        <!-- Version 1 -->
+        <div class="version-card">
+          <div class="version-header">
+            <div class="version-title-row">
+              <span class="version-icon">💼</span>
+              <div>
+                <div class="version-name">Professional Version</div>
+                <div class="version-desc">Polished, authoritative tone — ideal for corporate clients</div>
+              </div>
+            </div>
+            <div class="version-actions">
+              <button class="version-btn copy-btn" data-version="1">Copy</button>
+              <button class="version-btn" onclick="downloadVersion(1)">⬇ Save</button>
+            </div>
+          </div>
+          <div class="version-body" id="version-body-1">
+            The modern freelance economy represents a paradigm shift in how organisations source and leverage talent.
+            With the global independent workforce now commanding a market valuation exceeding $1.5 trillion,
+            businesses that adapt their talent acquisition strategies to incorporate freelance professionals are
+            positioned to gain significant competitive advantage. This analysis examines the structural drivers
+            behind the accelerating adoption of remote and independent work arrangements, with particular
+            emphasis on the strategic implications for solopreneurs seeking to establish sustainable,
+            high-value client portfolios. The evidence suggests that those who invest in building a clearly
+            differentiated personal brand and specialist expertise will consistently outperform generalist
+            competitors in both earning potential and client retention rates.
+          </div>
+          <button class="version-expand-btn" onclick="toggleExpand('version-body-1', this)">Show more ▾</button>
+        </div>
+
+        <!-- Version 2 -->
+        <div class="version-card">
+          <div class="version-header">
+            <div class="version-title-row">
+              <span class="version-icon">💬</span>
+              <div>
+                <div class="version-name">Conversational Version</div>
+                <div class="version-desc">Warm and relatable — great for blogs and newsletters</div>
+              </div>
+            </div>
+            <div class="version-actions">
+              <button class="version-btn copy-btn" data-version="2">Copy</button>
+              <button class="version-btn" onclick="downloadVersion(2)">⬇ Save</button>
+            </div>
+          </div>
+          <div class="version-body" id="version-body-2">
+            Here's something most people don't realise: freelancing isn't just a side hustle anymore —
+            it's become a $1.5 trillion industry, and it's only getting bigger. If you're a solopreneur or
+            freelancer, that's genuinely exciting news. It means there are more opportunities than ever
+            to build the kind of career (and life) you actually want. But here's the thing — with more
+            freelancers entering the market every day, just being "good at your job" isn't enough.
+            You need a clear niche, a recognisable personal brand, and a smart approach to landing
+            clients who value your work. In this guide, we're going to break down exactly how to
+            do that — in plain English, with real examples you can actually use.
+          </div>
+          <button class="version-expand-btn" onclick="toggleExpand('version-body-2', this)">Show more ▾</button>
+        </div>
+
+        <!-- Version 3 -->
+        <div class="version-card">
+          <div class="version-header">
+            <div class="version-title-row">
+              <span class="version-icon">🔥</span>
+              <div>
+                <div class="version-name">Persuasive Version</div>
+                <div class="version-desc">High-impact, action-driven — perfect for sales pages</div>
+              </div>
+            </div>
+            <div class="version-actions">
+              <button class="version-btn copy-btn" data-version="3">Copy</button>
+              <button class="version-btn" onclick="downloadVersion(3)">⬇ Save</button>
+            </div>
+          </div>
+          <div class="version-body" id="version-body-3">
+            The freelance revolution is already here. And right now, you have two choices:
+            adapt and thrive, or stay stuck while others take the opportunities you're leaving on the table.
+            The numbers don't lie — a $1.5 trillion industry, 159% growth in remote work,
+            and businesses actively seeking the kind of specialised, flexible expertise
+            that only a skilled solopreneur can deliver. This isn't a trend. This is the new economy.
+            The solopreneurs winning in this space aren't the ones working harder —
+            they're the ones working smarter, positioning themselves as undeniable experts,
+            and building client relationships that generate consistent, recurring income.
+            You could be one of them. Here's exactly how to start.
+          </div>
+          <button class="version-expand-btn" onclick="toggleExpand('version-body-3', this)">Show more ▾</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── TAB: IMPROVEMENTS ── -->
+    <div class="tab-panel" id="tab-improvements">
+      <div class="card">
+        <div class="card-title">Writing Improvement Suggestions</div>
+        <div class="card-desc">Prioritised fixes to strengthen your content before publishing.</div>
+        <div class="improvements-list" id="improvementsList">
+
+          <div class="improvement-item">
+            <span class="improvement-icon">⚠️</span>
+            <div>
+              <div class="improvement-text">Fix the LinkedIn founding date (Paragraph 4)</div>
+              <span class="improvement-priority high">High Priority</span>
+              <div class="improvement-detail">The incorrect year (2004) could damage your credibility with readers who know the correct date. Update to 2002/2003 immediately.</div>
+            </div>
+          </div>
+
+          <div class="improvement-item">
+            <span class="improvement-icon">📎</span>
+            <div>
+              <div class="improvement-text">Add citations for two unsourced statistics</div>
+              <span class="improvement-priority high">High Priority</span>
+              <div class="improvement-detail">The "80% of businesses" and "40% higher earnings" claims need sources or should be reworded to avoid overstating the data.</div>
+            </div>
+          </div>
+
+          <div class="improvement-item">
+            <span class="improvement-icon">✂️</span>
+            <div>
+              <div class="improvement-text">Shorten your introduction — it's 23% too long</div>
+              <span class="improvement-priority medium">Medium Priority</span>
+              <div class="improvement-detail">Your intro takes 340 words to reach the main point. Aim for under 200. Readers decide in the first 8 seconds — hook them faster.</div>
+            </div>
+          </div>
+
+          <div class="improvement-item">
+            <span class="improvement-icon">💡</span>
+            <div>
+              <div class="improvement-text">Add subheadings every 300–400 words</div>
+              <span class="improvement-priority medium">Medium Priority</span>
+              <div class="improvement-detail">Section 2 runs for 680 words without a break. Subheadings improve skimmability and keep readers engaged, especially on mobile devices.</div>
+            </div>
+          </div>
+
+          <div class="improvement-item">
+            <span class="improvement-icon">🔄</span>
+            <div>
+              <div class="improvement-text">Vary your sentence length — it's too uniform</div>
+              <span class="improvement-priority low">Low Priority</span>
+              <div class="improvement-detail">78% of your sentences are between 18–24 words. A mix of short punchy sentences and longer explanatory ones creates better rhythm and keeps readers reading.</div>
+            </div>
+          </div>
+
+          <div class="improvement-item">
+            <span class="improvement-icon">🎯</span>
+            <div>
+              <div class="improvement-text">Strengthen your call-to-action in the conclusion</div>
+              <span class="improvement-priority low">Low Priority</span>
+              <div class="improvement-detail">Your conclusion ends with a vague suggestion. Replace with a specific, actionable next step so readers know exactly what to do after finishing.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: STRUCTURE ── -->
+    <div class="tab-panel" id="tab-structure">
+      <div class="card">
+        <div class="card-title">Document Structure &amp; Flow</div>
+        <div class="card-desc">An overview of how your content is organised and how well it flows.</div>
+
+        <div class="structure-overview">
+          <div class="structure-metric">
+            <div class="structure-metric-label">Word Count</div>
+            <div class="structure-metric-val">4,283</div>
+            <div class="structure-metric-note">Ideal for a long-form article or short eBook chapter</div>
+          </div>
+          <div class="structure-metric">
+            <div class="structure-metric-label">Reading Time</div>
+            <div class="structure-metric-val">~17 min</div>
+            <div class="structure-metric-note">Based on 250 words per minute average</div>
+          </div>
+          <div class="structure-metric">
+            <div class="structure-metric-label">Sections Found</div>
+            <div class="structure-metric-val">6 sections</div>
+            <div class="structure-metric-note">3 main headings, 8 subheadings detected</div>
+          </div>
+          <div class="structure-metric">
+            <div class="structure-metric-label">Flesch Score</div>
+            <div class="structure-metric-val">68 / 100</div>
+            <div class="structure-metric-note">Standard — suitable for adult general audience</div>
+          </div>
+        </div>
+
+        <div class="card-title" style="margin-bottom:12px;">Content Outline</div>
+        <div class="outline-tree" id="outlineTree">
+          <div class="outline-item h1"><div class="outline-dot"></div> Introduction: The Freelance Revolution</div>
+          <div class="outline-item h2"><div class="outline-dot"></div> Why the Market Is Growing</div>
+          <div class="outline-item h3"><div class="outline-dot"></div> Key statistics and data</div>
+          <div class="outline-item h3"><div class="outline-dot"></div> Remote work trends</div>
+          <div class="outline-item h1"><div class="outline-dot"></div> Building Your Personal Brand</div>
+          <div class="outline-item h2"><div class="outline-dot"></div> Choosing Your Niche</div>
+          <div class="outline-item h3"><div class="outline-dot"></div> Skill inventory exercise</div>
+          <div class="outline-item h2"><div class="outline-dot"></div> Positioning Yourself as an Expert</div>
+          <div class="outline-item h3"><div class="outline-dot"></div> Portfolio tips</div>
+          <div class="outline-item h3"><div class="outline-dot"></div> Social proof strategies</div>
+          <div class="outline-item h1"><div class="outline-dot"></div> Finding and Keeping Clients</div>
+          <div class="outline-item h2"><div class="outline-dot"></div> Outreach Methods That Work</div>
+          <div class="outline-item h2"><div class="outline-dot"></div> Pricing Your Services</div>
+          <div class="outline-item h1"><div class="outline-dot"></div> Scaling Without Burning Out</div>
+          <div class="outline-item h2"><div class="outline-dot"></div> Systems and automation</div>
+          <div class="outline-item h2"><div class="outline-dot"></div> When to say no</div>
+          <div class="outline-item h1"><div class="outline-dot"></div> Conclusion &amp; Next Steps</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /resultsSection -->
+
+</main>
+
+<!-- ════════ FOOTER ════════ -->
+<footer class="footer">
+  Built for <span>freelancers &amp; solopreneurs</span> who write seriously.
+  &nbsp;·&nbsp; ProseCheck AI &nbsp;·&nbsp; Powered by advanced language models.
+</footer>
+
+<!-- ════════ TOAST CONTAINER ════════ -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ════════ SCRIPT ════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ── Elements ──
+  const fileInput       = document.getElementById('fileInput');
+  const uploadZone      = document.getElementById('uploadZone');
+  const fileInfo        = document.getElementById('fileInfo');
+  const fileInfoName    = document.getElementById('fileInfoName');
+  const fileInfoSize    = document.getElementById('fileInfoSize');
+  const fileInfoIcon    = document.getElementById('fileInfoIcon');
+  const fileRemoveBtn   = document.getElementById('fileRemoveBtn');
+  const textInput       = document.getElementById('textInput');
+  const optionsGrid     = document.getElementById('optionsGrid');
+  const toneRow         = document.getElementById('toneRow');
+  const submitBtn       = document.getElementById('submitBtn');
+  const inputSection    = document.getElementById('inputSection');
+  const processingSection = document.getElementById('processingSection');
+  const resultsSection  = document.getElementById('resultsSection');
+  const progressFill    = document.getElementById('progressFill');
+  const progressMessage = document.getElementById('progressMessage');
+  const progressSteps   = document.querySelectorAll('.progress-step');
+  const newAnalysisBtn  = document.getElementById('newAnalysisBtn');
+  const exportBtn       = document.getElementById('exportBtn');
+
+  let selectedFile = null;
+  let activeTone   = 'professional';
+
+  // ── File Upload ──
+  const EXT_ICONS = {
+    pdf: '📕', doc: '📘', docx: '📘', txt: '📄', rtf: '📝', odt: '📄'
+  };
+
+  function formatBytes(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  function setFile(file) {
+    if (!file) return;
+    selectedFile = file;
+    const ext = file.name.split('.').pop().toLowerCase();
+    fileInfoName.textContent = file.name;
+    fileInfoSize.textContent = formatBytes(file.size) + ' · ' + ext.toUpperCase();
+    fileInfoIcon.textContent = EXT_ICONS[ext] || '📄';
+    fileInfo.classList.add('visible');
+    uploadZone.classList.add('has-file');
+    uploadZone.querySelector('.upload-icon').textContent = '✅';
+    uploadZone.querySelector('.upload-title').textContent = 'File ready!';
+  }
+
+  function clearFile() {
+    selectedFile = null;
+    fileInput.value = '';
+    fileInfo.classList.remove('visible');
+    uploadZone.classList.remove('has-file');
+    uploadZone.querySelector('.upload-icon').textContent = '📄';
+    uploadZone.querySelector('.upload-title').textContent = 'Drop your file here';
+  }
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) setFile(fileInput.files[0]);
+  });
+
+  fileRemoveBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    clearFile();
+  });
+
+  // Drag & Drop
+  uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('dragover');
+  });
+
+  uploadZone.addEventListener('dragleave', () => {
+    uploadZone.classList.remove('dragover');
+  });
+
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      const allowed = ['pdf','doc','docx','txt','rtf','odt'];
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (allowed.includes(ext)) {
+        setFile(file);
+      } else {
+        showToast('⚠️ File type not supported. Try PDF, DOC, DOCX, or TXT.', 'info');
       }
     }
+  });
 
-    function saveState() {
-      localStorage.setItem(APP_KEY, JSON.stringify(state));
-      updateProgressUI();
+  // ── Option Chips ──
+  optionsGrid.querySelectorAll('.option-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      chip.classList.toggle('selected');
+      const cb = chip.querySelector('input[type="checkbox"]');
+      cb.checked = !cb.checked;
+    });
+  });
+
+  // ── Tone Buttons ──
+  toneRow.querySelectorAll('.tone-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      toneRow.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeTone = btn.dataset.tone;
+    });
+  });
+
+  // ── Tabs ──
+  document.getElementById('resultsTabs').querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ── Submit / Processing ──
+  submitBtn.addEventListener('click', () => {
+    const hasText = textInput.value.trim().length > 10;
+    const hasFile = !!selectedFile;
+    if (!hasText && !hasFile) {
+      showToast('📎 Please upload a file or paste some text first.', 'info');
+      return;
     }
+    startProcessing();
+  });
 
-    let state = loadState();
+  function startProcessing() {
+    inputSection.style.display = 'none';
+    processingSection.style.display = 'block';
+    resultsSection.style.display = 'none';
 
-    // Pub/sub minimal
-    const listeners = new Set();
-    function subscribe(listener) { listeners.add(listener); }
-    function notify() { listeners.forEach((l) => l(state)); }
-
-    /*
-      Lesson and Stage Definitions (30 lessons, 4 stages)
-    */
-    const stages = [
-      { id: 1, title: 'Stage 1: Foundation Reconstruction', range: [1, 10], color: '#7dd3fc' },
-      { id: 2, title: 'Stage 2: Intermediate Integration', range: [11, 18], color: '#60a5fa' },
-      { id: 3, title: 'Stage 3: Classical Mathematical Thinking', range: [19, 25], color: '#34d399' },
-      { id: 4, title: 'Stage 4: Sacred Geometry Synthesis', range: [26, 30], color: '#f59e0b' },
+    const messages = [
+      'Reading and parsing your document…',
+      'Running fact-check on all claims…',
+      'Generating rewritten versions…',
+      'Scoring writing quality…',
+      'Compiling your full report…'
     ];
 
-    // Example lessons content (objectives and a quick activity)
-    const lessons = (() => {
-      const L = [];
-      const push = (day, title, objective, activity) => L.push({ day, title, objective, activity });
-      // Stage 1 (1-10)
-      push(1, 'PEMDAS Warm-up', 'Rebuild order of operations intuition', 'Evaluate: 3 + 6 × 2^2 − 4');
-      push(2, 'Variables & Expressions', 'Translate words to symbols and back', 'Simplify: 2a + 3a − a');
-      push(3, 'Linear Expressions', 'Distribute, combine, and factor basics', 'Solve: 5(x − 2) = 3x + 6');
-      push(4, 'Solving Linear Equations I', 'Balance operations on both sides', 'Solve: 7x − 9 = 3x + 15');
-      push(5, 'Solving Linear Equations II', 'Work multi-step equations', 'Solve: (x/3) + 4 = 9');
-      push(6, 'Basic Geometry', 'Angles, triangles, and perimeter', 'Find perimeter of triangle with sides 3, 4, 5');
-      push(7, 'Area & Units', 'Compute area accurately with units', 'Area of rectangle 8 by 3');
-      push(8, 'Proportions & Ratios', 'Scale quantities sensibly', 'A map uses 1 cm : 5 km. 7 cm means?');
-      push(9, 'Graphs of Lines', 'Slope as rate of change', 'Find slope through (2,3) and (5,11)');
-      push(10, 'Review & Confidence', 'Integrate week 1 learnings', 'Reflect: what felt easier this time?');
-      // Stage 2 (11-18)
-      push(11, 'Right Triangle Trig', 'Sine, cosine, tangent basics', 'Find sin(30°), cos(60°)');
-      push(12, 'Angles & Trig Applications', 'Heights, shadows, slopes', 'A ladder 10 ft at 60°: height reached?');
-      push(13, 'Advanced Geometry', 'Similarity and congruence', 'Are two triangles with sides 3:4:5 and 6:8:10 similar?');
-      push(14, 'Coordinate Geometry', 'Distance and midpoint', 'Distance between (−2,5) and (4,−1)');
-      push(15, 'Transformations', 'Translate, rotate, reflect', 'Reflect (3,−1) over x-axis');
-      push(16, 'Quadratic Basics', 'Parabolas and factoring', 'Find vertex of y = x^2 − 4x + 1');
-      push(17, 'Quadratic Solving', 'Quadratic formula and roots', 'Solve: x^2 − 5x + 6 = 0');
-      push(18, 'Week 2 Review', 'Connect trigonometry and algebra', 'Explain one real use of trig');
-      // Stage 3 (19-25)
-      push(19, 'Euclidean Geometry', 'Axioms and constructions', 'Sum of angles in triangle?');
-      push(20, 'Golden Ratio', 'Phi in art and nature', 'Compute (1 + sqrt(5))/2');
-      push(21, 'Fibonacci Patterns', 'Sequences and growth', 'Find F(10) given F(0)=0, F(1)=1');
-      push(22, 'Conic Sections I', 'Parabola properties', 'Focus-directrix insight: what defines a parabola?');
-      push(23, 'Conic Sections II', 'Ellipse and hyperbola', 'Sum of distances to foci in ellipse equals?');
-      push(24, 'Classical Proofs', 'Logic clarity and structure', 'Prove: sum of two even numbers is even');
-      push(25, 'Week 3 Synthesis', 'Big-picture patterns', 'Where do you see math in your work?');
-      // Stage 4 (26-30)
-      push(26, 'Sacred Geometry I', 'Basic constructions and symbolism', 'Draw a seed of life pattern');
-      push(27, 'Sacred Geometry II', 'Proportions and harmony', 'Find ratio in pentagon star');
-      push(28, 'Geometric Proofs', 'Rigor with diagrams', 'Explain why base angles of isosceles equal');
-      push(29, 'Patterns & Cosmology', 'Ancient insights as patterns', 'Identify symmetry in nature photo');
-      push(30, 'Capstone Day', 'Showcase your understanding', 'Teach a mini-lesson to someone');
-      return L;
-    })();
+    const stepDurations = [900, 1200, 1500, 800, 700];
+    let current = 0;
+    let elapsed = 0;
+    const total = stepDurations.reduce((a, b) => a + b, 0);
 
-    // Progress UI rendering and logic
-    const progressFillEl = document.getElementById('progressFill');
-    const progressTextEl = document.getElementById('progressText');
-    const milestoneTextEl = document.getElementById('milestoneText');
-    const stagesContainerEl = document.getElementById('stagesContainer');
-    const lessonGridEl = document.getElementById('lessonGrid');
-    const currentLessonDetailEl = document.getElementById('currentLessonDetail');
-
-    function updateProgressUI() {
-      const completedCount = state.progress.completed.filter(Boolean).length;
-      const pct = completedCount / lessons.length;
-      progressFillEl.style.width = formatPercent(pct);
-      progressTextEl.textContent = `${completedCount}/${lessons.length} lessons (${Math.round(pct*100)}%)`;
-      const ms = milestoneMessage(pct);
-      milestoneTextEl.textContent = ms;
-      renderStages();
-      renderLessons();
-    }
-
-    function milestoneMessage(pct) {
-      if (pct >= 1) return 'Incredible! You finished. 🎉';
-      if (pct >= 0.75) return '75% milestone—momentum is yours!';
-      if (pct >= 0.5) return 'Halfway there—keep going!';
-      if (pct >= 0.25) return 'Great start—25% complete!';
-      return 'Let’s begin';
-    }
-
-    function renderStages() {
-      stagesContainerEl.innerHTML = '';
-      stages.forEach(st => {
-        const [start, end] = st.range;
-        const total = end - start + 1;
-        const done = state.progress.completed.slice(start-1, end).filter(Boolean).length;
-        const pct = Math.round((done/total) * 100);
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div style="width:14px;height:14px;border-radius:3px;background:${st.color}"></div>
-              <strong>${st.title}</strong>
-            </div>
-            <span class="chip">${pct}% complete</span>
-          </div>
-          <div class="progress-bar" style="margin-top:8px">
-            <div class="progress-fill" style="background:${st.color};width:${pct}%"></div>
-          </div>
-        `;
-        stagesContainerEl.appendChild(div);
-      });
-    }
-
-    function renderLessons() {
-      lessonGridEl.innerHTML = '';
-      const currentIdx = getCurrentLessonIndex();
-      lessons.forEach((lesson, i) => {
-        const completed = !!state.progress.completed[i];
-        const card = document.createElement('div');
-        card.className = 'lesson-card' + (completed ? ' completed' : (i === currentIdx ? ' current' : ''));
-        const stageId = getStageIdForDay(lesson.day);
-        const statusPill = completed ? '<span class="pill green">Done</span>' : (i === currentIdx ? '<span class="pill yellow">Now</span>' : '<span class="pill gray">Next</span>');
-        card.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-            <div>
-              <div class="lesson-title">Day ${lesson.day}: ${lesson.title}</div>
-              <div style="color:var(--muted);font-size:12px;">Stage ${stageId}</div>
-            </div>
-            ${statusPill}
-          </div>
-        `;
-        card.addEventListener('click', () => selectLesson(i));
-        lessonGridEl.appendChild(card);
-      });
-    }
-
-    function getStageIdForDay(day) {
-      for (const st of stages) {
-        if (day >= st.range[0] && day <= st.range[1]) return st.id;
-      }
-      return 1;
-    }
-
-    function getCurrentLessonIndex() {
-      const firstIncomplete = state.progress.completed.findIndex(c => !c);
-      return firstIncomplete === -1 ? lessons.length - 1 : firstIncomplete;
-    }
-
-    function selectLesson(index) {
-      state.currentLessonIndex = index;
-      saveState();
-      renderCurrentLesson();
-      // if newly selected lesson is next not completed, mark as current visually
-      updateProgressUI();
-    }
-
-    function renderCurrentLesson() {
-      const i = state.currentLessonIndex ?? getCurrentLessonIndex();
-      const L = lessons[i];
-      currentLessonDetailEl.innerHTML = `
-        <div style="display:grid;gap:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
-            <div>
-              <strong>Day ${L.day}: ${L.title}</strong>
-              <div style="color:var(--muted);font-size:13px">Stage ${getStageIdForDay(L.day)}</div>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-              <button id="markCompleteBtn">Mark Complete</button>
-              <button id="jumpToFlashBtn">Practice Flashcards</button>
-              <button id="openGraphWithSampleBtn">Graph Example</button>
-            </div>
-          </div>
-          <div><em>Objective:</em> ${L.objective}</div>
-          <div><em>Quick Activity:</em> ${L.activity}</div>
-          <div style="color:var(--muted);font-size:13px">Tip: After completing, celebrate progress and revisit any tricky flashcards.</div>
-        </div>
-      `;
-      document.getElementById('markCompleteBtn').addEventListener('click', () => {
-        if (!state.progress.completed[i]) {
-          state.progress.completed[i] = true;
-          saveState();
-          celebrateIfMilestone();
-        }
-      });
-      document.getElementById('jumpToFlashBtn').addEventListener('click', () => switchTab('flash'));
-      document.getElementById('openGraphWithSampleBtn').addEventListener('click', () => {
-        switchTab('graph');
-        // Pre-fill an expression based on the lesson theme
-        const sample = suggestExpressionForLesson(L.day);
-        exprInput.value = sample;
-        plotCurrentExpression();
-      });
-    }
-
-    function suggestExpressionForLesson(day) {
-      if (day <= 10) return '2x + 3';
-      if (day <= 18) return 'sin(x) + cos(2x)';
-      if (day <= 25) return 'x^2 - 4x + 1';
-      return 'sqrt(x) * sin(x)';
-    }
-
-    function celebrateIfMilestone() {
-      const count = state.progress.completed.filter(Boolean).length;
-      const milestones = [1, 5, 10, 15, 20, 25, 30];
-      if (milestones.includes(count)) {
-        launchConfetti();
-      }
-    }
-
-    /*
-      Confetti celebration (lightweight, no dependency)
-    */
-    const confettiCanvas = document.getElementById('confettiCanvas');
-    const cctx = confettiCanvas.getContext('2d');
-    let confettiParticles = [];
-    let confettiRunning = false;
-
-    function resizeConfetti() {
-      confettiCanvas.width = window.innerWidth;
-      confettiCanvas.height = window.innerHeight;
-    }
-
-    window.addEventListener('resize', resizeConfetti);
-    resizeConfetti();
-
-    function launchConfetti() {
-      const colors = ['#7dd3fc','#60a5fa','#34d399','#f59e0b','#ef4444'];
-      for (let i = 0; i < 180; i++) {
-        confettiParticles.push({
-          x: Math.random() * confettiCanvas.width,
-          y: -20 - Math.random()*200,
-          vx: (Math.random()-0.5) * 2,
-          vy: 2 + Math.random() * 3,
-          size: 4 + Math.random()*4,
-          color: colors[Math.floor(Math.random()*colors.length)],
-          tilt: Math.random()*Math.PI,
-          life: 200 + Math.random()*200
-        });
-      }
-      if (!confettiRunning) {
-        confettiRunning = true;
-        requestAnimationFrame(confettiLoop);
-      }
-    }
-
-    function confettiLoop() {
-      cctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
-      confettiParticles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.tilt += 0.1;
-        p.life -= 1;
-        cctx.save();
-        cctx.translate(p.x, p.y);
-        cctx.rotate(p.tilt);
-        cctx.fillStyle = p.color;
-        cctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
-        cctx.restore();
-      });
-      confettiParticles = confettiParticles.filter(p => p.life > 0 && p.y < confettiCanvas.height + 20);
-      if (confettiParticles.length > 0) requestAnimationFrame(confettiLoop);
-      else confettiRunning = false;
-    }
-
-    /*
-      Flashcard Engine with Spaced Repetition (SM-2 inspired simplified)
-      - Card: { id, front, back, tags }
-      - Stats: { ease: number, intervalDays: number, reps: number, due: number, lapse: number }
-      - Algorithm:
-        When rating:
-          again(1): ease = max(1.3, ease - 0.2), reps=0, interval=0, due=now+10min
-          hard(2):  ease = max(1.3, ease - 0.15), interval = max(1, round(interval*0.5)) or 1
-          good(3):  ease += 0.1, reps++, interval progression (1, 6, interval*ease)
-          easy(4):  ease += 0.15, reps++, interval progression accelerated
-        Due queue favors cards with due <= now and then nearest due, and sprinkles a few new cards
-    */
-
-    function getDefaultDeck() {
-      // A compact deck across stages, users can add more
-      const d = [];
-      const add = (front, back, tags=[]) => d.push({ id: uid(), front, back, tags });
-      // Stage 1
-      add('Order of operations acronym?', 'PEMDAS: Parentheses, Exponents, Multiplication, Division, Addition, Subtraction', ['stage1']);
-      add('Simplify: 2a + 3a − a', '4a', ['stage1']);
-      add('Solve: 7x − 9 = 3x + 15', 'x = 6', ['stage1']);
-      add('Slope formula between (x1,y1) and (x2,y2)?', 'm = (y2−y1)/(x2−x1)', ['stage1']);
-      // Stage 2
-      add('sin(30°) and cos(60°)', 'sin(30°)=1/2, cos(60°)=1/2', ['trig','stage2']);
-      add('Distance formula in coordinate plane?', 'd = sqrt((x2−x1)^2 + (y2−y1)^2)', ['stage2']);
-      add('Quadratic formula?', 'x = [−b ± sqrt(b^2 − 4ac)] / (2a)', ['quadratic','stage2']);
-      // Stage 3
-      add('Define the golden ratio φ', 'φ = (1 + sqrt(5))/2 ≈ 1.618', ['stage3']);
-      add('Fibonacci recursion', 'F(n) = F(n−1) + F(n−2), F(0)=0, F(1)=1', ['stage3']);
-      // Stage 4
-      add('Sacred geometry: what is a “seed of life”?', 'A pattern of seven overlapping circles symbolizing creation', ['stage4']);
-      return d;
-    }
-
-    // DOM elements for flashcards
-    const flashcardEl = document.getElementById('flashcard');
-    const flashFrontEl = document.getElementById('flashFront');
-    const flashBackEl = document.getElementById('flashBack');
-    const flipBtn = document.getElementById('flipBtn');
-    const shuffleDeckBtn = document.getElementById('shuffleDeckBtn');
-    const addCardBtn = document.getElementById('addCardBtn');
-    const againBtn = document.getElementById('againBtn');
-    const hardBtn = document.getElementById('hardBtn');
-    const goodBtn = document.getElementById('goodBtn');
-    const easyBtn = document.getElementById('easyBtn');
-    const dueCountEl = document.getElementById('dueCount');
-    const cardProgressEl = document.getElementById('cardProgress');
-
-    let currentCardIndex = 0; // index in the dueQueue
-    let dueQueue = [];
-
-    function getCardStats(id) {
-      if (!state.flashcards.stats[id]) {
-        state.flashcards.stats[id] = {
-          ease: 2.4,
-          intervalDays: 0,
-          reps: 0,
-          due: Date.now(),
-          lapse: 0,
-        };
-      }
-      return state.flashcards.stats[id];
-    }
-
-    function scheduleCards() {
-      const now = Date.now();
-      const cards = [...state.flashcards.deck];
-      // Prioritize due cards
-      const due = cards.filter(c => getCardStats(c.id).due <= now);
-      const notDue = cards.filter(c => getCardStats(c.id).due > now)
-                          .sort((a,b) => getCardStats(a.id).due - getCardStats(b.id).due);
-      // Sprinkle some not-due near future
-      const sprinkleCount = Math.min(3, notDue.length);
-      dueQueue = [...due, ...notDue.slice(0, sprinkleCount)];
-      if (dueQueue.length === 0 && cards.length > 0) {
-        // ensure at least one card present
-        dueQueue = [notDue[0] || cards[0]];
-      }
-      currentCardIndex = 0;
-      updateFlashcardUI();
-    }
-
-    function updateFlashcardUI() {
-      const total = state.flashcards.deck.length;
-      const dueN = dueQueue.length;
-      dueCountEl.textContent = `Due: ${dueN}`;
-      cardProgressEl.textContent = `${Math.min(currentCardIndex+1, Math.max(1, dueN))}/${Math.max(1,dueN)}`;
-
-      if (dueN === 0) {
-        flashFrontEl.innerHTML = 'No cards due. Great moment to practice finished lessons or add new cards!';
-        flashBackEl.innerHTML = 'Tip: Click Add Card to include your own concepts.';
-        flashcardEl.classList.remove('flipped');
+    function runStep() {
+      if (current >= progressSteps.length) {
+        progressFill.style.width = '100%';
+        progressMessage.textContent = 'Done! Loading your report…';
+        setTimeout(showResults, 500);
         return;
       }
-      const card = dueQueue[currentCardIndex];
-      flashFrontEl.innerHTML = sanitize(card.front);
-      flashBackEl.innerHTML = sanitize(card.back);
-      flashcardEl.classList.remove('flipped');
-    }
 
-    function sanitize(html) {
-      // Very light sanitizer for this demo (prevents script tags)
-      return String(html).replace(/<\s*script/gi, '&lt;script');
-    }
-
-    function rateCurrentCard(grade) {
-      const card = dueQueue[currentCardIndex];
-      if (!card) return;
-      const stats = getCardStats(card.id);
-      const now = Date.now();
-
-      switch (grade) {
-        case 1: // Again
-          stats.ease = Math.max(1.3, stats.ease - 0.2);
-          stats.reps = 0;
-          stats.intervalDays = 0;
-          stats.lapse += 1;
-          stats.due = now + 10 * 60 * 1000; // 10 minutes
-          break;
-        case 2: // Hard
-          stats.ease = Math.max(1.3, stats.ease - 0.15);
-          stats.reps = Math.max(1, stats.reps);
-          stats.intervalDays = Math.max(1, Math.round(Math.max(1, stats.intervalDays) * 0.5));
-          stats.due = now + stats.intervalDays * 24 * 60 * 60 * 1000;
-          break;
-        case 3: // Good
-          stats.ease = Math.min(2.8, stats.ease + 0.1);
-          stats.reps += 1;
-          if (stats.reps === 1) stats.intervalDays = 1;
-          else if (stats.reps === 2) stats.intervalDays = 6;
-          else stats.intervalDays = Math.round(stats.intervalDays * stats.ease);
-          stats.due = now + stats.intervalDays * 24 * 60 * 60 * 1000;
-          break;
-        case 4: // Easy
-          stats.ease = Math.min(3.0, stats.ease + 0.15);
-          stats.reps += 1;
-          if (stats.reps === 1) stats.intervalDays = 2;
-          else if (stats.reps === 2) stats.intervalDays = 8;
-          else stats.intervalDays = Math.round(stats.intervalDays * (stats.ease + 0.1));
-          stats.due = now + stats.intervalDays * 24 * 60 * 60 * 1000;
-          break;
-      }
-      saveState();
-      // Remove from current queue view
-      dueQueue.splice(currentCardIndex, 1);
-      if (currentCardIndex >= dueQueue.length) currentCardIndex = Math.max(0, dueQueue.length - 1);
-      updateFlashcardUI();
-    }
-
-    // Flashcard events
-    flashcardEl.addEventListener('click', () => flashcardEl.classList.toggle('flipped'));
-    flipBtn.addEventListener('click', () => flashcardEl.classList.toggle('flipped'));
-    shuffleDeckBtn.addEventListener('click', () => {
-      state.flashcards.deck.sort(() => Math.random() - 0.5);
-      saveState();
-      scheduleCards();
-    });
-    addCardBtn.addEventListener('click', () => {
-      const front = prompt('New card front (question/prompt):');
-      if (!front) return;
-      const back = prompt('New card back (answer/explanation):') || '';
-      state.flashcards.deck.push({ id: uid(), front, back, tags: ['custom'] });
-      saveState();
-      scheduleCards();
-    });
-
-    againBtn.addEventListener('click', () => rateCurrentCard(1));
-    hardBtn.addEventListener('click', () => rateCurrentCard(2));
-    goodBtn.addEventListener('click', () => rateCurrentCard(3));
-    easyBtn.addEventListener('click', () => rateCurrentCard(4));
-
-    document.addEventListener('keydown', (e) => {
-      const activeTab = getActiveTabId();
-      if (activeTab === 'tab-flash') {
-        if (e.key === 'Enter') { flashcardEl.classList.toggle('flipped'); }
-        if (e.key === '1') rateCurrentCard(1);
-        if (e.key === '2') rateCurrentCard(2);
-        if (e.key === '3') rateCurrentCard(3);
-        if (e.key === '4') rateCurrentCard(4);
-        if (e.key.toLowerCase() === 's') {
-          state.flashcards.deck.sort(() => Math.random() - 0.5);
-          saveState();
-          scheduleCards();
-        }
-      }
-    });
-
-    /*
-      Geometry Canvas (2D shapes and pseudo-3D isometric cube)
-      - Support dragging vertices
-      - Compute measurements (area, perimeter, etc.)
-      - Scroll to zoom and reset button
-    */
-    const geomCanvas = document.getElementById('geomCanvas');
-    const geomWrap = document.getElementById('geomWrap');
-    const shapeSelect = document.getElementById('shapeSelect');
-    const resetGeometryBtn = document.getElementById('resetGeometryBtn');
-    const geomPropsEl = document.getElementById('geomProps');
-    const geomNotesEl = document.getElementById('geomNotes');
-    const gctx = geomCanvas.getContext('2d');
-
-    const geomState = {
-      shape: 'triangle',
-      zoom: 1,
-      offset: { x: 0, y: 0 },
-      dragging: null, // { type: 'vertex'|'shape', index?: number, start:{x,y} }
-      vertices: [ {x:-80,y:60}, {x:0,y:-60}, {x:80,y:60} ], // triangle default
-      rect: { x:-100, y:-60, w: 200, h: 120 },
-      circle: { x: 0, y: 0, r: 80 },
-      cube: { center: {x:0,y:0}, size: 120, rot: 0.3 },
-    };
-
-    function resizeGeom() {
-      const rect = geomWrap.getBoundingClientRect();
-      geomCanvas.width = rect.width * devicePixelRatio;
-      geomCanvas.height = rect.height * devicePixelRatio;
-      gctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-      drawGeometry();
-    }
-    new ResizeObserver(resizeGeom).observe(geomWrap);
-
-    function worldToScreen(p) {
-      const cx = geomCanvas.width / devicePixelRatio / 2 + geomState.offset.x;
-      const cy = geomCanvas.height / devicePixelRatio / 2 + geomState.offset.y;
-      return { x: cx + p.x * geomState.zoom, y: cy + p.y * geomState.zoom };
-    }
-    function screenToWorld(p) {
-      const cx = geomCanvas.width / devicePixelRatio / 2 + geomState.offset.x;
-      const cy = geomCanvas.height / devicePixelRatio / 2 + geomState.offset.y;
-      return { x: (p.x - cx) / geomState.zoom, y: (p.y - cy) / geomState.zoom };
-    }
-
-    function drawHandle(p) {
-      gctx.beginPath();
-      gctx.arc(p.x, p.y, 6, 0, Math.PI*2);
-      gctx.fillStyle = 'rgba(255,255,255,0.9)';
-      gctx.fill();
-      gctx.strokeStyle = 'rgba(0,0,0,0.4)';
-      gctx.stroke();
-    }
-
-    function drawGeometry() {
-      const w = geomCanvas.width / devicePixelRatio;
-      const h = geomCanvas.height / devicePixelRatio;
-      gctx.clearRect(0,0,w,h);
-
-      // Axes
-      gctx.save();
-      gctx.translate(w/2 + geomState.offset.x, h/2 + geomState.offset.y);
-      gctx.scale(geomState.zoom, geomState.zoom);
-      gctx.strokeStyle = 'rgba(255,255,255,0.2)';
-      gctx.lineWidth = 1 / geomState.zoom;
-      gctx.beginPath();
-      gctx.moveTo(-w, 0); gctx.lineTo(w, 0);
-      gctx.moveTo(0, -h); gctx.lineTo(0, h);
-      gctx.stroke();
-      gctx.restore();
-
-      // Draw shape
-      const shape = geomState.shape;
-      if (shape === 'triangle') drawTriangle();
-      if (shape === 'rectangle') drawRectangle();
-      if (shape === 'circle') drawCircle();
-      if (shape === 'cube') drawCube();
-
-      updateGeomProps();
-    }
-
-    function drawTriangle() {
-      const pts = geomState.vertices.map(worldToScreen);
-      gctx.beginPath();
-      gctx.moveTo(pts[0].x, pts[0].y);
-      gctx.lineTo(pts[1].x, pts[1].y);
-      gctx.lineTo(pts[2].x, pts[2].y);
-      gctx.closePath();
-      gctx.fillStyle = 'rgba(125,211,252,0.25)';
-      gctx.strokeStyle = 'rgba(125,211,252,0.9)';
-      gctx.lineWidth = 2;
-      gctx.fill(); gctx.stroke();
-      pts.forEach(drawHandle);
-    }
-
-    function drawRectangle() {
-      const r = geomState.rect;
-      const p = worldToScreen({x:r.x,y:r.y});
-      const size = { w: r.w * geomState.zoom, h: r.h * geomState.zoom };
-      gctx.fillStyle = 'rgba(96,165,250,0.25)';
-      gctx.strokeStyle = 'rgba(96,165,250,0.9)';
-      gctx.lineWidth = 2;
-      gctx.fillRect(p.x, p.y, size.w, size.h);
-      gctx.strokeRect(p.x, p.y, size.w, size.h);
-      // handles at corners
-      [
-        {x:r.x, y:r.y}, {x:r.x+r.w, y:r.y}, {x:r.x+r.w, y:r.y+r.h}, {x:r.x, y:r.y+r.h}
-      ].map(worldToScreen).forEach(drawHandle);
-    }
-
-    function drawCircle() {
-      const c = geomState.circle;
-      const p = worldToScreen({x:c.x, y:c.y});
-      const r = c.r * geomState.zoom;
-      gctx.beginPath();
-      gctx.arc(p.x, p.y, r, 0, Math.PI*2);
-      gctx.fillStyle = 'rgba(52,211,153,0.25)';
-      gctx.strokeStyle = 'rgba(52,211,153,0.9)';
-      gctx.lineWidth = 2;
-      gctx.fill(); gctx.stroke();
-      drawHandle({x:p.x + r, y:p.y});
-      drawHandle(p);
-    }
-
-    function drawCube() {
-      const { center, size, rot } = geomState.cube;
-      // Isometric projection axes
-      const iso = (x,y,z) => {
-        const a = Math.cos(rot), b = Math.sin(rot);
-        const ix = (x - z) * a;
-        const iy = y + (x + z) * b * 0.5;
-        const p = worldToScreen({x:center.x + ix, y:center.y + iy});
-        return p;
-      };
-      const s = size/2;
-      const verts = [
-        [-s,-s,-s], [s,-s,-s], [s,-s,s], [-s,-s,s],
-        [-s,s,-s],  [s,s,-s],  [s,s,s],  [-s,s,s]
-      ].map(v => iso(v[0], v[1], v[2]));
-      const edges = [
-        [0,1],[1,2],[2,3],[3,0],
-        [4,5],[5,6],[6,7],[7,4],
-        [0,4],[1,5],[2,6],[3,7]
-      ];
-      gctx.strokeStyle = 'rgba(245,158,11,0.9)';
-      gctx.lineWidth = 2;
-      edges.forEach(([i,j]) => {
-        gctx.beginPath();
-        gctx.moveTo(verts[i].x, verts[i].y);
-        gctx.lineTo(verts[j].x, verts[j].y);
-        gctx.stroke();
+      progressSteps.forEach((s, i) => {
+        s.classList.remove('active', 'done');
+        if (i < current) s.classList.add('done');
+        if (i === current) s.classList.add('active');
       });
-      // center handle
-      drawHandle(worldToScreen(center));
+
+      progressMessage.textContent = messages[current];
+      progressFill.style.width = Math.round((elapsed / total) * 95) + '%';
+
+      elapsed += stepDurations[current];
+      const duration = stepDurations[current];
+      current++;
+      setTimeout(runStep, duration);
     }
 
-    function updateGeomProps() {
-      const shape = geomState.shape;
-      let html = '';
-      let notes = [];
-      if (shape === 'triangle') {
-        const [A,B,C] = geomState.vertices;
-        const side = (P, Q) => Math.hypot(P.x - Q.x, P.y - Q.y);
-        const a = side(B,C), b = side(A,C), c = side(A,B);
-        const s = (a+b+c)/2;
-        const area = Math.sqrt(Math.max(0, s*(s-a)*(s-b)*(s-c)));
-        html = `Perimeter = ${ (a+b+c).toFixed(2) } units, Area = ${ area.toFixed(2) } sq units`;
-        notes = [
-          'Heron’s formula: A = sqrt(s(s−a)(s−b)(s−c))',
-          'Perimeter is the sum of side lengths',
-        ];
-      } else if (shape === 'rectangle') {
-        const r = geomState.rect;
-        const area = Math.abs(r.w*r.h);
-        const peri = 2*(Math.abs(r.w)+Math.abs(r.h));
-        html = `Perimeter = ${ peri.toFixed(2) }, Area = ${ area.toFixed(2) }`;
-        notes = [
-          'Area rectangle = width × height',
-          'Perimeter rectangle = 2(w+h)',
-        ];
-      } else if (shape === 'circle') {
-        const c = geomState.circle;
-        const area = Math.PI * c.r * c.r;
-        const circ = 2 * Math.PI * c.r;
-        html = `Circumference = ${ circ.toFixed(2) }, Area = ${ area.toFixed(2) }`;
-        notes = [
-          'Circumference = 2πr',
-          'Area circle = πr²',
-        ];
-      } else if (shape === 'cube') {
-        const s = geomState.cube.size;
-        const vol = Math.pow(s,3);
-        const sa = 6 * s * s;
-        html = `Edge = ${ s.toFixed(1) }, Surface Area = ${ sa.toFixed(1) }, Volume = ${ vol.toFixed(1) }`;
-        notes = [
-          'Surface area of a cube = 6s²',
-          'Volume of a cube = s³',
-          'Isometric is a pseudo-3D projection (equal angles)',
-        ];
-      }
-      geomPropsEl.textContent = html;
-      geomNotesEl.innerHTML = notes.map(n => `<li>${n}</li>`).join('');
-    }
+    runStep();
+  }
 
-    // Geometry interactions
-    geomCanvas.addEventListener('mousedown', geomPointerDown);
-    geomCanvas.addEventListener('mousemove', geomPointerMove);
-    geomCanvas.addEventListener('mouseup', geomPointerUp);
-    geomCanvas.addEventListener('mouseleave', geomPointerUp);
+  function showResults() {
+    processingSection.style.display = 'none';
+    resultsSection.style.display = 'block';
+    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // Touch support for geometry
-    geomCanvas.addEventListener('touchstart', (e) => {
-      const t = e.touches[0];
-      const rect = geomCanvas.getBoundingClientRect();
-      geomPointerDown({ clientX: t.clientX, clientY: t.clientY, preventDefault: ()=>{}, target: geomCanvas, currentTarget: geomCanvas });
-      e.preventDefault();
-    }, { passive:false });
-    geomCanvas.addEventListener('touchmove', (e) => {
-      const t = e.touches[0];
-      geomPointerMove({ clientX: t.clientX, clientY: t.clientY });
-      e.preventDefault();
-    }, { passive:false });
-    geomCanvas.addEventListener('touchend', (e) => {
-      geomPointerUp();
-      e.preventDefault();
-    }, { passive:false });
+    // Animate score bars
+    setTimeout(() => {
+      document.querySelectorAll('.score-bar-fill').forEach(bar => {
+        const target = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => { bar.style.width = target; }, 50);
+      });
+    }, 100);
 
-    geomCanvas.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      const delta = Math.sign(e.deltaY);
-      const factor = delta > 0 ? 0.9 : 1.1;
-      geomState.zoom = clamp(geomState.zoom * factor, 0.4, 5);
-      drawGeometry();
-    }, { passive:false });
+    showToast('✅ Analysis complete! Scroll down to see your full report.', 'success');
+  }
 
-    function pickHandleAt(x, y) {
-      const pt = { x, y };
-      const hit = (p) => Math.hypot(p.x - pt.x, p.y - pt.y) <= 8;
-      if (geomState.shape === 'triangle') {
-        const pts = geomState.vertices.map(worldToScreen);
-        for (let i=0;i<pts.length;i++) if (hit(pts[i])) return { type:'vertex', index:i };
-      } else if (geomState.shape === 'rectangle') {
-        const r = geomState.rect;
-        const pts = [
-          {x:r.x,y:r.y}, {x:r.x+r.w,y:r.y}, {x:r.x+r.w,y:r.y+r.h}, {x:r.x,y:r.y+r.h}
-        ].map(worldToScreen);
-        for (let i=0;i<pts.length;i++) if (hit(pts[i])) return { type:'rectCorner', index:i };
-      } else if (geomState.shape === 'circle') {
-        const c = worldToScreen(geomState.circle);
-        const edge = { x: c.x + geomState.circle.r * geomState.zoom, y: c.y };
-        if (hit(edge)) return { type:'circleEdge' };
-        if (hit(c)) return { type:'circleCenter' };
-      } else if (geomState.shape === 'cube') {
-        const center = worldToScreen(geomState.cube.center);
-        if (hit(center)) return { type:'cubeCenter' };
-      }
-      return { type:'shape' };
-    }
+  // ── New Analysis ──
+  newAnalysisBtn.addEventListener('click', () => {
+    resultsSection.style.display = 'none';
+    inputSection.style.display = 'block';
+    clearFile();
+    textInput.value = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
-    function geomPointerDown(e) {
-      const rect = geomCanvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const hit = pickHandleAt(x, y);
-      geomState.dragging = { ...hit, start: { x, y } };
-    }
-    function geomPointerMove(e) {
-      if (!geomState.dragging) return;
-      const rect = geomCanvas.getBoundingClientRect();
-      const dx = e.clientX - rect.left - geomState.dragging.start.x;
-      const dy = e.clientY - rect.top - geomState.dragging.start.y;
-      geomState.dragging.start = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  // ── Export ──
+  exportBtn.addEventListener('click', () => {
+    showToast('📥 Generating your PDF report…', 'info');
+    setTimeout(() => showToast('✅ Report ready to download!', 'success'), 1800);
+  });
 
-      if (geomState.dragging.type === 'vertex') {
-        const idx = geomState.dragging.index;
-        const current = worldToScreen(geomState.vertices[idx]);
-        const moved = { x: current.x + dx, y: current.y + dy };
-        geomState.vertices[idx] = screenToWorld(moved);
-      } else if (geomState.dragging.type === 'rectCorner') {
-        const corners = [
-          {x: geomState.rect.x, y: geomState.rect.y},
-          {x: geomState.rect.x + geomState.rect.w, y: geomState.rect.y},
-          {x: geomState.rect.x + geomState.rect.w, y: geomState.rect.y + geomState.rect.h},
-          {x: geomState.rect.x, y: geomState.rect.y + geomState.rect.h}
-        ];
-        const idx = geomState.dragging.index;
-        const moved = screenToWorld({ x: (worldToScreen(corners[idx]).x + dx), y: (worldToScreen(corners[idx]).y + dy) });
-        // Adjust rectangle based on which corner moved
-        const opposite = corners[(idx+2)%4];
-        geomState.rect.x = Math.min(moved.x, opposite.x);
-        geomState.rect.y = Math.min(moved.y, opposite.y);
-        geomState.rect.w = Math.abs(moved.x - opposite.x);
-        geomState.rect.h = Math.abs(moved.y - opposite.y);
-      } else if (geomState.dragging.type === 'circleCenter') {
-        const center = worldToScreen(geomState.circle);
-        const newCenter = screenToWorld({ x: center.x + dx, y: center.y + dy });
-        geomState.circle.x = newCenter.x;
-        geomState.circle.y = newCenter.y;
-      } else if (geomState.dragging.type === 'circleEdge') {
-        const center = worldToScreen(geomState.circle);
-        const edge = { x: center.x + geomState.circle.r * geomState.zoom + dx, y: center.y + dy };
-        const w = screenToWorld(edge);
-        geomState.circle.r = Math.max(5, Math.hypot(w.x - geomState.circle.x, w.y - geomState.circle.y));
-      } else if (geomState.dragging.type === 'cubeCenter') {
-        const center = worldToScreen(geomState.cube.center);
-        geomState.cube.center = screenToWorld({ x: center.x + dx, y: center.y + dy });
-      } else {
-        // Pan shape/world
-        geomState.offset.x += dx;
-        geomState.offset.y += dy;
-      }
-      drawGeometry();
-    }
-    function geomPointerUp() { geomState.dragging = null; }
-
-    shapeSelect.addEventListener('change', (e) => {
-      geomState.shape = e.target.value;
-      drawGeometry();
-    });
-
-    resetGeometryBtn.addEventListener('click', () => {
-      geomState.zoom = 1;
-      geomState.offset = { x: 0, y: 0 };
-      geomState.vertices = [ {x:-80,y:60}, {x:0,y:-60}, {x:80,y:60} ];
-      geomState.rect = { x:-100, y:-60, w: 200, h: 120 };
-      geomState.circle = { x: 0, y: 0, r: 80 };
-      geomState.cube = { center: {x:0,y:0}, size: 120, rot: 0.3 };
-      drawGeometry();
-    });
-
-    /*
-      Graphing System
-      - Expression parser (shunting-yard) supporting + - * / ^, functions (sin, cos, tan, ln, log, sqrt, abs, exp), constants (pi, e)
-      - Canvas with pan/zoom, axes, grid
-      - Intercept highlighting, step overlays (linear/quadratic formulas; else Newton)
-    */
-    const graphCanvas = document.getElementById('graphCanvas');
-    const graphWrap = document.getElementById('graphWrap');
-    const g2 = graphCanvas.getContext('2d');
-    const exprInput = document.getElementById('exprInput');
-    const plotBtn = document.getElementById('plotBtn');
-    const resetViewBtn = document.getElementById('resetViewBtn');
-    const solveOverlay = document.getElementById('solveOverlay');
-
-    const graphState = {
-      expr: 'sin(x)',
-      compiled: null,
-      zoom: 60, // px per unit
-      origin: { x: 0, y: 0 }, // in pixels offset from center
-      dragging: false,
-      dragStart: { x: 0, y: 0 },
-      lastPan: { x: 0, y: 0 },
-      intercepts: { x: [], y: 0 },
-      stepsHtml: '',
-    };
-
-    function resizeGraph() {
-      const rect = graphWrap.getBoundingClientRect();
-      graphCanvas.width = rect.width * devicePixelRatio;
-      graphCanvas.height = rect.height * devicePixelRatio;
-      g2.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-      drawGraph();
-    }
-    new ResizeObserver(resizeGraph).observe(graphWrap);
-
-    function drawGraph() {
-      const w = graphCanvas.width / devicePixelRatio;
-      const h = graphCanvas.height / devicePixelRatio;
-      g2.clearRect(0, 0, w, h);
-
-      // Grid
-      const scale = graphState.zoom;
-      const step = niceGridStep(scale);
-      const left = -w/2 - graphState.origin.x;
-      const top = -h/2 - graphState.origin.y;
-
-      g2.save();
-      g2.translate(w/2 + graphState.origin.x, h/2 + graphState.origin.y);
-
-      // minor grid
-      g2.strokeStyle = 'rgba(255,255,255,0.07)';
-      g2.lineWidth = 1;
-      drawGrid(g2, w, h, scale, step/5);
-      // major grid
-      g2.strokeStyle = 'rgba(255,255,255,0.15)';
-      drawGrid(g2, w, h, scale, step);
-
-      // axes
-      g2.strokeStyle = 'rgba(255,255,255,0.6)';
-      g2.lineWidth = 1.5;
-      g2.beginPath();
-      g2.moveTo(-w, 0); g2.lineTo(w, 0);
-      g2.moveTo(0, -h); g2.lineTo(0, h);
-      g2.stroke();
-
-      // labels
-      g2.fillStyle = 'rgba(255,255,255,0.7)';
-      g2.font = '12px system-ui, sans-serif';
-      drawAxisLabels(g2, w, h, scale, step);
-
-      // Plot function
-      if (graphState.compiled) {
-        g2.strokeStyle = '#7dd3fc';
-        g2.lineWidth = 2;
-        g2.beginPath();
-        const sampleStep = 1 / scale; // pixel aligned sampling
-        let first = true;
-        for (let x = -w/2/scale - graphState.origin.x/scale - 2; x <= w/2/scale - graphState.origin.x/scale + 2; x += sampleStep) {
-          const y = safeEval(graphState.compiled, x);
-          if (!isFinite(y)) { first = true; continue; }
-          const px = x * scale;
-          const py = -y * scale;
-          if (first) { g2.moveTo(px, py); first = false; }
-          else g2.lineTo(px, py);
-        }
-        g2.stroke();
-
-        // Intercepts
-        g2.fillStyle = '#ef4444';
-        graphState.intercepts.x.forEach(ix => {
-          const px = ix * scale;
-          g2.beginPath(); g2.arc(px, 0, 4, 0, Math.PI*2); g2.fill();
+  // ── Copy Version ──
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const vId = btn.dataset.version;
+      const body = document.getElementById('version-body-' + vId);
+      if (body) {
+        navigator.clipboard.writeText(body.innerText.trim()).then(() => {
+          btn.textContent = '✓ Copied';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+          showToast('📋 Version copied to clipboard!', 'success');
+        }).catch(() => {
+          showToast('⚠️ Could not copy — try selecting manually.', 'info');
         });
-        g2.fillStyle = '#34d399';
-        const y0 = graphState.intercepts.y;
-        g2.beginPath(); g2.arc(0, -y0*scale, 4, 0, Math.PI*2); g2.fill();
-      }
-
-      g2.restore();
-    }
-
-    function niceGridStep(scalePxPerUnit) {
-      // choose world step s.t. pixel spacing ~ 60px
-      const targetPx = 60;
-      const raw = targetPx / scalePxPerUnit;
-      const pow = Math.pow(10, Math.floor(Math.log10(raw)));
-      const norm = raw / pow;
-      let step = 1;
-      if (norm < 1.5) step = 1;
-      else if (norm < 3.5) step = 2;
-      else if (norm < 7.5) step = 5;
-      else step = 10;
-      return step * pow;
-    }
-
-    function drawGrid(ctx, w, h, scale, step) {
-      const left = -w/2 - graphState.origin.x;
-      const right = w/2 - graphState.origin.x;
-      const top = -h/2 - graphState.origin.y;
-      const bottom = h/2 - graphState.origin.y;
-
-      // Draw vertical lines
-      const startX = Math.floor((left/scale) / step) * step;
-      for (let x = startX; x < (right/scale); x += step) {
-        ctx.beginPath();
-        ctx.moveTo(x*scale, -h);
-        ctx.lineTo(x*scale, h);
-        ctx.stroke();
-      }
-      // Draw horizontal lines
-      const startY = Math.floor((top/scale) / step) * step;
-      for (let y = startY; y < (bottom/scale); y += step) {
-        ctx.beginPath();
-        ctx.moveTo(-w, y*scale);
-        ctx.lineTo(w, y*scale);
-        ctx.stroke();
-      }
-    }
-
-    function drawAxisLabels(ctx, w, h, scale, step) {
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      for (let x = -w/2/scale - graphState.origin.x/scale; x <= w/2/scale - graphState.origin.x/scale; x += step) {
-        const px = Math.round(x*scale) + 0.5; // crisp
-        if (Math.abs(x) < 1e-8) continue;
-        ctx.fillText(String(x.toFixed(2).replace(/\.00$/, '')), px, 4);
-      }
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'middle';
-      for (let y = -h/2/scale - graphState.origin.y/scale; y <= h/2/scale - graphState.origin.y/scale; y += step) {
-        const py = Math.round(-y*scale) + 0.5;
-        if (Math.abs(y) < 1e-8) continue;
-        ctx.fillText(String(y.toFixed(2).replace(/\.00$/, '')), -4, py);
-      }
-    }
-
-    // Parser: Shunting-yard to RPN then evaluator
-    const FUNCTIONS = {
-      sin: Math.sin,
-      cos: Math.cos,
-      tan: Math.tan,
-      asin: Math.asin,
-      acos: Math.acos,
-      atan: Math.atan,
-      sqrt: Math.sqrt,
-      abs: Math.abs,
-      ln: Math.log,
-      log: (v) => Math.log10(v),
-      exp: Math.exp,
-    };
-
-    const CONSTANTS = {
-      pi: Math.PI,
-      e: Math.E,
-    };
-
-    function tokenize(expr) {
-      // Insert explicit * for implicit multiplication: 2x -> 2*x, 2(x+1) -> 2*(x+1), )x -> )*x
-      let s = expr.replace(/\s+/g, '');
-      s = s.replace(/(\d)(x|\()/gi, '$1*$2');
-      s = s.replace(/(\))(x|\()/gi, '$1*$2');
-      const tokens = [];
-      const re = /([0-9]*\.?[0-9]+|pi|e|[a-zA-Z_][a-zA-Z_0-9]*|\^|\+|\-|\*|\/|\(|\)|,)/g;
-      let m;
-      while ((m = re.exec(s)) !== null) {
-        tokens.push(m[1]);
-      }
-      return tokens;
-    }
-
-    function toRPN(tokens) {
-      const out = [];
-      const ops = [];
-      const prec = { '+':1, '-':1, '*':2, '/':2, '^':3 };
-      const rightAssoc = { '^': true };
-      let prev = null;
-      for (let i=0;i<tokens.length;i++) {
-        const t = tokens[i];
-        if (/^[0-9]*\.?[0-9]+$/.test(t) || t === 'x' || t in CONSTANTS) {
-          out.push(t);
-        } else if (t in FUNCTIONS) {
-          ops.push(t);
-        } else if (t === ',') {
-          while (ops.length && ops[ops.length-1] !== '(') out.push(ops.pop());
-        } else if (t in prec) {
-          // handle unary minus
-          const isUnary = (t === '-' && (prev === null || (prev in prec) || prev === '(' || prev === ','));
-          const op = isUnary ? 'u-' : t;
-          if (isUnary) {
-            ops.push(op);
-          } else {
-            while (ops.length) {
-              const top = ops[ops.length-1];
-              if ((top in prec || top === 'u-' ) && ((prec[top] > prec[t]) || (prec[top] === prec[t] && !rightAssoc[t]))) {
-                out.push(ops.pop());
-              } else break;
-            }
-            ops.push(t);
-          }
-        } else if (t === '(') {
-          ops.push(t);
-        } else if (t === ')') {
-          while (ops.length && ops[ops.length-1] !== '(') out.push(ops.pop());
-          ops.pop(); // remove '('
-          if (ops.length && (ops[ops.length-1] in FUNCTIONS)) out.push(ops.pop());
-        }
-        prev = t;
-      }
-      while (ops.length) out.push(ops.pop());
-      return out;
-    }
-
-    function compile(expr) {
-      try {
-        const tokens = tokenize(expr);
-        const rpn = toRPN(tokens);
-        return rpn;
-      } catch (e) {
-        console.warn('Parse error', e);
-        return null;
-      }
-    }
-
-    function evalRPN(rpn, x) {
-      const stack = [];
-      for (const t of rpn) {
-        if (/^[0-9]*\.?[0-9]+$/.test(t)) stack.push(parseFloat(t));
-        else if (t === 'x') stack.push(x);
-        else if (t in CONSTANTS) stack.push(CONSTANTS[t]);
-        else if (t === 'u-') { stack.push(-stack.pop()); }
-        else if (t === '+') { const b = stack.pop(); const a = stack.pop(); stack.push(a + b); }
-        else if (t === '-') { const b = stack.pop(); const a = stack.pop(); stack.push(a - b); }
-        else if (t === '*') { const b = stack.pop(); const a = stack.pop(); stack.push(a * b); }
-        else if (t === '/') { const b = stack.pop(); const a = stack.pop(); stack.push(a / b); }
-        else if (t === '^') { const b = stack.pop(); const a = stack.pop(); stack.push(Math.pow(a, b)); }
-        else if (t in FUNCTIONS) {
-          const fn = FUNCTIONS[t];
-          const a = stack.pop();
-          stack.push(fn(a));
-        }
-      }
-      return stack.pop();
-    }
-
-    function safeEval(rpn, x) {
-      try { return evalRPN(rpn, x); } catch { return NaN; }
-    }
-
-    function findIntercepts(rpn) {
-      const xs = [];
-      const compiled = rpn;
-      // scan across visible domain for sign changes
-      const w = graphCanvas.width / devicePixelRatio;
-      const scale = graphState.zoom;
-      const minX = -w/2/scale - graphState.origin.x/scale - 10;
-      const maxX = w/2/scale - graphState.origin.x/scale + 10;
-      const step = (maxX - minX) / 200;
-      let prevX = minX;
-      let prevY = safeEval(compiled, prevX);
-      for (let x = minX + step; x <= maxX; x += step) {
-        const y = safeEval(compiled, x);
-        if (isFinite(prevY) && isFinite(y) && prevY * y <= 0) {
-          const root = refineRootBisection(compiled, prevX, x, 20);
-          if (isFinite(root)) xs.push(root);
-        }
-        prevX = x; prevY = y;
-      }
-      const y0 = safeEval(compiled, 0);
-      return { x: dedupeSorted(xs), y: y0 };
-    }
-
-    function refineRootBisection(rpn, a, b, iters=20) {
-      let fa = safeEval(rpn, a), fb = safeEval(rpn, b);
-      if (!isFinite(fa) || !isFinite(fb)) return NaN;
-      if (fa === 0) return a;
-      if (fb === 0) return b;
-      if (fa * fb > 0) return NaN;
-      for (let i=0;i<iters;i++) {
-        const m = (a+b)/2;
-        const fm = safeEval(rpn, m);
-        if (!isFinite(fm)) break;
-        if (Math.abs(fm) < 1e-6) return m;
-        if (fa * fm <= 0) { b = m; fb = fm; } else { a = m; fa = fm; }
-      }
-      return (a+b)/2;
-    }
-
-    function dedupeSorted(arr) {
-      arr.sort((a,b) => a-b);
-      const out = [];
-      for (const v of arr) if (out.length === 0 || Math.abs(out[out.length-1] - v) > 1e-3) out.push(v);
-      return out;
-    }
-
-    function trySymbolicSteps(expr, rpn) {
-      // Try to detect linear ax+b and quadratic ax^2+bx+c via sampling
-      const f = (x) => safeEval(rpn, x);
-      const f0 = f(0), f1 = f(1), f_1 = f(-1), f2 = f(2);
-      if ([f0,f1,f_1].every(Number.isFinite)) {
-        // Test linear: second difference ≈ 0
-        const d1 = f1 - f0; const d2 = f2 - f1;
-        if (Number.isFinite(f2) && Math.abs(d2 - d1) < 1e-6) {
-          const a = f1 - f0; // approx slope
-          const b = f0; // intercept
-          const steps = [
-            `<strong>Detected linear:</strong> f(x) ≈ ${a.toFixed(4)}x + ${b.toFixed(4)}`,
-            `Solve f(x)=0: ${a.toFixed(4)}x + ${b.toFixed(4)} = 0`,
-            `x = −b/a = ${( -b / a ).toFixed(6)}`
-          ];
-          return steps;
-        }
-      }
-      // Quadratic: second difference constant
-      if ([f0,f1,f2,f_1].every(Number.isFinite)) {
-        const s1 = f1 - f0; const s0 = f0 - f_1; const s2 = f2 - f1;
-        if (Math.abs(s2 - s1) < 1e-4 && Math.abs(s1 - s0) < 1e-4) {
-          // Fit coefficients via system on 0,1,2
-          const a = (f2 - 2*f1 + f0)/2; // from finite diff
-          const b = f1 - f0 - 3*a/2 + a; // rough
-          // Better: solve a,b,c from values
-          const A = f0; // at x=0, c = f0
-          const c = A;
-          const B = f1; // a + b + c = f1
-          const C = f2; // 4a + 2b + c = f2
-          const a2 = (C - 2*B + A)/2;
-          const b2 = B - a2 - c;
-          const steps = [
-            `<strong>Detected quadratic:</strong> f(x) ≈ ${a2.toFixed(4)}x² + ${b2.toFixed(4)}x + ${c.toFixed(4)}`,
-            `Discriminant Δ = b² − 4ac = ${(b2*b2 - 4*a2*c).toFixed(6)}`,
-            `Roots: x = [−b ± √Δ]/(2a)`
-          ];
-          return steps;
-        }
-      }
-      return null;
-    }
-
-    function plotCurrentExpression() {
-      const expr = exprInput.value.trim();
-      if (!expr) return;
-      const compiled = compile(expr);
-      graphState.expr = expr;
-      graphState.compiled = compiled;
-      graphState.intercepts = compiled ? findIntercepts(compiled) : { x:[], y:0 };
-      const symbolic = compiled ? trySymbolicSteps(expr, compiled) : null;
-      if (symbolic) {
-        graphState.stepsHtml = `<div><ol>${symbolic.map(s=>`<li>${s}</li>`).join('')}</ol></div>`;
-      } else if (compiled) {
-        // Newton iterations from x0=1 for 5 steps
-        let x = 1; const steps = [];
-        const df = (x) => { const h=1e-4; return (safeEval(compiled, x+h) - safeEval(compiled, x-h))/(2*h); };
-        for (let i=0;i<5;i++) {
-          const y = safeEval(compiled, x);
-          const d = df(x);
-          if (!isFinite(y) || !isFinite(d) || Math.abs(d) < 1e-6) break;
-          const nx = x - y/d;
-          steps.push(`Iter ${i+1}: x = ${x.toFixed(6)}, f(x) = ${y.toFixed(6)}, f'(x) ≈ ${d.toFixed(6)}, next ≈ ${nx.toFixed(6)}`);
-          x = nx;
-        }
-        graphState.stepsHtml = `<div><strong>Newton’s method steps:</strong><ul>${steps.map(s=>`<li>${s}</li>`).join('')}</ul></div>`;
-      } else {
-        graphState.stepsHtml = '<div>Parse error. Please check expression.</div>';
-      }
-      solveOverlay.innerHTML = graphState.stepsHtml;
-      solveOverlay.hidden = false;
-      drawGraph();
-    }
-
-    // Graph interactions
-    graphCanvas.addEventListener('mousedown', (e) => {
-      graphState.dragging = true;
-      graphState.dragStart = { x: e.clientX, y: e.clientY };
-      graphState.lastPan = { ...graphState.origin };
-    });
-    window.addEventListener('mousemove', (e) => {
-      if (!graphState.dragging) return;
-      const dx = e.clientX - graphState.dragStart.x;
-      const dy = e.clientY - graphState.dragStart.y;
-      graphState.origin.x = graphState.lastPan.x + dx;
-      graphState.origin.y = graphState.lastPan.y + dy;
-      drawGraph();
-    });
-    window.addEventListener('mouseup', () => graphState.dragging = false);
-
-    // Touch pan and pinch zoom
-    graphCanvas.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 1) {
-        const t = e.touches[0];
-        graphState.dragging = true;
-        graphState.dragStart = { x: t.clientX, y: t.clientY };
-        graphState.lastPan = { ...graphState.origin };
-      }
-      e.preventDefault();
-    }, { passive:false });
-    graphCanvas.addEventListener('touchmove', (e) => {
-      if (e.touches.length === 1 && graphState.dragging) {
-        const t = e.touches[0];
-        const dx = t.clientX - graphState.dragStart.x;
-        const dy = t.clientY - graphState.dragStart.y;
-        graphState.origin.x = graphState.lastPan.x + dx;
-        graphState.origin.y = graphState.lastPan.y + dy;
-        drawGraph();
-      } else if (e.touches.length === 2) {
-        // pinch
-        const [a,b] = e.touches;
-        const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
-        if (!graphState._pinchStart) {
-          graphState._pinchStart = dist;
-          graphState._zoomStart = graphState.zoom;
-        } else {
-          const factor = dist / graphState._pinchStart;
-          graphState.zoom = clamp(graphState._zoomStart * factor, 20, 400);
-          graphState.intercepts = graphState.compiled ? findIntercepts(graphState.compiled) : { x:[], y:0 };
-          drawGraph();
-        }
-      }
-      e.preventDefault();
-    }, { passive:false });
-    graphCanvas.addEventListener('touchend', (e) => {
-      if (e.touches.length === 0) {
-        graphState.dragging = false;
-        graphState._pinchStart = null;
-      }
-      e.preventDefault();
-    }, { passive:false });
-
-    graphCanvas.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      const delta = Math.sign(e.deltaY);
-      const factor = delta > 0 ? 0.9 : 1.1;
-      const mouse = { x: e.offsetX - graphCanvas.width/devicePixelRatio/2, y: e.offsetY - graphCanvas.height/devicePixelRatio/2 };
-      // Zoom towards mouse position
-      const before = { x: (mouse.x - graphState.origin.x)/graphState.zoom, y: (mouse.y - graphState.origin.y)/graphState.zoom };
-      graphState.zoom = clamp(graphState.zoom * factor, 20, 400);
-      const after = { x: (mouse.x - graphState.origin.x)/graphState.zoom, y: (mouse.y - graphState.origin.y)/graphState.zoom };
-      graphState.origin.x += (after.x - before.x) * graphState.zoom;
-      graphState.origin.y += (after.y - before.y) * graphState.zoom;
-      graphState.intercepts = graphState.compiled ? findIntercepts(graphState.compiled) : { x:[], y:0 };
-      drawGraph();
-    }, { passive:false });
-
-    plotBtn.addEventListener('click', plotCurrentExpression);
-    exprInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') plotCurrentExpression(); });
-    resetViewBtn.addEventListener('click', () => { graphState.zoom = 60; graphState.origin = {x:0,y:0}; drawGraph(); });
-
-    document.addEventListener('keydown', (e) => {
-      const tab = getActiveTabId();
-      if (tab === 'tab-graph') {
-        if (e.key === '+') { graphState.zoom = clamp(graphState.zoom * 1.1, 20, 400); drawGraph(); }
-        if (e.key === '-') { graphState.zoom = clamp(graphState.zoom * 0.9, 20, 400); drawGraph(); }
-        if (e.key === '0') { graphState.zoom = 60; graphState.origin = {x:0,y:0}; drawGraph(); }
-        if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
-          const pan = 40;
-          if (e.key === 'ArrowLeft') graphState.origin.x += pan;
-          if (e.key === 'ArrowRight') graphState.origin.x -= pan;
-          if (e.key === 'ArrowUp') graphState.origin.y += pan;
-          if (e.key === 'ArrowDown') graphState.origin.y -= pan;
-          drawGraph();
-        }
       }
     });
+  });
 
-    /*
-      Teach-Back Module
-      - Concept selection, prompt generator, hint progression, self-assessment
-    */
-    const teachConceptSelect = document.getElementById('teachConceptSelect');
-    const teachPromptEl = document.getElementById('teachPrompt');
-    const newPromptBtn = document.getElementById('newPromptBtn');
-    const teachResponse = document.getElementById('teachResponse');
-    const saveTeachBtn = document.getElementById('saveTeachBtn');
-    const teachSaveMsg = document.getElementById('teachSaveMsg');
-    const hintList = document.getElementById('hintList');
-    const revealNextHintBtn = document.getElementById('revealNextHintBtn');
-    const showFullAnswerBtn = document.getElementById('showFullAnswerBtn');
-    const selfMsg = document.getElementById('selfMsg');
+  // ── Toast ──
+  function showToast(message, type = 'info') {
+    const wrap = document.getElementById('toastWrap');
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + type;
+    toast.textContent = message;
+    wrap.appendChild(toast);
+    setTimeout(() => {
+      toast.style.animation = 'slideOut 0.3s ease forwards';
+      setTimeout(() => toast.remove(), 300);
+    }, 3500);
+  }
 
-    const concepts = [
-      { key: 'pemdas', name: 'Order of Operations (PEMDAS)', hints: [
-        'Which operation should be handled first in 3 + 2 × 4?',
-        'Try rewriting 3 + 2 × 4 as 3 + (2 × 4). What next?',
-        'Multiplication comes before addition, so 3 + (8) = 11.'
-      ], example: 'PEMDAS organizes what to do first: parentheses, exponents, multiplication/division, then addition/subtraction.' },
-      { key: 'linear', name: 'Solving Linear Equations', hints: [
-        'Balance both sides by undoing operations in reverse order.',
-        'Isolate x: move constants to one side, x-terms to the other.',
-        'Divide by the coefficient of x to solve.'
-      ], example: 'For 7x − 9 = 3x + 15, subtract 3x both sides → 4x − 9 = 15, add 9 → 4x = 24, divide by 4 → x = 6.' },
-      { key: 'trig', name: 'Right Triangle Trigonometry', hints: [
-        'SOH-CAH-TOA helps map sides to functions.',
-        'Sine: opposite/hypotenuse. Cosine: adjacent/hypotenuse. Tangent: opposite/adjacent.',
-        'Relate an angle to a ratio of sides to solve.'
-      ], example: 'sin(30°)=0.5 because the opposite side is half of the hypotenuse in a 30-60-90 triangle.' },
-      { key: 'quadratic', name: 'Quadratics & Roots', hints: [
-        'Put equation in ax²+bx+c=0 form.',
-        'Compute discriminant Δ = b²−4ac to know number of roots.',
-        'Use formula x = [−b ± √Δ]/(2a).' 
-      ], example: 'x² − 5x + 6 = 0 has a=1,b=−5,c=6 → Δ=1 → roots: 2 and 3.' },
-      { key: 'geometry', name: 'Area and Perimeter', hints: [
-        'Perimeter adds all side lengths; area covers space within.',
-        'Match formula to shape: rectangle, circle, triangle.',
-        'Check units: area is in square units.'
-      ], example: 'Rectangle 8×3: perimeter 22, area 24.' },
-    ];
-
-    function populateTeachConcepts() {
-      teachConceptSelect.innerHTML = concepts.map(c => `<option value="${c.key}">${c.name}</option>`).join('');
+  // ── Version Expand ──
+  window.toggleExpand = function(bodyId, btn) {
+    const body = document.getElementById(bodyId);
+    if (body.classList.contains('expanded')) {
+      body.classList.remove('expanded');
+      btn.textContent = 'Show more ▾';
+    } else {
+      body.classList.add('expanded');
+      btn.textContent = 'Show less ▴';
     }
+  };
 
-    function randomPromptForConcept(c) {
-      const prompts = [
-        'Explain this concept as if to a 12-year-old with one real-life example.',
-        'Teach it to a colleague returning to math after years; focus on confidence.',
-        'Write a step-by-step method in under 6 sentences.',
-        'Describe a common mistake and how to avoid it.',
-      ];
-      return prompts[Math.floor(Math.random()*prompts.length)];
-    }
+  // ── Download Version ──
+  window.downloadVersion = function(vId) {
+    const body = document.getElementById('version-body-' + vId);
+    if (!body) return;
+    const blob = new Blob([body.innerText.trim()], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'prosecheck-version-' + vId + '.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('💾 Version ' + vId + ' saved!', 'success');
+  };
 
-    function updateTeachPrompt() {
-      const key = teachConceptSelect.value;
-      const concept = concepts.find(c => c.key === key) || concepts[0];
-      const prompt = randomPromptForConcept(concept);
-      teachPromptEl.textContent = `${concept.name}: ${prompt}`;
-      // Reset hints
-      hintList.innerHTML = '';
-      concept.hints.slice(0,1).forEach(h => addHint(h));
-      revealNextHintBtn.onclick = () => {
-        const shown = hintList.querySelectorAll('li').length;
-        if (shown < concept.hints.length) addHint(concept.hints[shown]);
-      };
-      showFullAnswerBtn.onclick = () => {
-        addHint('Full example: ' + concept.example);
-      };
-    }
-
-    function addHint(text) {
-      const li = document.createElement('li');
-      li.textContent = text;
-      hintList.appendChild(li);
-    }
-
-    saveTeachBtn.addEventListener('click', () => {
-      const key = teachConceptSelect.value;
-      const concept = concepts.find(c => c.key === key) || concepts[0];
-      const entry = { concept: concept.name, prompt: teachPromptEl.textContent, text: teachResponse.value, timestamp: Date.now() };
-      state.teachBack.reflections.push(entry);
-      saveState();
-      teachSaveMsg.textContent = 'Saved! Reflecting builds mastery.';
-      setTimeout(() => teachSaveMsg.textContent = '', 2000);
-      teachResponse.value = '';
-    });
-
-    document.querySelectorAll('.selfBtn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const score = Number(btn.dataset.score);
-        const last = state.teachBack.reflections[state.teachBack.reflections.length-1];
-        if (last) {
-          last.selfScore = score;
-          saveState();
-          selfMsg.textContent = score === 3 ? 'Excellent clarity.' : score === 2 ? 'Good! Try one more example.' : 'Great effort. Revisit hints and try again.';
-          setTimeout(() => selfMsg.textContent = '', 2500);
-        }
-      });
-    });
-
-    newPromptBtn.addEventListener('click', updateTeachPrompt);
-
-    /*
-      Tabs & Settings
-    */
-    const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
-    function switchTab(id) {
-      tabButtons.forEach(btn => btn.setAttribute('aria-current', btn.dataset.tab === id ? 'page' : 'false'));
-      document.getElementById('tab-progress').hidden = id !== 'progress';
-      document.getElementById('tab-flash').hidden = id !== 'flash';
-      document.getElementById('tab-geometry').hidden = id !== 'geometry';
-      document.getElementById('tab-graph').hidden = id !== 'graph';
-      document.getElementById('tab-teach').hidden = id !== 'teach';
-      document.getElementById('tab-settings').hidden = id !== 'settings';
-      if (id === 'flash') scheduleCards();
-      if (id === 'geometry') drawGeometry();
-      if (id === 'graph') drawGraph();
-    }
-
-    function getActiveTabId() {
-      if (!document.getElementById('tab-progress').hidden) return 'tab-progress';
-      if (!document.getElementById('tab-flash').hidden) return 'tab-flash';
-      if (!document.getElementById('tab-geometry').hidden) return 'tab-geometry';
-      if (!document.getElementById('tab-graph').hidden) return 'tab-graph';
-      if (!document.getElementById('tab-teach').hidden) return 'tab-teach';
-      return 'tab-settings';
-    }
-
-    tabButtons.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
-
-    // Settings
-    const contrastToggleBtn = document.getElementById('contrastToggleBtn');
-    const exportBtn = document.getElementById('exportBtn');
-    const importBtn = document.getElementById('importBtn');
-    const importInput = document.getElementById('importInput');
-    const resetAllBtn = document.getElementById('resetAllBtn');
-
-    function applyContrastSetting() {
-      document.documentElement.classList.toggle('high-contrast', !!state.settings.highContrast);
-    }
-
-    contrastToggleBtn.addEventListener('click', () => {
-      state.settings.highContrast = !state.settings.highContrast;
-      saveState();
-      applyContrastSetting();
-    });
-
-    exportBtn.addEventListener('click', () => {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'math_journey_export.json';
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    importBtn.addEventListener('click', () => importInput.click());
-    importInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      try {
-        const text = await file.text();
-        const data = JSON.parse(text);
-        state = { ...createInitialState(), ...data };
-        saveState();
-        applyContrastSetting();
-        updateProgressUI();
-        renderCurrentLesson();
-        scheduleCards();
-        drawGeometry();
-        drawGraph();
-        alert('Import successful');
-      } catch (err) {
-        alert('Import failed: ' + err.message);
-      } finally {
-        importInput.value = '';
-      }
-    });
-
-    resetAllBtn.addEventListener('click', () => {
-      if (!confirm('Reset all progress and settings? This cannot be undone.')) return;
-      state = createInitialState();
-      saveState();
-      applyContrastSetting();
-      updateProgressUI();
-      renderCurrentLesson();
-      scheduleCards();
-      drawGeometry();
-      drawGraph();
-    });
-
-    // Accessibility: help shortcut
-    document.addEventListener('keydown', (e) => {
-      if (e.shiftKey && e.key === '?') {
-        alert('Shortcuts:\nFlashcards: Enter flip, 1-4 rate\nGraphing: Drag to pan, wheel / + / - to zoom, 0 reset');
-      }
-    });
-
-    // Initialize
-    function init() {
-      applyContrastSetting();
-      updateProgressUI();
-      renderCurrentLesson();
-      scheduleCards();
-      resizeGeom();
-      resizeGraph();
-      populateTeachConcepts();
-      updateTeachPrompt();
-    }
-
-    window.addEventListener('load', init);
-
-  </script>
+})();
+</script>
 </body>
 </html>
